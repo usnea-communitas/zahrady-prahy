@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   useCallback,
@@ -8,8 +8,8 @@ import {
   useState,
   type CSSProperties,
   type SyntheticEvent,
-} from "react";
-import Image from "next/image";
+} from 'react';
+import Image from 'next/image';
 import {
   ArrowRight,
   Leaf,
@@ -25,18 +25,20 @@ import {
   Sprout,
   Check,
   X,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
+import { MapMotionLayer } from '@/components/map/MapMotionLayer';
+import { projectToPercent } from '@/lib/map/projection';
 
 type Garden = {
   id: string;
@@ -45,114 +47,116 @@ type Garden = {
   area: string;
   description: string;
   tags: string[];
-  x: number;
-  y: number;
+  lat: number;
+  lon: number;
+  locationStatus?: string;
   sourceUrl: string;
 };
 
 const gardens: Garden[] = [
   {
-    id: "metrofarm",
-    name: "MetroFarm Císařský ostrov",
-    district: "Císařský ostrov",
-    area: "Praha 7",
+    id: 'metrofarm',
+    name: 'MetroFarm Císařský ostrov',
+    district: 'Císařský ostrov',
+    area: 'Praha 7',
     description:
-      "Komunitní zahrada a městská farma s vlastními záhonky, společným políčkem, kompostem i zvířaty.",
-    tags: ["záhonky", "dobrovolnictví", "zvířata"],
-    x: 58,
-    y: 26,
-    sourceUrl: "https://www.metrofarm.cz/metrofarm/",
+      'Komunitní zahrada a městská farma s vlastními záhonky, společným políčkem, kompostem i zvířaty.',
+    tags: ['záhonky', 'dobrovolnictví', 'zvířata'],
+    lat: 50.1121511,
+    lon: 14.4147114,
+    sourceUrl: 'https://www.metrofarm.cz/metrofarm/',
   },
   {
-    id: "prales",
-    name: "Komunitní zahrada Prales",
-    district: "Kbely",
-    area: "Praha 19",
+    id: 'prales',
+    name: 'Komunitní zahrada Prales',
+    district: 'Kbely',
+    area: 'Praha 19',
     description:
-      "Bezbariérová zahrada ekocentra s vyvýšenými záhony, foliovníkem, dešťovou vodou a kompostem.",
-    tags: ["bezbariérové", "kompost", "ekocentrum"],
-    x: 88,
-    y: 23,
+      'Bezbariérová zahrada ekocentra s vyvýšenými záhony, foliovníkem, dešťovou vodou a kompostem.',
+    tags: ['bezbariérové', 'kompost', 'ekocentrum'],
+    lat: 50.1336044,
+    lon: 14.5607443,
     sourceUrl:
-      "https://lesypraha.cz/vzdelavani/ekocentrum-prales/komunitni-zahrada/",
+      'https://lesypraha.cz/vzdelavani/ekocentrum-prales/komunitni-zahrada/',
   },
   {
-    id: "kotlaska",
-    name: "Komunitní centrum a zahrada Kotlaska",
-    district: "Libeň",
-    area: "Praha 8",
+    id: 'kotlaska',
+    name: 'Komunitní centrum a zahrada Kotlaska',
+    district: 'Libeň',
+    area: 'Praha 8',
     description:
-      "Rozlehlá zahrada se starým sadem, komunitními záhonky, programem pro děti a kulturními akcemi.",
-    tags: ["sad", "pro děti", "akce"],
-    x: 75,
-    y: 35,
-    sourceUrl: "https://www.kckotlaska.cz/",
+      'Rozlehlá zahrada se starým sadem, komunitními záhonky, programem pro děti a kulturními akcemi.',
+    tags: ['sad', 'pro děti', 'akce'],
+    lat: 50.1071472,
+    lon: 14.476603,
+    sourceUrl: 'https://www.kckotlaska.cz/',
   },
   {
-    id: "troja",
-    name: "Komunitní zahrada Troja",
-    district: "Podhoří",
-    area: "Praha-Troja",
+    id: 'troja',
+    name: 'Komunitní zahrada Troja',
+    district: 'Podhoří',
+    area: 'Praha-Troja',
     description:
-      "Místo pro sousedy a rodiny, které spojuje pěstování, veřejný kompostér, knihobudku a týpí.",
-    tags: ["rodiny", "kompost", "knihobudka"],
-    x: 66,
-    y: 18,
-    sourceUrl: "https://www.komunitnizahrada.cz/",
+      'Místo pro sousedy a rodiny, které spojuje pěstování, veřejný kompostér, knihobudku a týpí.',
+    tags: ['rodiny', 'kompost', 'knihobudka'],
+    lat: 50.1267793,
+    lon: 14.4078329,
+    sourceUrl: 'https://www.komunitnizahrada.cz/',
   },
   {
-    id: "mecislavka",
-    name: "Vnitroblok Mečislavka",
-    district: "Nusle",
-    area: "Praha 4",
+    id: 'mecislavka',
+    name: 'Vnitroblok Mečislavka',
+    district: 'Nusle',
+    area: 'Praha 4',
     description:
-      "Veřejně přístupná zahrada s vyvýšenými záhony, kompostérem, grilem a komunitní pecí na pizzu.",
-    tags: ["veřejná", "kompost", "pec"],
-    x: 57,
-    y: 66,
-    sourceUrl: "https://www.mapko.cz/4519-vnitroblok-mecislavova",
+      'Veřejně přístupná zahrada s vyvýšenými záhony, kompostérem, grilem a komunitní pecí na pizzu.',
+    tags: ['veřejná', 'kompost', 'pec'],
+    lat: 50.0649253,
+    lon: 14.4442846,
+    sourceUrl: 'https://www.vnitrobloky.cz/mecislavka',
   },
   {
-    id: "vidimova",
-    name: "Komunitní zahrada Vidimova",
-    district: "Chodov",
-    area: "Praha 11",
+    id: 'vidimova',
+    name: 'Komunitní zahrada Vidimova',
+    district: 'Chodov',
+    area: 'Praha 11',
     description:
-      "Sousedská zahrada mezi domy, která vrací pěstování a společná setkání do sídliště.",
-    tags: ["sídliště", "sousedství", "záhony"],
-    x: 65,
-    y: 82,
-    sourceUrl: "https://www.mapko.cz/4432-komunitni-zahrada-vidimova",
+      'Sousedská zahrada mezi domy, která vrací pěstování a společná setkání do sídliště.',
+    tags: ['sídliště', 'sousedství', 'záhony'],
+    lat: 50.0254095,
+    lon: 14.5248575,
+    sourceUrl: 'https://www.mapko.cz/4432-komunitni-zahrada-vidimova',
   },
   {
-    id: "prokopka",
-    name: "Zahrada Prokopka",
-    district: "Velká Ohrada",
-    area: "Praha 13",
+    id: 'prokopka',
+    name: 'Zahrada Prokopka',
+    district: 'Velká Ohrada',
+    area: 'Praha 13',
     description:
-      "Komunitní zahrada na školním pozemku, kde spolek Pro kořínky pořádá pěstební i sousedské akce.",
-    tags: ["školní", "workshopy", "sousedství"],
-    x: 23,
-    y: 75,
-    sourceUrl: "https://www.zahradaprokopka.cz/",
+      'Komunitní zahrada na školním pozemku, kde spolek Pro kořínky pořádá pěstební i sousedské akce.',
+    tags: ['školní', 'workshopy', 'sousedství'],
+    lat: 50.0398094,
+    lon: 14.3437361,
+    sourceUrl: 'https://www.zahradaprokopka.cz/',
   },
   {
-    id: "velky-haj",
-    name: "Komunitní zahrada Velký háj",
-    district: "Krč",
-    area: "Praha 4",
+    id: 'velky-haj',
+    name: 'Komunitní zahrada Velký háj',
+    district: 'Krč',
+    area: 'Praha 4',
     description:
-      "Nový velkorysý projekt mezi Novodvorskou a Chateau Havel se sadem, společným zázemím a záhony.",
-    tags: ["nové místo", "sad", "záhony"],
-    x: 53,
-    y: 86,
+      'Nový velkorysý projekt mezi Novodvorskou a Chateau Havel se sadem, společným zázemím a záhony.',
+    tags: ['nové místo', 'sad', 'záhony'],
+    lat: 50.0327,
+    lon: 14.4446,
+    locationStatus: 'orientační poloha',
     sourceUrl:
-      "https://www.kokoza.cz/komunitni-zahrady/dve-nove-komunitni-zahrady/",
+      'https://www.kokoza.cz/komunitni-zahrady/dve-nove-komunitni-zahrady/',
   },
 ];
 
-type FilterId = "children" | "accessible" | "compost" | "events";
-type SoundState = "idle" | "loading" | "playing" | "paused" | "error";
+type FilterId = 'children' | 'accessible' | 'compost' | 'events';
+type SoundState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 
 const AUDIO_TARGET_VOLUME = 0.38;
 
@@ -162,26 +166,26 @@ const filterOptions: Array<{
   matches: (garden: Garden) => boolean;
 }> = [
   {
-    id: "children",
-    label: "Pro děti",
+    id: 'children',
+    label: 'Pro děti',
     matches: (garden) =>
-      garden.tags.includes("pro děti") || garden.tags.includes("rodiny"),
+      garden.tags.includes('pro děti') || garden.tags.includes('rodiny'),
   },
   {
-    id: "accessible",
-    label: "Bezbariérové",
-    matches: (garden) => garden.tags.includes("bezbariérové"),
+    id: 'accessible',
+    label: 'Bezbariérové',
+    matches: (garden) => garden.tags.includes('bezbariérové'),
   },
   {
-    id: "compost",
-    label: "Kompost",
-    matches: (garden) => garden.tags.includes("kompost"),
+    id: 'compost',
+    label: 'Kompost',
+    matches: (garden) => garden.tags.includes('kompost'),
   },
   {
-    id: "events",
-    label: "Akce",
+    id: 'events',
+    label: 'Akce',
     matches: (garden) =>
-      garden.tags.includes("akce") || garden.tags.includes("workshopy"),
+      garden.tags.includes('akce') || garden.tags.includes('workshopy'),
   },
 ];
 
@@ -189,23 +193,26 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioFadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const markerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState("");
+  const [query, setQuery] = useState('');
+  const [selectedId, setSelectedId] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Set<FilterId>>(new Set());
   const [addOpen, setAddOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [soundState, setSoundState] = useState<SoundState>("idle");
+  const [soundState, setSoundState] = useState<SoundState>('idle');
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [motionPaused, setMotionPaused] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   const filteredGardens = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase("cs");
+    const normalizedQuery = query.trim().toLocaleLowerCase('cs');
     return gardens.filter((garden) => {
       const matchesQuery =
         !normalizedQuery ||
         [garden.name, garden.district, garden.area, ...garden.tags]
-          .join(" ")
-          .toLocaleLowerCase("cs")
+          .join(' ')
+          .toLocaleLowerCase('cs')
           .includes(normalizedQuery);
       const matchesFilters = [...activeFilters].every((activeId) =>
         filterOptions.find((option) => option.id === activeId)?.matches(garden),
@@ -217,7 +224,11 @@ export default function Home() {
 
   const selectedGarden =
     filteredGardens.find((garden) => garden.id === selectedId) ?? null;
-  const isSoundPlaying = soundState === "playing";
+  const selectedPosition = selectedGarden
+    ? projectToPercent(selectedGarden)
+    : null;
+  const isSoundPlaying = soundState === 'playing';
+  const isMotionPaused = motionPaused || prefersReducedMotion;
 
   const cancelAudioFade = useCallback(() => {
     if (audioFadeTimerRef.current !== null) {
@@ -256,7 +267,7 @@ export default function Home() {
 
   const pauseSound = useCallback(
     (audio: HTMLAudioElement) => {
-      setSoundState("paused");
+      setSoundState('paused');
       fadeAudio(audio, 0, 240, () => {
         audio.pause();
         audio.volume = AUDIO_TARGET_VOLUME;
@@ -268,14 +279,22 @@ export default function Home() {
   useEffect(() => cancelAudioFade, [cancelAudioFade]);
 
   useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncPreference = () => setPrefersReducedMotion(preference.matches);
+    syncPreference();
+    preference.addEventListener('change', syncPreference);
+    return () => preference.removeEventListener('change', syncPreference);
+  }, []);
+
+  useEffect(() => {
     const handleVisibilityChange = () => {
       const audio = audioRef.current;
       if (document.hidden && audio && !audio.paused) pauseSound(audio);
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [pauseSound]);
 
   function toggleFilter(filterId: FilterId) {
@@ -296,26 +315,26 @@ export default function Home() {
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (soundState === "loading" || !audio.paused) {
+    if (soundState === 'loading' || !audio.paused) {
       pauseSound(audio);
       return;
     }
 
     cancelAudioFade();
     audio.volume = 0;
-    setSoundState("loading");
+    setSoundState('loading');
 
     try {
       await audio.play();
     } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-      setSoundState("error");
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      setSoundState('error');
     }
   }
 
   function closePreview() {
     const closingId = selectedId;
-    setSelectedId("");
+    setSelectedId('');
     requestAnimationFrame(() => markerRefs.current[closingId]?.focus());
   }
 
@@ -326,27 +345,34 @@ export default function Home() {
       </a>
 
       <section
-        className={`map-canvas${selectedGarden ? " has-selection" : ""}${
-          filtersOpen ? " filters-open" : ""
+        className={`map-canvas${selectedGarden ? ' has-selection' : ''}${
+          filtersOpen ? ' filters-open' : ''
         }`}
         aria-label="Ilustrovaná mapa Prahy"
       >
         <div className="map-plane">
           <Image
             className="map-art"
-            src="/prague-garden-map.webp"
-            alt="Ručně malovaná ptačí perspektiva Prahy s Vltavou, mosty a zelenými čtvrtěmi"
+            src="/map/prague-illustrated-v2.webp"
+            alt="Ručně malovaná, geograficky věrná mapa Prahy se skutečným tokem Vltavy, čtvrtěmi a zelenými plochami"
             fill
             priority
             sizes="100vw"
+            onLoad={() => setMapLoaded(true)}
           />
           <div className="map-wash" aria-hidden="true" />
           <div className="paper-grain" aria-hidden="true" />
+          <MapMotionLayer
+            paused={isMotionPaused}
+            quiet={Boolean(selectedGarden) || filtersOpen}
+            ready={mapLoaded}
+          />
 
           <fieldset className="garden-markers">
             <legend className="sr-only">Zahrady na mapě</legend>
             {filteredGardens.map((garden) => {
               const isSelected = selectedId === garden.id;
+              const position = projectToPercent(garden);
 
               return (
                 <button
@@ -355,11 +381,11 @@ export default function Home() {
                     markerRefs.current[garden.id] = node;
                   }}
                   type="button"
-                  className={`garden-marker${isSelected ? " is-selected" : ""}`}
+                  className={`garden-marker${isSelected ? ' is-selected' : ''}`}
                   style={
                     {
-                      left: `${garden.x}%`,
-                      top: `${garden.y}%`,
+                      left: `${position.x}%`,
+                      top: `${position.y}%`,
                     } as CSSProperties
                   }
                   onClick={() => setSelectedId(garden.id)}
@@ -403,7 +429,7 @@ export default function Home() {
               <button
                 className="clear-search"
                 type="button"
-                onClick={() => setQuery("")}
+                onClick={() => setQuery('')}
                 aria-label="Vymazat hledání"
               >
                 <X />
@@ -424,7 +450,7 @@ export default function Home() {
               aria-expanded={filtersOpen}
               aria-controls="garden-filters"
               aria-label={`Filtry zahrad${
-                activeFilters.size ? `, ${activeFilters.size} aktivní` : ""
+                activeFilters.size ? `, ${activeFilters.size} aktivní` : ''
               }`}
             >
               <SlidersHorizontal />
@@ -448,7 +474,7 @@ export default function Home() {
         </header>
 
         <div
-          className={`filter-tray${filtersOpen ? " is-open" : ""}`}
+          className={`filter-tray${filtersOpen ? ' is-open' : ''}`}
           id="garden-filters"
           aria-hidden={!filtersOpen}
         >
@@ -459,7 +485,7 @@ export default function Home() {
               <button
                 key={option.id}
                 type="button"
-                className={isActive ? "is-active" : undefined}
+                className={isActive ? 'is-active' : undefined}
                 onClick={() => toggleFilter(option.id)}
                 aria-pressed={isActive}
                 tabIndex={filtersOpen ? 0 : -1}
@@ -489,7 +515,7 @@ export default function Home() {
           <p>Objevte místa, kde se sousedé potkávají a město kvete.</p>
           <div
             className={`sound-control is-${soundState}`}
-            aria-busy={soundState === "loading"}
+            aria-busy={soundState === 'loading'}
           >
             <Music2 aria-hidden="true" />
             <span className="sound-copy">
@@ -503,7 +529,7 @@ export default function Home() {
               aria-label="Zvuková krajina Mezi listím a kamenem"
               aria-pressed={isSoundPlaying}
             >
-              {soundState === "loading" ? (
+              {soundState === 'loading' ? (
                 <LoaderCircle className="sound-loader" aria-hidden="true" />
               ) : isSoundPlaying ? (
                 <Pause aria-hidden="true" />
@@ -518,20 +544,20 @@ export default function Home() {
               loop
               preload="none"
               onPlaying={() => {
-                setSoundState("playing");
+                setSoundState('playing');
                 const audio = audioRef.current;
                 if (audio) fadeAudio(audio, AUDIO_TARGET_VOLUME, 520);
               }}
               onWaiting={() => {
-                if (!audioRef.current?.paused) setSoundState("loading");
+                if (!audioRef.current?.paused) setSoundState('loading');
               }}
               onStalled={() => {
-                if (!audioRef.current?.paused) setSoundState("loading");
+                if (!audioRef.current?.paused) setSoundState('loading');
               }}
               onPause={() =>
-                setSoundState((state) => (state === "error" ? state : "paused"))
+                setSoundState((state) => (state === 'error' ? state : 'paused'))
               }
-              onError={() => setSoundState("error")}
+              onError={() => setSoundState('error')}
             >
               <source src="/audio/mezi-listim-a-kamenem.m4a" type="audio/mp4" />
               <source
@@ -541,11 +567,11 @@ export default function Home() {
             </audio>
           </div>
           <output className="sound-status" aria-live="polite">
-            {soundState === "loading"
-              ? "Načítám zvukovou krajinu…"
-              : soundState === "error"
-                ? "Zvuk se nepodařilo přehrát."
-                : ""}
+            {soundState === 'loading'
+              ? 'Načítám zvukovou krajinu…'
+              : soundState === 'error'
+                ? 'Zvuk se nepodařilo přehrát.'
+                : ''}
           </output>
           <button
             className="text-link"
@@ -580,12 +606,12 @@ export default function Home() {
             </button>
             <div className="preview-illustration" aria-hidden="true">
               <Image
-                src="/prague-garden-map.webp"
+                src="/map/prague-illustrated-v2.webp"
                 alt=""
                 fill
                 sizes="368px"
                 style={{
-                  objectPosition: `${selectedGarden.x}% ${selectedGarden.y}%`,
+                  objectPosition: `${selectedPosition?.x}% ${selectedPosition?.y}%`,
                 }}
               />
               <span className="preview-glyph">
@@ -597,7 +623,9 @@ export default function Home() {
                 <span>
                   <MapPin /> {selectedGarden.district}
                 </span>
-                <span className="verified-dot">ověřeno</span>
+                <span className="verified-dot">
+                  {selectedGarden.locationStatus ?? 'ověřeno'}
+                </span>
               </div>
               <h2>{selectedGarden.name}</h2>
               <p>{selectedGarden.description}</p>
@@ -622,9 +650,37 @@ export default function Home() {
           <output className="result-count">
             <i aria-hidden="true" /> {filteredGardens.length} objevených míst
           </output>
-          <span className="prototype-note">
-            Praha · první ilustrovaný výřez
-          </span>
+          <div className="footer-meta">
+            <button
+              className="motion-toggle"
+              type="button"
+              onClick={() => setMotionPaused((paused) => !paused)}
+              disabled={prefersReducedMotion}
+              aria-pressed={isMotionPaused}
+              title={
+                prefersReducedMotion
+                  ? 'Pohyb je vypnutý podle nastavení systému'
+                  : undefined
+              }
+            >
+              {isMotionPaused ? <Play /> : <Pause />}
+              <span>
+                {prefersReducedMotion
+                  ? 'Pohyb omezen systémem'
+                  : isMotionPaused
+                    ? 'Rozpohybovat mapu'
+                    : 'Pozastavit pohyb'}
+              </span>
+            </button>
+            <a
+              className="prototype-note"
+              href="https://www.openstreetmap.org/copyright"
+              target="_blank"
+              rel="noreferrer"
+            >
+              © OpenStreetMap contributors
+            </a>
+          </div>
         </footer>
       </section>
 
@@ -732,7 +788,8 @@ export default function Home() {
             <DialogTitle>Každá zahrada je malý živý svět.</DialogTitle>
             <DialogDescription>
               Body na mapě odkazují na skutečná pražská místa. Vybíráme je z
-              veřejných zdrojů a každý údaj před zveřejněním kontrolujeme.
+              veřejných zdrojů a každý údaj před zveřejněním kontrolujeme. U
+              připravovaných projektů vždy označujeme orientační polohu.
             </DialogDescription>
           </DialogHeader>
           <ol className="how-list">

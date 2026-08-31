@@ -1,6 +1,6 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -13,12 +13,21 @@
   --color-moss-shadow: #7c7464;
   --color-deep-forest: #23291b;
   --color-teal-accent: #0f3639;
+  --color-river-glass: #63aeb3;
+  --color-meadow: #75a65c;
+  --color-young-leaf: #b7d477;
+  --color-terracotta: #b85d42;
+  --color-poppy: #c9533e;
+  --color-sun-gold: #d5a23b;
+  --color-lavender: #8e83b8;
+  --color-dusty-rose: #c65b74;
+  --color-warm-cream: #f2e5c5;
   --color-ash-mist: #e5e5e3;
   --color-slate-edge: #121516;
   --font-pplxsans: var(--font-interface-sans), Inter, -apple-system, sans-serif;
   --font-pplxsansmono:
-    var(--font-interface-mono), "JetBrains Mono", Consolas, monospace;
-  --font-pplxserif: Georgia, "Times New Roman", serif;
+    var(--font-interface-mono), 'JetBrains Mono', Consolas, monospace;
+  --font-pplxserif: Georgia, 'Times New Roman', serif;
   --text-caption: 11px;
   --leading-caption: 1.2;
   --text-body-sm: 12px;
@@ -178,7 +187,7 @@ textarea:focus-visible {
   height: 100%;
   object-fit: contain;
   object-position: center;
-  filter: saturate(0.72) sepia(0.09) contrast(0.92) brightness(1.055);
+  filter: saturate(1.08) contrast(1.015) brightness(1.015);
 }
 .map-wash {
   position: absolute;
@@ -186,19 +195,29 @@ textarea:focus-visible {
   z-index: 1;
   pointer-events: none;
   background:
+    radial-gradient(
+      circle at 82% 18%,
+      rgba(142, 131, 184, 0.12),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 72% 82%,
+      rgba(197, 91, 116, 0.09),
+      transparent 26%
+    ),
     linear-gradient(
       180deg,
-      rgba(250, 248, 245, 0.73),
-      transparent 22%,
-      transparent 72%,
-      rgba(39, 26, 0, 0.16)
+      rgba(255, 247, 224, 0.18),
+      transparent 18%,
+      transparent 78%,
+      rgba(39, 26, 0, 0.1)
     ),
     linear-gradient(
       90deg,
-      rgba(250, 248, 245, 0.5),
-      transparent 30%,
-      transparent 75%,
-      rgba(250, 248, 245, 0.18)
+      rgba(255, 247, 224, 0.22),
+      transparent 26%,
+      transparent 78%,
+      rgba(99, 174, 179, 0.06)
     );
 }
 .paper-grain {
@@ -206,7 +225,7 @@ textarea:focus-visible {
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  opacity: 0.045;
+  opacity: 0.032;
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
 }
@@ -259,12 +278,12 @@ textarea:focus-visible {
   place-items: center;
   border: 1px solid rgba(39, 26, 0, 0.14);
   border-radius: var(--radius-other);
-  background: rgba(255, 255, 255, 0.64);
+  background: rgba(242, 229, 197, 0.86);
   backdrop-filter: blur(20px);
 }
 .brand-mark svg {
   width: 18px;
-  color: var(--color-teal-accent);
+  color: var(--color-terracotta);
 }
 .brand > span:last-child {
   display: flex;
@@ -292,7 +311,7 @@ textarea:focus-visible {
   gap: 8px;
   border: 1px solid rgba(39, 26, 0, 0.14);
   border-radius: var(--radius-inputs);
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 250, 240, 0.9);
   padding: 0 8px 0 16px;
   color: var(--color-aged-sepia);
   backdrop-filter: blur(20px);
@@ -380,13 +399,13 @@ textarea:focus-visible {
   background: rgba(255, 255, 255, 0.86) !important;
 }
 .header-actions .add-button {
-  border: 1px solid var(--color-slate-edge) !important;
+  border: 1px solid rgba(184, 93, 66, 0.48) !important;
   border-radius: var(--radius-buttons);
-  background: #d6d5d4 !important;
-  color: #171615 !important;
+  background: rgba(242, 204, 117, 0.94) !important;
+  color: var(--color-aged-sepia) !important;
 }
 .header-actions .add-button:hover {
-  background: var(--color-pure-white) !important;
+  background: var(--color-warm-cream) !important;
 }
 
 .filter-tray {
@@ -464,9 +483,9 @@ textarea:focus-visible {
   left: clamp(24px, 3vw, 40px);
   z-index: 25;
   width: min(452px, calc(100vw - 80px));
-  border: 1px solid rgba(39, 26, 0, 0.08);
+  border: 1px solid rgba(184, 93, 66, 0.18);
   border-radius: var(--radius-cards);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 252, 244, 0.95);
   padding: var(--card-padding);
   color: var(--color-aged-sepia);
   backdrop-filter: blur(20px);
@@ -485,6 +504,7 @@ textarea:focus-visible {
 }
 .eyebrow svg {
   width: 14px;
+  color: var(--color-sun-gold);
 }
 .intro-card h1 {
   max-width: 9ch;
@@ -512,7 +532,7 @@ textarea:focus-visible {
   margin-top: 28px;
   border: 1px solid var(--color-fog);
   border-radius: var(--radius-other);
-  background: var(--color-parchment);
+  background: rgba(183, 212, 119, 0.14);
   padding: 8px;
   transition:
     border-color 180ms ease,
@@ -520,7 +540,7 @@ textarea:focus-visible {
 }
 .sound-control.is-playing {
   border-color: var(--color-teal-accent);
-  background: var(--color-pure-white);
+  background: rgba(131, 199, 197, 0.16);
 }
 .sound-control > svg {
   width: 16px;
@@ -608,7 +628,7 @@ textarea:focus-visible {
 .garden-markers {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 5;
   min-inline-size: 0;
   margin: 0;
   border: 0;
@@ -630,17 +650,17 @@ textarea:focus-visible {
 .marker-aura {
   position: absolute;
   inset: -8px;
-  border: 1px solid rgba(15, 54, 57, 0.32);
+  border: 1px solid rgba(213, 162, 59, 0.72);
   border-radius: 50%;
-  background: rgba(250, 248, 245, 0.42);
+  background: rgba(242, 229, 197, 0.52);
   opacity: 0.78;
 }
 .marker-aura::after {
   position: absolute;
   inset: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(142, 131, 184, 0.48);
   border-radius: inherit;
-  content: "";
+  content: '';
 }
 .marker-core {
   position: relative;
@@ -713,8 +733,8 @@ textarea:focus-visible {
   outline-offset: 6px;
 }
 .garden-marker.is-selected .marker-aura {
-  border: 2px solid var(--color-teal-accent);
-  background: rgba(255, 255, 255, 0.62);
+  border: 2px solid var(--color-sun-gold);
+  background: rgba(183, 212, 119, 0.5);
   animation: selected-marker 3s ease-in-out infinite;
 }
 
@@ -765,11 +785,11 @@ textarea:focus-visible {
     rgba(250, 248, 245, 0.08),
     rgba(250, 248, 245, 0.36)
   );
-  content: "";
+  content: '';
 }
 .preview-illustration img {
   object-fit: cover;
-  filter: saturate(0.72) sepia(0.08) contrast(0.94) brightness(1.04);
+  filter: saturate(1.08) contrast(1.01) brightness(1.02);
   transform: scale(1.75);
 }
 .preview-glyph {
@@ -783,8 +803,8 @@ textarea:focus-visible {
   place-items: center;
   border: 1px solid rgba(39, 26, 0, 0.14);
   border-radius: var(--radius-other);
-  background: rgba(255, 255, 255, 0.7);
-  color: var(--color-teal-accent);
+  background: rgba(242, 229, 197, 0.82);
+  color: var(--color-terracotta);
   backdrop-filter: blur(20px);
 }
 .preview-glyph svg {
@@ -818,7 +838,7 @@ textarea:focus-visible {
   height: 6px;
   border-radius: 50%;
   background: var(--color-teal-accent);
-  content: "";
+  content: '';
 }
 .preview-body h2 {
   margin: 16px 0 12px;
@@ -851,6 +871,18 @@ textarea:focus-visible {
   font-size: 10px;
   font-weight: 400;
   letter-spacing: 0;
+}
+.tag-list span:nth-child(3n + 1) {
+  border-color: rgba(117, 166, 92, 0.3);
+  background: rgba(183, 212, 119, 0.18);
+}
+.tag-list span:nth-child(3n + 2) {
+  border-color: rgba(198, 91, 116, 0.25);
+  background: rgba(198, 91, 116, 0.1);
+}
+.tag-list span:nth-child(3n) {
+  border-color: rgba(142, 131, 184, 0.28);
+  background: rgba(142, 131, 184, 0.1);
 }
 .preview-button {
   width: 100%;
@@ -938,13 +970,40 @@ textarea:focus-visible {
   border-radius: 50%;
   background: var(--color-teal-accent);
 }
+.footer-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.motion-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  padding: 4px 0;
+  color: inherit;
+  font: inherit;
+  opacity: 0.78;
+}
+.motion-toggle:hover {
+  opacity: 1;
+}
+.motion-toggle:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+.motion-toggle svg {
+  width: 11px;
+  height: 11px;
+}
 .prototype-note {
   color: inherit;
   opacity: 0.64;
   text-decoration: none;
 }
 
-[data-slot="dialog-overlay"] {
+[data-slot='dialog-overlay'] {
   background: rgba(35, 41, 27, 0.48);
   backdrop-filter: blur(8px);
 }
@@ -961,8 +1020,8 @@ textarea:focus-visible {
   padding: 40px;
   color: var(--color-aged-sepia);
 }
-.add-garden-dialog [data-slot="dialog-close"],
-.about-dialog [data-slot="dialog-close"] {
+.add-garden-dialog [data-slot='dialog-close'],
+.about-dialog [data-slot='dialog-close'] {
   top: 16px;
   right: 16px;
   width: 40px;
@@ -972,8 +1031,8 @@ textarea:focus-visible {
   background: var(--color-parchment);
   opacity: 1;
 }
-.add-garden-dialog [data-slot="dialog-title"],
-.about-dialog [data-slot="dialog-title"] {
+.add-garden-dialog [data-slot='dialog-title'],
+.about-dialog [data-slot='dialog-title'] {
   max-width: 15ch;
   color: var(--color-slate-edge);
   font-family: var(--font-pplxserif);
@@ -982,8 +1041,8 @@ textarea:focus-visible {
   letter-spacing: normal;
   line-height: 1.08;
 }
-.add-garden-dialog [data-slot="dialog-description"],
-.about-dialog [data-slot="dialog-description"] {
+.add-garden-dialog [data-slot='dialog-description'],
+.about-dialog [data-slot='dialog-description'] {
   max-width: 54ch;
   color: var(--color-moss-shadow);
   font-size: 15px;
@@ -1159,6 +1218,9 @@ textarea:focus-visible {
   .intro-card h1 {
     font-size: 56px;
   }
+  .motion-toggle {
+    display: none;
+  }
 }
 @media (max-width: 720px) {
   .map-header {
@@ -1255,8 +1317,8 @@ textarea:focus-visible {
     gap: 20px;
     padding: 28px 40px;
   }
-  .add-garden-dialog [data-slot="dialog-title"],
-  .about-dialog [data-slot="dialog-title"] {
+  .add-garden-dialog [data-slot='dialog-title'],
+  .about-dialog [data-slot='dialog-title'] {
     font-size: 40px;
   }
   .garden-form {

@@ -1,0 +1,101 @@
+.motionLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 800ms ease;
+}
+
+.motionLayer.ready {
+  opacity: 1;
+}
+
+.motionLayer.quiet .actors {
+  opacity: 0.16;
+}
+
+.motionLayer.quiet .shimmer {
+  opacity: 0.45;
+}
+
+.actors,
+.shimmer {
+  transition: opacity 320ms ease;
+}
+
+.boat {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: boatBob 3.8s ease-in-out infinite;
+}
+
+.boatSecondary {
+  animation-delay: -1.7s;
+}
+
+.birdFlock {
+  opacity: 0;
+  animation: flockReveal 48s ease-in-out infinite;
+}
+
+.birdFlockSecondary {
+  animation-delay: -23s;
+  animation-duration: 56s;
+}
+
+.riverGlint {
+  fill: none;
+  stroke: rgba(240, 255, 244, 0.58);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 14 38;
+  opacity: 0.44;
+  animation: riverDrift 18s linear infinite;
+}
+
+.riverGlintSecondary {
+  stroke: rgba(242, 204, 117, 0.28);
+  stroke-width: 2;
+  stroke-dasharray: 8 48;
+  animation-duration: 27s;
+  animation-direction: reverse;
+}
+
+@keyframes boatBob {
+  0%,
+  100% {
+    translate: 0 -1px;
+  }
+  50% {
+    translate: 0 1px;
+  }
+}
+
+@keyframes riverDrift {
+  to {
+    stroke-dashoffset: -156;
+  }
+}
+
+@keyframes flockReveal {
+  0%,
+  8%,
+  38%,
+  100% {
+    opacity: 0;
+  }
+  14%,
+  30% {
+    opacity: 0.74;
+  }
+}
+
+@media (max-width: 1023px), (prefers-reduced-motion: reduce) {
+  .motionLayer {
+    display: none;
+  }
+}
