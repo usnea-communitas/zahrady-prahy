@@ -272,6 +272,20 @@ button { cursor: pointer; }
 .eyebrow svg { width: .86rem; }
 .intro-card h1 { max-width: 8ch; margin: .8rem 0 .7rem; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(2.45rem, 4vw, 4.8rem); font-weight: 500; letter-spacing: -.055em; line-height: .9; }
 .intro-card p { max-width: 31ch; margin: 0; color: rgba(255, 253, 243, .82); font-size: .94rem; line-height: 1.55; }
+.sound-control { display: grid; grid-template-columns: 1.65rem minmax(0, 1fr) 2.15rem; align-items: center; gap: .58rem; width: min(100%, 19rem); margin-top: 1rem; border: 1px solid rgba(255, 255, 255, .2); border-radius: 999px; background: rgba(9, 42, 32, .28); padding: .42rem .42rem .42rem .68rem; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08); backdrop-filter: blur(10px); transition: border-color 180ms ease, background 180ms ease; }
+.sound-control.is-playing { border-color: rgba(228, 237, 176, .45); background: rgba(9, 42, 32, .46); }
+.sound-control > svg { width: 1rem; color: #e4edb0; transition: transform 240ms var(--ease-out); }
+.sound-control.is-playing > svg { transform: rotate(-8deg) scale(1.08); }
+.sound-copy { min-width: 0; line-height: 1.08; }
+.sound-copy small, .sound-copy strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sound-copy small { color: rgba(255, 253, 243, .58); font-size: .56rem; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+.sound-copy strong { margin-top: .2rem; color: #fffdf3; font-family: Georgia, 'Times New Roman', serif; font-size: .76rem; font-weight: 600; letter-spacing: -.01em; }
+.sound-toggle { display: grid; width: 2.15rem; height: 2.15rem; place-items: center; border: 0; border-radius: 50%; background: #e4edb0; color: #174432; box-shadow: 0 5px 16px rgba(5, 30, 22, .22); transition: transform 180ms var(--ease-out), background 180ms ease; }
+.sound-toggle:hover { transform: scale(1.06); background: #f0f5c9; }
+.sound-toggle:focus-visible { outline: 3px solid #fffdf0; outline-offset: 3px; }
+.sound-toggle svg { width: .9rem; fill: currentColor; }
+.sound-toggle svg.lucide-pause { fill: none; }
+.sound-status { display: block; min-height: .8rem; margin-top: .25rem; color: #f4d9b3; font-size: .61rem; }
 .text-link { display: inline-flex; align-items: center; gap: .45rem; margin-top: 1.15rem; border: 0; background: transparent; padding: 0; color: #eff4c2; font-size: .78rem; font-weight: 730; }
 .text-link svg { width: .95rem; transition: transform 180ms var(--ease-out); }
 .text-link:hover svg { transform: translateX(3px); }
@@ -485,6 +499,9 @@ button { cursor: pointer; }
   .intro-card { top: 5.1rem; left: .75rem; width: min(18rem, calc(100vw - 1.5rem)); padding: 1rem; }
   .intro-card h1 { margin-block: .55rem; font-size: 2.25rem; }
   .intro-card p { font-size: .78rem; }
+  .sound-control { margin-top: .7rem; }
+  .sound-copy strong { font-size: .72rem; }
+  .sound-status { min-height: .65rem; }
   .text-link { margin-top: .75rem; }
   .garden-marker { width: 3rem; height: 3rem; }
   .marker-core { width: 2.35rem; height: 2.35rem; }

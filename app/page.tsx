@@ -1,11 +1,14 @@
 'use client';
 
-import { useMemo, useState, type CSSProperties, type SyntheticEvent } from 'react';
+import { useMemo, useRef, useState, type CSSProperties, type SyntheticEvent } from 'react';
 import Image from 'next/image';
 import {
   ArrowRight,
   Leaf,
   MapPin,
+  Music2,
+  Pause,
+  Play,
   Plus,
   Search,
   SlidersHorizontal,
@@ -178,6 +181,7 @@ const filterOptions: Array<{
 ];
 
 export default function Home() {
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState(gardens[0].id);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -185,6 +189,8 @@ export default function Home() {
   const [addOpen, setAddOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isSoundPlaying, setIsSoundPlaying] = useState(false);
+  const [soundError, setSoundError] = useState(false);
 
   const filteredGardens = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('cs');
@@ -218,6 +224,27 @@ export default function Home() {
   function submitGarden(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitted(true);
+  }
+
+  async function toggleSound() {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    setSoundError(false);
+
+    if (!audio.paused) {
+      audio.pause();
+      return;
+    }
+
+    audio.volume = 0.38;
+
+    try {
+      await audio.play();
+    } catch {
+      setIsSoundPlaying(false);
+      setSoundError(true);
+    }
   }
 
   return (
@@ -330,6 +357,45 @@ export default function Home() {
           </span>
           <h1 id="intro-title">Praha roste společně.</h1>
           <p>Objevte místa, kde se sousedé potkávají a město kvete.</p>
+          <div className={`sound-control${isSoundPlaying ? ' is-playing' : ''}`}>
+            <Music2 aria-hidden="true" />
+            <span className="sound-copy">
+              <small>Zvuková krajina</small>
+              <strong>Mezi listím a kamenem</strong>
+            </span>
+            <button
+              className="sound-toggle"
+              type="button"
+              onClick={toggleSound}
+              aria-label={
+                isSoundPlaying
+                  ? 'Pozastavit skladbu Mezi listím a kamenem'
+                  : 'Přehrát skladbu Mezi listím a kamenem'
+              }
+              aria-pressed={isSoundPlaying}
+            >
+              {isSoundPlaying ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
+            </button>
+            {/* Instrumentální zvuková krajina neobsahuje mluvené slovo. */}
+            {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
+            <audio
+              ref={audioRef}
+              loop
+              preload="none"
+              onPlay={() => setIsSoundPlaying(true)}
+              onPause={() => setIsSoundPlaying(false)}
+              onError={() => {
+                setIsSoundPlaying(false);
+                setSoundError(true);
+              }}
+            >
+              <source src="/audio/mezi-listim-a-kamenem.m4a" type="audio/mp4" />
+              <source src="/audio/mezi-listim-a-kamenem.mp3" type="audio/mpeg" />
+            </audio>
+          </div>
+          <output className="sound-status" aria-live="polite">
+            {soundError ? 'Zvuk se nepodařilo přehrát.' : ''}
+          </output>
           <button className="text-link" type="button" onClick={() => setAboutOpen(true)}>
             Jak mapa funguje <ArrowRight />
           </button>
