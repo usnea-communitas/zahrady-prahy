@@ -187,7 +187,7 @@ textarea:focus-visible {
   height: 100%;
   object-fit: contain;
   object-position: center;
-  filter: saturate(1.08) contrast(1.015) brightness(1.015);
+  filter: saturate(1.04) contrast(1.015) brightness(1.01);
 }
 .map-wash {
   position: absolute;

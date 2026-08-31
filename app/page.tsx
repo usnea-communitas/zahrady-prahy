@@ -353,8 +353,8 @@ export default function Home() {
         <div className="map-plane">
           <Image
             className="map-art"
-            src="/map/prague-illustrated-v2.webp"
-            alt="Ručně malovaná, geograficky věrná mapa Prahy se skutečným tokem Vltavy, čtvrtěmi a zelenými plochami"
+            src="/map/prague-storybook-vltava-v5.webp"
+            alt="Hravá ilustrovaná karikatura Prahy se záměrně zvětšenými památkami a geograficky věrným tokem Vltavy"
             fill
             priority
             sizes="100vw"
@@ -606,7 +606,7 @@ export default function Home() {
             </button>
             <div className="preview-illustration" aria-hidden="true">
               <Image
-                src="/map/prague-illustrated-v2.webp"
+                src="/map/prague-storybook-vltava-v5.webp"
                 alt=""
                 fill
                 sizes="368px"
