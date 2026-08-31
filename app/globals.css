@@ -490,6 +490,43 @@ textarea:focus-visible {
   color: var(--color-aged-sepia);
   backdrop-filter: blur(20px);
 }
+.garden-postcard {
+  position: absolute;
+  bottom: 72px;
+  left: clamp(24px, 3vw, 40px);
+  z-index: 24;
+  width: 208px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  margin: 0;
+  border: 6px solid rgba(255, 252, 244, 0.96);
+  border-radius: var(--radius-cards);
+  background: var(--color-parchment);
+  box-shadow: 0 18px 48px rgba(39, 26, 0, 0.16);
+  pointer-events: none;
+  transform: rotate(-1.25deg);
+  transition: opacity 240ms ease;
+  animation: garden-postcard-drift 9s ease-in-out infinite;
+}
+.garden-postcard::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 245, 215, 0.04),
+    rgba(39, 26, 0, 0.08)
+  );
+  content: '';
+}
+.garden-postcard img {
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(1.04) contrast(1.01) brightness(1.01);
+  transform: scale(1.02);
+}
+.garden-postcard.is-quiet {
+  opacity: 0.38;
+}
 .eyebrow,
 .dialog-eyebrow {
   display: flex;
@@ -1192,6 +1229,15 @@ textarea:focus-visible {
     transform: translateY(12px);
   }
 }
+@keyframes garden-postcard-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-1.25deg);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0) rotate(-0.45deg);
+  }
+}
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -1215,10 +1261,18 @@ textarea:focus-visible {
     width: 400px;
     padding: 32px;
   }
+  .garden-postcard {
+    display: none;
+  }
   .intro-card h1 {
     font-size: 56px;
   }
   .motion-toggle {
+    display: none;
+  }
+}
+@media (max-height: 820px) {
+  .garden-postcard {
     display: none;
   }
 }
@@ -1330,6 +1384,7 @@ textarea:focus-visible {
     scroll-behavior: auto;
   }
   .filter-tray,
+  .garden-postcard,
   .text-link svg,
   .marker-core,
   .marker-label,

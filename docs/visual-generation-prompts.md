@@ -22,3 +22,17 @@ DO NOT ADD: text, labels, pins, UI, logos, legend, compass, border, boats, birds
 
 OUTPUT: one seamless clean production plate at the same aspect ratio and crop, with the corrected Vltava as the sole watercourse.
 ```
+
+## Production soundtrack
+
+- Mode: Picsart generation using ElevenLabs Music v2, instrumental.
+- Source generation: 30 seconds at 44.1 kHz stereo.
+- Production master: a 4-second equal-power crossfade creates a seamless 26.04-second loop; the loop is repeated three times to reduce the frequency of browser loop boundaries.
+- Workspace production assets: `public/audio/zahrady-nad-vltavou.m4a` and `public/audio/zahrady-nad-vltavou.mp3`.
+- Final delivery: 78.12 seconds, AAC-LC/MP3 at 160 kb/s, approximately -20.9 LUFS integrated and -4.5 dBTP.
+
+Exact production prompt:
+
+```text
+Create a seamless-loop instrumental soundscape for an illustrated interactive map of Prague community gardens. The feeling is a quiet sunlit morning when the city and its gardens slowly wake beside the Vltava: intimate, organic, kind, lightly magical, sophisticated rather than childish. Gentle botanical chamber ambient at 64 BPM in a soft flowing 6/8. A small memorable four-note motif appears sparsely on warm felt piano and airy clarinet, answered by very soft pizzicato viola and cello; add delicate harp harmonics, rare cimbalom-like droplets, muted marimba and brushed wooden seed percussion. Warm modal harmony with a subtle Bohemian character, calm and hopeful, with generous breathing room and no dramatic climax. This is a 30-second repeating web loop: begin immediately inside the established texture, no intro, no ending cadence; the final ambience, harmony and sustained texture must connect naturally back to the first beat for an inaudible repeat. Instrumental only. No vocals, no spoken word, no choir, no polka, no tourist cliché, no quotation or imitation of any existing Czech melody, no cinematic trailer swell, no heavy drums, no EDM, no lo-fi beat or vinyl crackle, no generic spa synth pad, no dark melancholy, no tension, no sharp bells, no dominant sound effects or birdsong.
+```

@@ -520,13 +520,13 @@ export default function Home() {
             <Music2 aria-hidden="true" />
             <span className="sound-copy">
               <small>Zvuková krajina</small>
-              <strong>Mezi listím a kamenem</strong>
+              <strong>Zahrady nad Vltavou</strong>
             </span>
             <button
               className="sound-toggle"
               type="button"
               onClick={toggleSound}
-              aria-label="Zvuková krajina Mezi listím a kamenem"
+              aria-label="Zvuková krajina Zahrady nad Vltavou"
               aria-pressed={isSoundPlaying}
             >
               {soundState === 'loading' ? (
@@ -559,11 +559,8 @@ export default function Home() {
               }
               onError={() => setSoundState('error')}
             >
-              <source src="/audio/mezi-listim-a-kamenem.m4a" type="audio/mp4" />
-              <source
-                src="/audio/mezi-listim-a-kamenem.mp3"
-                type="audio/mpeg"
-              />
+              <source src="/audio/zahrady-nad-vltavou.m4a" type="audio/mp4" />
+              <source src="/audio/zahrady-nad-vltavou.mp3" type="audio/mpeg" />
             </audio>
           </div>
           <output className="sound-status" aria-live="polite">
@@ -581,6 +578,15 @@ export default function Home() {
             Jak mapa funguje <ArrowRight />
           </button>
         </section>
+
+        <figure
+          className={`garden-postcard${
+            selectedGarden || filtersOpen ? ' is-quiet' : ''
+          }`}
+          aria-hidden="true"
+        >
+          <Image src="/zahrady-prahy-og.png" alt="" fill sizes="208px" />
+        </figure>
 
         {filteredGardens.length === 0 && (
           <output className="empty-state" aria-live="polite">
