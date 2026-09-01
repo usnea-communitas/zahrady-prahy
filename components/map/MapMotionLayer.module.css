@@ -37,6 +37,16 @@
   animation-delay: -1.7s;
 }
 
+.boatTertiary {
+  animation-delay: -2.6s;
+  animation-duration: 4.4s;
+}
+
+.boatFourth {
+  animation-delay: -0.8s;
+  animation-duration: 3.3s;
+}
+
 .birdFlock {
   opacity: 0;
   animation: flockReveal 48s ease-in-out infinite;
@@ -45,6 +55,16 @@
 .birdFlockSecondary {
   animation-delay: -23s;
   animation-duration: 56s;
+}
+
+.birdFlockTertiary {
+  animation-delay: -29s;
+  animation-duration: 62s;
+}
+
+.birdFlockFourth {
+  animation-delay: -48s;
+  animation-duration: 70s;
 }
 
 .riverGlint {
@@ -83,14 +103,14 @@
 
 @keyframes flockReveal {
   0%,
-  8%,
-  38%,
+  6%,
+  82%,
   100% {
     opacity: 0;
   }
-  14%,
-  30% {
-    opacity: 0.74;
+  13%,
+  70% {
+    opacity: 0.68;
   }
 }
 

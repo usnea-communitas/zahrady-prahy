@@ -159,6 +159,16 @@ type FilterId = 'children' | 'accessible' | 'compost' | 'events';
 type SoundState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 
 const AUDIO_TARGET_VOLUME = 0.38;
+const WIDE_MAP_CONTENT_SCALE = 0.8;
+
+function projectToWideMapPercent(point: Garden) {
+  const projected = projectToPercent(point);
+
+  return {
+    x: 50 + (projected.x - 50) * WIDE_MAP_CONTENT_SCALE,
+    y: 50 + (projected.y - 50) * WIDE_MAP_CONTENT_SCALE,
+  };
+}
 
 const filterOptions: Array<{
   id: FilterId;
@@ -225,7 +235,7 @@ export default function Home() {
   const selectedGarden =
     filteredGardens.find((garden) => garden.id === selectedId) ?? null;
   const selectedPosition = selectedGarden
-    ? projectToPercent(selectedGarden)
+    ? projectToWideMapPercent(selectedGarden)
     : null;
   const isSoundPlaying = soundState === 'playing';
   const isMotionPaused = motionPaused || prefersReducedMotion;
@@ -277,6 +287,68 @@ export default function Home() {
   );
 
   useEffect(() => cancelAudioFade, [cancelAudioFade]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    let disposed = false;
+    let waitingForGesture = false;
+
+    const removeUnlockListeners = () => {
+      window.removeEventListener('pointerdown', unlockSound, true);
+      window.removeEventListener('keydown', unlockSound, true);
+    };
+
+    const attemptAutoplay = async () => {
+      if (disposed) return;
+
+      cancelAudioFade();
+      audio.volume = 0;
+      setSoundState('loading');
+
+      try {
+        await audio.play();
+        waitingForGesture = false;
+        removeUnlockListeners();
+      } catch (error) {
+        if (disposed) return;
+        if (error instanceof DOMException && error.name === 'AbortError')
+          return;
+
+        waitingForGesture = true;
+        setSoundState('paused');
+        window.addEventListener('pointerdown', unlockSound, {
+          capture: true,
+          once: true,
+        });
+        window.addEventListener('keydown', unlockSound, {
+          capture: true,
+          once: true,
+        });
+      }
+    };
+
+    function unlockSound(event: Event) {
+      if (!waitingForGesture) return;
+      waitingForGesture = false;
+      removeUnlockListeners();
+      if (
+        event.target instanceof Element &&
+        event.target.closest('.header-sound')
+      ) {
+        return;
+      }
+      void attemptAutoplay();
+    }
+
+    void attemptAutoplay();
+
+    return () => {
+      disposed = true;
+      removeUnlockListeners();
+    };
+  }, [cancelAudioFade]);
 
   useEffect(() => {
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -353,8 +425,8 @@ export default function Home() {
         <div className="map-plane">
           <Image
             className="map-art"
-            src="/map/prague-storybook-vltava-v5.webp"
-            alt="Hravá ilustrovaná karikatura Prahy se záměrně zvětšenými památkami a geograficky věrným tokem Vltavy"
+            src="/map/prague-storybook-vltava-v6-wide.webp"
+            alt="Široký pohádkově ilustrovaný pohled na Prahu se zvětšenými památkami a Vltavou"
             fill
             priority
             sizes="100vw"
@@ -372,7 +444,7 @@ export default function Home() {
             <legend className="sr-only">Zahrady na mapě</legend>
             {filteredGardens.map((garden) => {
               const isSelected = selectedId === garden.id;
-              const position = projectToPercent(garden);
+              const position = projectToWideMapPercent(garden);
 
               return (
                 <button
@@ -442,6 +514,68 @@ export default function Home() {
           </search>
 
           <div className="header-actions">
+            <button
+              className={`header-sound is-${soundState}`}
+              type="button"
+              onClick={toggleSound}
+              aria-label={
+                isSoundPlaying
+                  ? 'Pozastavit zvukovou krajinu Zahrady nad Vltavou'
+                  : 'Přehrát zvukovou krajinu Zahrady nad Vltavou'
+              }
+              aria-pressed={isSoundPlaying}
+              aria-busy={soundState === 'loading'}
+              title={
+                isSoundPlaying
+                  ? 'Pozastavit zvukovou krajinu'
+                  : 'Přehrát zvukovou krajinu'
+              }
+            >
+              <Music2 className="sound-note" aria-hidden="true" />
+              <span className="sound-action" aria-hidden="true">
+                {soundState === 'loading' ? (
+                  <LoaderCircle className="sound-loader" />
+                ) : isSoundPlaying ? (
+                  <Pause />
+                ) : (
+                  <Play />
+                )}
+              </span>
+            </button>
+            {/* Instrumentální zvuková krajina neobsahuje mluvené slovo. */}
+            {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
+            <audio
+              ref={audioRef}
+              loop
+              preload="auto"
+              onPlaying={() => {
+                setSoundState('playing');
+                const audio = audioRef.current;
+                if (audio) fadeAudio(audio, AUDIO_TARGET_VOLUME, 720);
+              }}
+              onWaiting={() => {
+                if (!audioRef.current?.paused) setSoundState('loading');
+              }}
+              onStalled={() => {
+                if (!audioRef.current?.paused) setSoundState('loading');
+              }}
+              onPause={() =>
+                setSoundState((state) => (state === 'error' ? state : 'paused'))
+              }
+              onError={() => setSoundState('error')}
+            >
+              <source src="/audio/zahrady-nad-vltavou.m4a" type="audio/mp4" />
+              <source src="/audio/zahrady-nad-vltavou.mp3" type="audio/mpeg" />
+            </audio>
+            <output className="sr-only" aria-live="polite">
+              {soundState === 'loading'
+                ? 'Načítám zvukovou krajinu…'
+                : soundState === 'error'
+                  ? 'Zvuk se nepodařilo přehrát.'
+                  : isSoundPlaying
+                    ? 'Zvuková krajina hraje.'
+                    : ''}
+            </output>
             <Button
               className="glass-button"
               variant="outline"
@@ -507,86 +641,31 @@ export default function Home() {
           )}
         </div>
 
-        <section className="intro-card" id="top" aria-labelledby="intro-title">
-          <span className="eyebrow">
-            <Sparkles /> živá mapa města
-          </span>
-          <h1 id="intro-title">Praha roste společně.</h1>
-          <p>Objevte místa, kde se sousedé potkávají a město kvete.</p>
-          <div
-            className={`sound-control is-${soundState}`}
-            aria-busy={soundState === 'loading'}
-          >
-            <Music2 aria-hidden="true" />
-            <span className="sound-copy">
-              <small>Zvuková krajina</small>
-              <strong>Zahrady nad Vltavou</strong>
-            </span>
-            <button
-              className="sound-toggle"
-              type="button"
-              onClick={toggleSound}
-              aria-label="Zvuková krajina Zahrady nad Vltavou"
-              aria-pressed={isSoundPlaying}
-            >
-              {soundState === 'loading' ? (
-                <LoaderCircle className="sound-loader" aria-hidden="true" />
-              ) : isSoundPlaying ? (
-                <Pause aria-hidden="true" />
-              ) : (
-                <Play aria-hidden="true" />
-              )}
-            </button>
-            {/* Instrumentální zvuková krajina neobsahuje mluvené slovo. */}
-            {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
-            <audio
-              ref={audioRef}
-              loop
-              preload="none"
-              onPlaying={() => {
-                setSoundState('playing');
-                const audio = audioRef.current;
-                if (audio) fadeAudio(audio, AUDIO_TARGET_VOLUME, 520);
-              }}
-              onWaiting={() => {
-                if (!audioRef.current?.paused) setSoundState('loading');
-              }}
-              onStalled={() => {
-                if (!audioRef.current?.paused) setSoundState('loading');
-              }}
-              onPause={() =>
-                setSoundState((state) => (state === 'error' ? state : 'paused'))
-              }
-              onError={() => setSoundState('error')}
-            >
-              <source src="/audio/zahrady-nad-vltavou.m4a" type="audio/mp4" />
-              <source src="/audio/zahrady-nad-vltavou.mp3" type="audio/mpeg" />
-            </audio>
-          </div>
-          <output className="sound-status" aria-live="polite">
-            {soundState === 'loading'
-              ? 'Načítám zvukovou krajinu…'
-              : soundState === 'error'
-                ? 'Zvuk se nepodařilo přehrát.'
-                : ''}
-          </output>
-          <button
-            className="text-link"
-            type="button"
-            onClick={() => setAboutOpen(true)}
-          >
-            Jak mapa funguje <ArrowRight />
-          </button>
-        </section>
-
-        <figure
-          className={`garden-postcard${
+        <section
+          className={`intro-card${
             selectedGarden || filtersOpen ? ' is-quiet' : ''
           }`}
-          aria-hidden="true"
+          id="top"
+          aria-labelledby="intro-title"
         >
-          <Image src="/zahrady-prahy-og.png" alt="" fill sizes="208px" />
-        </figure>
+          <div className="intro-content">
+            <span className="eyebrow">
+              <Sparkles /> živá mapa města
+            </span>
+            <h1 id="intro-title">Praha roste společně.</h1>
+            <p>Objevte místa, kde se sousedé potkávají a město kvete.</p>
+            <button
+              className="text-link"
+              type="button"
+              onClick={() => setAboutOpen(true)}
+            >
+              Jak mapa funguje <ArrowRight />
+            </button>
+          </div>
+          <figure className="intro-visual" aria-hidden="true">
+            <Image src="/zahrady-prahy-og.png" alt="" fill sizes="396px" />
+          </figure>
+        </section>
 
         {filteredGardens.length === 0 && (
           <output className="empty-state" aria-live="polite">
@@ -612,7 +691,7 @@ export default function Home() {
             </button>
             <div className="preview-illustration" aria-hidden="true">
               <Image
-                src="/map/prague-storybook-vltava-v5.webp"
+                src="/map/prague-storybook-vltava-v6-wide.webp"
                 alt=""
                 fill
                 sizes="368px"
