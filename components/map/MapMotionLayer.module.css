@@ -27,6 +27,48 @@
   transition: opacity 320ms ease;
 }
 
+.motionLayer.paused .boat,
+.motionLayer.paused .birdFlock,
+.motionLayer.paused .treeCluster,
+.motionLayer.paused .riverGlint {
+  animation-play-state: paused;
+}
+
+.treeCluster {
+  opacity: 0.58;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: treeSway 8.4s ease-in-out infinite alternate;
+}
+
+.trees {
+  opacity: 0.9;
+}
+
+.treeClusterFirst {
+  animation-delay: -1.2s;
+}
+
+.treeClusterSecond {
+  animation-delay: -4.1s;
+  animation-duration: 9.2s;
+}
+
+.treeClusterThird {
+  animation-delay: -6.8s;
+  animation-duration: 7.6s;
+}
+
+.treeClusterFourth {
+  animation-delay: -2.4s;
+  animation-duration: 9.8s;
+}
+
+.treeClusterFifth {
+  animation-delay: -7.2s;
+  animation-duration: 8.8s;
+}
+
 .boat {
   transform-box: fill-box;
   transform-origin: center;
@@ -50,10 +92,11 @@
 .birdFlock {
   opacity: 0;
   animation: flockReveal 48s ease-in-out infinite;
+  animation-delay: -7s;
 }
 
 .birdFlockSecondary {
-  animation-delay: -23s;
+  animation-delay: -34s;
   animation-duration: 56s;
 }
 
@@ -65,6 +108,21 @@
 .birdFlockFourth {
   animation-delay: -48s;
   animation-duration: 70s;
+}
+
+.birdFlockFifth {
+  animation-delay: -17s;
+  animation-duration: 76s;
+}
+
+.birdFlockSixth {
+  animation-delay: -53s;
+  animation-duration: 84s;
+}
+
+.birdFlockSeventh {
+  animation-delay: -71s;
+  animation-duration: 92s;
 }
 
 .riverGlint {
@@ -98,6 +156,17 @@
 @keyframes riverDrift {
   to {
     stroke-dashoffset: -156;
+  }
+}
+
+@keyframes treeSway {
+  from {
+    translate: 0 0;
+    rotate: -0.45deg;
+  }
+  to {
+    translate: 0 -0.7px;
+    rotate: 0.55deg;
   }
 }
 

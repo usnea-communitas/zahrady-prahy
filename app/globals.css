@@ -548,32 +548,56 @@ textarea:focus-visible {
   left: clamp(24px, 3vw, 40px);
   z-index: 25;
   width: min(396px, calc(100vw - 80px));
+  height: 264px;
   overflow: hidden;
   border: 1px solid rgba(184, 93, 66, 0.18);
   border-radius: var(--radius-cards);
-  background: rgba(255, 252, 244, 0.9);
+  background: rgba(255, 252, 244, 0.34);
   color: var(--color-aged-sepia);
   transform: rotate(-0.18deg);
-  transition: opacity 240ms ease;
+  transition:
+    width 380ms var(--ease-out),
+    height 380ms var(--ease-out),
+    border-radius 380ms var(--ease-out),
+    opacity 240ms ease;
   animation: intro-card-float 9s ease-in-out infinite;
-  backdrop-filter: blur(20px) saturate(1.08);
+  backdrop-filter: blur(12px) saturate(1.08);
 }
 .intro-card.is-quiet {
   opacity: 0.44;
 }
-.intro-content {
-  position: relative;
-  z-index: 1;
-  padding: 36px 40px 32px;
+.intro-card.is-minimized {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+}
+.intro-postcard {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  transition: opacity 220ms ease;
+}
+.intro-postcard:focus-visible {
+  border-radius: inherit;
+  outline-offset: -4px;
+}
+.intro-card.is-minimized .intro-postcard {
+  opacity: 0.82;
+  pointer-events: none;
 }
 .intro-visual {
-  position: relative;
-  height: 150px;
+  position: absolute;
+  inset: 0;
+  display: block;
   overflow: hidden;
-  margin: 0;
-  border-top: 1px solid rgba(184, 93, 66, 0.16);
   background: var(--color-parchment);
-  pointer-events: none;
 }
 .intro-visual::after {
   position: absolute;
@@ -585,11 +609,42 @@ textarea:focus-visible {
 }
 .intro-visual img {
   object-fit: cover;
-  object-position: center 68%;
+  object-position: center 70%;
   filter: saturate(1.05) contrast(1.01) brightness(1.015);
   transform: scale(1.015);
+  transition: transform 500ms var(--ease-out);
 }
-.eyebrow,
+.intro-card.is-minimized .intro-visual img {
+  transform: scale(2.2);
+}
+.intro-minimize {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid rgba(39, 26, 0, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.54);
+  color: var(--color-aged-sepia);
+  backdrop-filter: blur(16px) saturate(1.16);
+  transition:
+    background 160ms ease,
+    transform 380ms var(--ease-out);
+}
+.intro-minimize:hover {
+  background: rgba(255, 255, 255, 0.76);
+}
+.intro-minimize svg {
+  width: 15px;
+}
+.intro-card.is-minimized .intro-minimize {
+  top: 18px;
+  right: 18px;
+}
 .dialog-eyebrow {
   display: flex;
   align-items: center;
@@ -600,46 +655,6 @@ textarea:focus-visible {
   font-weight: 500;
   letter-spacing: 0;
   text-transform: uppercase;
-}
-.eyebrow svg {
-  width: 14px;
-  color: var(--color-sun-gold);
-}
-.intro-card h1 {
-  max-width: 10ch;
-  margin: 20px 0 16px;
-  color: var(--color-aged-sepia);
-  font-family: var(--font-pplxserif);
-  font-size: clamp(50px, 3.7vw, 60px);
-  font-weight: 300;
-  letter-spacing: normal;
-  line-height: 1;
-}
-.intro-content > p {
-  max-width: 34ch;
-  margin: 0;
-  color: var(--color-moss-shadow);
-  font-size: 15px;
-  line-height: 1.5;
-}
-.text-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 20px;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  color: var(--color-aged-sepia);
-  font-size: 15px;
-  font-weight: 400;
-}
-.text-link svg {
-  width: 15px;
-  transition: transform 180ms var(--ease-out);
-}
-.text-link:hover svg {
-  transform: translateX(3px);
 }
 
 .garden-markers {
@@ -667,15 +682,15 @@ textarea:focus-visible {
 .marker-aura {
   position: absolute;
   inset: -8px;
-  border: 1px solid rgba(213, 162, 59, 0.72);
+  border: 1px solid rgba(117, 166, 92, 0.74);
   border-radius: 50%;
-  background: rgba(242, 229, 197, 0.52);
+  background: rgba(183, 212, 119, 0.28);
   opacity: 0.78;
 }
 .marker-aura::after {
   position: absolute;
   inset: 5px;
-  border: 1px solid rgba(142, 131, 184, 0.48);
+  border: 1px solid rgba(70, 108, 61, 0.48);
   border-radius: inherit;
   content: '';
 }
@@ -687,7 +702,7 @@ textarea:focus-visible {
   place-items: center;
   border: 4px solid var(--color-parchment);
   border-radius: 50%;
-  background: linear-gradient(145deg, #32402a, var(--color-deep-forest));
+  background: linear-gradient(145deg, #7eaa65, #456b3c);
   color: var(--color-parchment);
   outline: 1px solid var(--color-fog);
   transition:
@@ -737,7 +752,7 @@ textarea:focus-visible {
 .garden-marker:hover .marker-core,
 .garden-marker:focus-visible .marker-core,
 .garden-marker.is-selected .marker-core {
-  background: var(--color-teal-accent);
+  background: linear-gradient(145deg, #93ba72, #547b45);
   transform: scale(1.035);
 }
 .garden-marker:hover .marker-label,
@@ -794,9 +809,25 @@ textarea:focus-visible {
   overflow: hidden;
   background: var(--color-parchment);
 }
+.preview-illustration::before {
+  position: absolute;
+  inset: -45%;
+  z-index: 1;
+  background: radial-gradient(
+    circle,
+    rgba(255, 244, 173, 0.32) 0,
+    rgba(255, 244, 173, 0.08) 28%,
+    transparent 58%
+  );
+  content: '';
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: garden-sunlight 9s ease-in-out infinite alternate;
+}
 .preview-illustration::after {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(
     180deg,
     rgba(250, 248, 245, 0.08),
@@ -807,7 +838,8 @@ textarea:focus-visible {
 .preview-illustration img {
   object-fit: cover;
   filter: saturate(1.08) contrast(1.01) brightness(1.02);
-  transform: scale(1.75);
+  transform: scale(1.035);
+  animation: garden-scene-drift 16s ease-in-out infinite alternate;
 }
 .preview-glyph {
   position: absolute;
@@ -820,8 +852,8 @@ textarea:focus-visible {
   place-items: center;
   border: 1px solid rgba(39, 26, 0, 0.14);
   border-radius: var(--radius-other);
-  background: rgba(242, 229, 197, 0.82);
-  color: var(--color-terracotta);
+  background: rgba(234, 244, 215, 0.82);
+  color: #547b45;
   backdrop-filter: blur(20px);
 }
 .preview-glyph svg {
@@ -968,16 +1000,16 @@ textarea:focus-visible {
   min-height: 44px;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid rgba(39, 26, 0, 0.14);
+  border: 1px solid rgba(39, 26, 0, 0.12);
   border-radius: var(--radius-other);
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.24);
   padding: 0 16px;
   color: var(--color-aged-sepia);
   font-family: var(--font-pplxsansmono);
   font-size: 10px;
   font-weight: 400;
   letter-spacing: 0;
-  backdrop-filter: blur(20px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.12);
 }
 .result-count {
   display: inline-flex;
@@ -1212,6 +1244,22 @@ textarea:focus-visible {
     transform: translateY(12px);
   }
 }
+@keyframes garden-scene-drift {
+  from {
+    transform: scale(1.035) translate3d(-0.5%, 0, 0);
+  }
+  to {
+    transform: scale(1.095) translate3d(0.8%, -1.4%, 0);
+  }
+}
+@keyframes garden-sunlight {
+  from {
+    transform: translate3d(-11%, 3%, 0);
+  }
+  to {
+    transform: translate3d(16%, -4%, 0);
+  }
+}
 @keyframes intro-card-float {
   0%,
   100% {
@@ -1253,23 +1301,15 @@ textarea:focus-visible {
   }
   .intro-card {
     width: 360px;
-  }
-  .intro-content {
-    padding: 32px;
-  }
-  .intro-visual {
-    height: 148px;
-  }
-  .intro-card h1 {
-    font-size: 56px;
+    height: 240px;
   }
   .motion-toggle {
     display: none;
   }
 }
 @media (max-height: 820px) {
-  .intro-visual {
-    height: 112px;
+  .intro-card {
+    height: 214px;
   }
 }
 @media (max-width: 720px) {
@@ -1293,12 +1333,7 @@ textarea:focus-visible {
     top: 76px;
     left: 12px;
     width: min(360px, calc(100vw - 24px));
-  }
-  .intro-content {
-    padding: 24px;
-  }
-  .intro-card h1 {
-    font-size: 44px;
+    height: 228px;
   }
   .garden-preview {
     right: 12px;
@@ -1343,15 +1378,7 @@ textarea:focus-visible {
 @media (max-height: 760px) and (min-width: 721px) {
   .intro-card {
     top: 100px;
-  }
-  .intro-content {
-    padding: 28px 32px;
-  }
-  .intro-card h1 {
-    font-size: 52px;
-  }
-  .intro-visual {
-    height: 96px;
+    height: 184px;
   }
   .garden-preview {
     bottom: 52px;
@@ -1390,10 +1417,11 @@ textarea:focus-visible {
   .intro-card,
   .header-sound,
   .header-sound::before,
-  .text-link svg,
   .marker-core,
   .marker-label,
   .garden-preview,
+  .preview-illustration img,
+  .preview-illustration::before,
   .sound-loader,
   .garden-marker.is-selected .marker-aura {
     animation: none !important;

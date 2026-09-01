@@ -15,13 +15,14 @@ import {
   Leaf,
   LoaderCircle,
   MapPin,
+  Maximize2,
+  Minimize2,
   Music2,
   Pause,
   Play,
   Plus,
   Search,
   SlidersHorizontal,
-  Sparkles,
   Sprout,
   Check,
   X,
@@ -51,6 +52,7 @@ type Garden = {
   lon: number;
   locationStatus?: string;
   sourceUrl: string;
+  illustration: string;
 };
 
 const gardens: Garden[] = [
@@ -65,6 +67,7 @@ const gardens: Garden[] = [
     lat: 50.1121511,
     lon: 14.4147114,
     sourceUrl: 'https://www.metrofarm.cz/metrofarm/',
+    illustration: '/gardens/metrofarm.webp',
   },
   {
     id: 'prales',
@@ -78,6 +81,7 @@ const gardens: Garden[] = [
     lon: 14.5607443,
     sourceUrl:
       'https://lesypraha.cz/vzdelavani/ekocentrum-prales/komunitni-zahrada/',
+    illustration: '/gardens/prales.webp',
   },
   {
     id: 'kotlaska',
@@ -90,6 +94,7 @@ const gardens: Garden[] = [
     lat: 50.1071472,
     lon: 14.476603,
     sourceUrl: 'https://www.kckotlaska.cz/',
+    illustration: '/gardens/kotlaska.webp',
   },
   {
     id: 'troja',
@@ -102,6 +107,7 @@ const gardens: Garden[] = [
     lat: 50.1267793,
     lon: 14.4078329,
     sourceUrl: 'https://www.komunitnizahrada.cz/',
+    illustration: '/gardens/troja.webp',
   },
   {
     id: 'mecislavka',
@@ -114,6 +120,7 @@ const gardens: Garden[] = [
     lat: 50.0649253,
     lon: 14.4442846,
     sourceUrl: 'https://www.vnitrobloky.cz/mecislavka',
+    illustration: '/gardens/mecislavka.webp',
   },
   {
     id: 'vidimova',
@@ -126,6 +133,7 @@ const gardens: Garden[] = [
     lat: 50.0254095,
     lon: 14.5248575,
     sourceUrl: 'https://www.mapko.cz/4432-komunitni-zahrada-vidimova',
+    illustration: '/gardens/vidimova.webp',
   },
   {
     id: 'prokopka',
@@ -138,6 +146,7 @@ const gardens: Garden[] = [
     lat: 50.0398094,
     lon: 14.3437361,
     sourceUrl: 'https://www.zahradaprokopka.cz/',
+    illustration: '/gardens/prokopka.webp',
   },
   {
     id: 'velky-haj',
@@ -145,13 +154,14 @@ const gardens: Garden[] = [
     district: 'Krč',
     area: 'Praha 4',
     description:
-      'Nový velkorysý projekt mezi Novodvorskou a Chateau Havel se sadem, společným zázemím a záhony.',
+      'Pětihhektarová zahrada u lesa se záhony, pergolou, květnatou loukou, včelími úly a výběhem pro koně.',
     tags: ['nové místo', 'sad', 'záhony'],
     lat: 50.0327,
     lon: 14.4446,
     locationStatus: 'orientační poloha',
     sourceUrl:
-      'https://www.kokoza.cz/komunitni-zahrady/dve-nove-komunitni-zahrady/',
+      'https://tucnak.praha4.cz/06-2026/pestujte-ovoce-a-zeleninu-v-nove-komunitni-zahrade',
+    illustration: '/gardens/velky-haj.webp',
   },
 ];
 
@@ -214,6 +224,7 @@ export default function Home() {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [motionPaused, setMotionPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [introMinimized, setIntroMinimized] = useState(false);
 
   const filteredGardens = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('cs');
@@ -234,9 +245,6 @@ export default function Home() {
 
   const selectedGarden =
     filteredGardens.find((garden) => garden.id === selectedId) ?? null;
-  const selectedPosition = selectedGarden
-    ? projectToWideMapPercent(selectedGarden)
-    : null;
   const isSoundPlaying = soundState === 'playing';
   const isMotionPaused = motionPaused || prefersReducedMotion;
 
@@ -641,31 +649,40 @@ export default function Home() {
           )}
         </div>
 
-        <section
-          className={`intro-card${
+        <aside
+          className={`intro-card${introMinimized ? ' is-minimized' : ''}${
             selectedGarden || filtersOpen ? ' is-quiet' : ''
           }`}
           id="top"
-          aria-labelledby="intro-title"
+          aria-label="Pohlednice Zahrady Prahy"
         >
-          <div className="intro-content">
-            <span className="eyebrow">
-              <Sparkles /> živá mapa města
+          <button
+            id="intro-postcard"
+            className="intro-postcard"
+            type="button"
+            onClick={() => setAboutOpen(true)}
+            aria-label="Otevřít příběh mapy"
+            tabIndex={introMinimized ? -1 : 0}
+          >
+            <span className="intro-visual" aria-hidden="true">
+              <Image src="/zahrady-prahy-og.png" alt="" fill sizes="396px" />
             </span>
-            <h1 id="intro-title">Praha roste společně.</h1>
-            <p>Objevte místa, kde se sousedé potkávají a město kvete.</p>
-            <button
-              className="text-link"
-              type="button"
-              onClick={() => setAboutOpen(true)}
-            >
-              Jak mapa funguje <ArrowRight />
-            </button>
-          </div>
-          <figure className="intro-visual" aria-hidden="true">
-            <Image src="/zahrady-prahy-og.png" alt="" fill sizes="396px" />
-          </figure>
-        </section>
+          </button>
+          <button
+            className="intro-minimize"
+            type="button"
+            onClick={() => setIntroMinimized((minimized) => !minimized)}
+            aria-label={
+              introMinimized
+                ? 'Rozbalit pohlednici Zahrady Prahy'
+                : 'Minimalizovat pohlednici Zahrady Prahy'
+            }
+            aria-expanded={!introMinimized}
+            aria-controls="intro-postcard"
+          >
+            {introMinimized ? <Maximize2 /> : <Minimize2 />}
+          </button>
+        </aside>
 
         {filteredGardens.length === 0 && (
           <output className="empty-state" aria-live="polite">
@@ -691,13 +708,10 @@ export default function Home() {
             </button>
             <div className="preview-illustration" aria-hidden="true">
               <Image
-                src="/map/prague-storybook-vltava-v6-wide.webp"
+                src={selectedGarden.illustration}
                 alt=""
                 fill
                 sizes="368px"
-                style={{
-                  objectPosition: `${selectedPosition?.x}% ${selectedPosition?.y}%`,
-                }}
               />
               <span className="preview-glyph">
                 <Leaf />
