@@ -12,6 +12,7 @@ import {
 import Image from 'next/image';
 import {
   ArrowRight,
+  Flower2,
   Leaf,
   LoaderCircle,
   MapPin,
@@ -24,6 +25,7 @@ import {
   Search,
   SlidersHorizontal,
   Sprout,
+  Wheat,
   Check,
   X,
 } from 'lucide-react';
@@ -882,9 +884,43 @@ export default function Home() {
 
       <Dialog open={aboutOpen} onOpenChange={setAboutOpen}>
         <DialogContent className="about-dialog">
-          <DialogHeader>
-            <span className="dialog-eyebrow">Jak mapa funguje</span>
-            <DialogTitle>Každá zahrada je malý živý svět.</DialogTitle>
+          <div className="about-botanical-field" aria-hidden="true">
+            <Image
+              className="about-canopy about-canopy-left"
+              src="/map/motion/tree-cluster-v1.png"
+              alt=""
+              width={384}
+              height={256}
+              sizes="260px"
+            />
+            <Image
+              className="about-canopy about-canopy-right"
+              src="/map/motion/tree-cluster-v1.png"
+              alt=""
+              width={384}
+              height={256}
+              sizes="260px"
+            />
+            <span className="about-sprig about-sprig-one">
+              <Leaf />
+            </span>
+            <span className="about-sprig about-sprig-two">
+              <Flower2 />
+            </span>
+            <span className="about-sprig about-sprig-three">
+              <Wheat />
+            </span>
+          </div>
+          <DialogHeader className="about-dialog-header">
+            <span className="dialog-eyebrow">
+              <span className="dialog-eyebrow-icon" aria-hidden="true">
+                <Leaf />
+              </span>
+              Jak mapa funguje
+            </span>
+            <DialogTitle>
+              Každá zahrada je <span>malý živý svět.</span>
+            </DialogTitle>
             <DialogDescription>
               Body na mapě odkazují na skutečná pražská místa. Vybíráme je z
               veřejných zdrojů a každý údaj před zveřejněním kontrolujeme. U
@@ -893,27 +929,42 @@ export default function Home() {
           </DialogHeader>
           <ol className="how-list">
             <li>
-              <span>1</span>
-              <div>
+              <span className="how-icon" aria-hidden="true">
+                <Search />
+              </span>
+              <div className="how-step-copy">
                 <strong>Objevujte</strong>
                 <small>Hledejte podle názvu, čtvrti nebo vlastností.</small>
               </div>
+              <span className="how-step-number" aria-hidden="true">
+                01
+              </span>
             </li>
             <li>
-              <span>2</span>
-              <div>
+              <span className="how-icon" aria-hidden="true">
+                <Sprout />
+              </span>
+              <div className="how-step-copy">
                 <strong>Rozklikněte místo</strong>
                 <small>Každá zahrada má vlastní příběh a ověřený zdroj.</small>
               </div>
+              <span className="how-step-number" aria-hidden="true">
+                02
+              </span>
             </li>
             <li>
-              <span>3</span>
-              <div>
+              <span className="how-icon" aria-hidden="true">
+                <Flower2 />
+              </span>
+              <div className="how-step-copy">
                 <strong>Přidejte tip</strong>
                 <small>
                   Nové zahrady nejprve ověříme a teprve potom zveřejníme.
                 </small>
               </div>
+              <span className="how-step-number" aria-hidden="true">
+                03
+              </span>
             </li>
           </ol>
         </DialogContent>

@@ -52,7 +52,7 @@ export function MapMotionLayer({ paused, quiet, ready }: MapMotionLayerProps) {
             d={VLTAVA_WIDE_CENTERLINE_PATH}
             fill="none"
             stroke="black"
-            strokeWidth="32"
+            strokeWidth="56"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -124,6 +124,7 @@ export function MapMotionLayer({ paused, quiet, ready }: MapMotionLayerProps) {
             y="-23"
             width="22"
             height="48"
+            transform="rotate(-90)"
             preserveAspectRatio="xMidYMid meet"
           >
             <animateMotion
@@ -149,6 +150,7 @@ export function MapMotionLayer({ paused, quiet, ready }: MapMotionLayerProps) {
             y="-22"
             width="20"
             height="45"
+            transform="rotate(-90)"
             preserveAspectRatio="xMidYMid meet"
           >
             <animateMotion
@@ -174,6 +176,7 @@ export function MapMotionLayer({ paused, quiet, ready }: MapMotionLayerProps) {
             y="-20"
             width="18"
             height="40"
+            transform="rotate(-90)"
             preserveAspectRatio="xMidYMid meet"
           >
             <animateMotion
@@ -199,6 +202,7 @@ export function MapMotionLayer({ paused, quiet, ready }: MapMotionLayerProps) {
             y="-18"
             width="16"
             height="36"
+            transform="rotate(-90)"
             preserveAspectRatio="xMidYMid meet"
           >
             <animateMotion
