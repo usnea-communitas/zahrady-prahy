@@ -562,13 +562,24 @@ textarea:focus-visible {
     opacity 240ms ease;
   animation: intro-card-float 9s ease-in-out infinite;
   backdrop-filter: blur(12px) saturate(1.08);
+  will-change: top, left, width, height;
 }
 .intro-card.is-quiet {
   opacity: 0.44;
 }
+.intro-card.is-positioned {
+  transform: none;
+  animation: none;
+}
+.intro-card.is-move,
+.intro-card.is-resize {
+  z-index: 35;
+  user-select: none;
+  transition: none;
+}
 .intro-card.is-minimized {
-  width: 72px;
-  height: 72px;
+  width: 104px;
+  height: 56px;
   border-radius: 18px;
 }
 .intro-postcard {
@@ -617,10 +628,10 @@ textarea:focus-visible {
 .intro-card.is-minimized .intro-visual img {
   transform: scale(2.2);
 }
+.intro-drag-handle,
 .intro-minimize {
   position: absolute;
   top: 12px;
-  right: 12px;
   z-index: 3;
   display: grid;
   width: 36px;
@@ -635,15 +646,63 @@ textarea:focus-visible {
     background 160ms ease,
     transform 380ms var(--ease-out);
 }
+.intro-drag-handle {
+  left: 12px;
+  cursor: grab;
+  touch-action: none;
+}
+.intro-drag-handle:active {
+  cursor: grabbing;
+}
+.intro-minimize {
+  right: 12px;
+}
+.intro-drag-handle:hover,
 .intro-minimize:hover {
   background: rgba(255, 255, 255, 0.76);
 }
+.intro-drag-handle svg,
 .intro-minimize svg {
   width: 15px;
 }
+.intro-card.is-minimized .intro-drag-handle,
 .intro-card.is-minimized .intro-minimize {
-  top: 18px;
-  right: 18px;
+  top: 12px;
+  width: 32px;
+  height: 32px;
+}
+.intro-card.is-minimized .intro-drag-handle {
+  left: 12px;
+}
+.intro-card.is-minimized .intro-minimize {
+  right: 12px;
+}
+.intro-resize-handle {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(39, 26, 0, 0.14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.54);
+  color: var(--color-aged-sepia);
+  cursor: nwse-resize;
+  touch-action: none;
+  backdrop-filter: blur(16px) saturate(1.16);
+  transition:
+    background 160ms ease,
+    transform 180ms ease;
+}
+.intro-resize-handle:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.04);
+}
+.intro-resize-handle svg {
+  width: 14px;
 }
 .dialog-eyebrow {
   display: flex;
@@ -668,10 +727,14 @@ textarea:focus-visible {
   pointer-events: none;
 }
 .garden-marker {
+  --marker-top: #88b66d;
+  --marker-bottom: #3f6741;
+  --marker-edge: rgba(45, 79, 44, 0.78);
+  --marker-glow: rgba(122, 175, 101, 0.34);
   position: absolute;
   display: grid;
-  width: 52px;
-  height: 52px;
+  width: 58px;
+  height: 58px;
   place-items: center;
   border: 0;
   background: transparent;
@@ -679,39 +742,109 @@ textarea:focus-visible {
   pointer-events: auto;
   transform: translate(-50%, -50%);
 }
+.garden-marker::before {
+  position: absolute;
+  top: 39px;
+  left: 50%;
+  z-index: -1;
+  width: 3px;
+  height: 13px;
+  border-radius: 999px;
+  background: var(--marker-edge);
+  content: '';
+  transform: translateX(-50%) rotate(7deg);
+}
+.garden-marker.marker-community,
+.legend-symbol.marker-community {
+  --marker-top: #8dbd70;
+  --marker-bottom: #3f6c43;
+  --marker-edge: rgba(45, 85, 49, 0.82);
+  --marker-glow: rgba(116, 176, 91, 0.4);
+}
+.garden-marker.marker-urban-farm,
+.legend-symbol.marker-urban-farm {
+  --marker-top: #e8b85e;
+  --marker-bottom: #a7652f;
+  --marker-edge: rgba(119, 66, 27, 0.82);
+  --marker-glow: rgba(229, 165, 70, 0.42);
+}
+.garden-marker.marker-education,
+.legend-symbol.marker-education {
+  --marker-top: #b694c7;
+  --marker-bottom: #705687;
+  --marker-edge: rgba(81, 57, 101, 0.82);
+  --marker-glow: rgba(154, 116, 181, 0.4);
+}
+.garden-marker.marker-courtyard,
+.legend-symbol.marker-courtyard {
+  --marker-top: #df9274;
+  --marker-bottom: #9b503d;
+  --marker-edge: rgba(119, 57, 43, 0.82);
+  --marker-glow: rgba(210, 111, 78, 0.4);
+}
+.garden-marker.marker-nature,
+.legend-symbol.marker-nature {
+  --marker-top: #69aaa0;
+  --marker-bottom: #326d69;
+  --marker-edge: rgba(34, 82, 78, 0.84);
+  --marker-glow: rgba(70, 146, 135, 0.4);
+}
 .marker-aura {
   position: absolute;
-  inset: -8px;
-  border: 1px solid rgba(117, 166, 92, 0.74);
-  border-radius: 50%;
-  background: rgba(183, 212, 119, 0.28);
-  opacity: 0.78;
+  inset: -7px;
+  border: 1px solid var(--marker-edge);
+  border-radius: 50% 44% 52% 48% / 46% 54% 45% 55%;
+  background: color-mix(in srgb, var(--marker-top) 24%, transparent);
+  box-shadow: 0 0 26px var(--marker-glow);
+  opacity: 0.9;
+  transform: rotate(8deg);
 }
 .marker-aura::after {
   position: absolute;
   inset: 5px;
-  border: 1px solid rgba(70, 108, 61, 0.48);
+  border: 1px solid color-mix(in srgb, var(--marker-edge) 60%, transparent);
   border-radius: inherit;
   content: '';
 }
 .marker-core {
   position: relative;
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 43px;
+  height: 43px;
+  overflow: hidden;
   place-items: center;
-  border: 4px solid var(--color-parchment);
-  border-radius: 50%;
-  background: linear-gradient(145deg, #7eaa65, #456b3c);
+  border: 3px solid rgba(255, 253, 244, 0.94);
+  border-radius: 50% 43% 53% 47% / 45% 54% 46% 55%;
+  background: linear-gradient(145deg, var(--marker-top), var(--marker-bottom));
+  box-shadow:
+    0 7px 20px rgba(39, 26, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
   color: var(--color-parchment);
-  outline: 1px solid var(--color-fog);
+  outline: 1px solid var(--marker-edge);
+  transform: rotate(-6deg);
   transition:
     transform 180ms var(--ease-out),
-    background 180ms ease;
+    filter 180ms ease;
+}
+.marker-core::before {
+  position: absolute;
+  top: 3px;
+  left: 7px;
+  width: 17px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  content: '';
+  filter: blur(1px);
+  transform: rotate(-18deg);
 }
 .marker-core svg {
-  width: 15px;
-  stroke-width: 1.8;
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+  transform: rotate(6deg);
 }
 .marker-label {
   position: absolute;
@@ -752,8 +885,8 @@ textarea:focus-visible {
 .garden-marker:hover .marker-core,
 .garden-marker:focus-visible .marker-core,
 .garden-marker.is-selected .marker-core {
-  background: linear-gradient(145deg, #93ba72, #547b45);
-  transform: scale(1.035);
+  filter: saturate(1.12) brightness(1.08);
+  transform: rotate(-6deg) scale(1.12) translateY(-1px);
 }
 .garden-marker:hover .marker-label,
 .garden-marker:focus-visible .marker-label {
@@ -766,8 +899,89 @@ textarea:focus-visible {
 }
 .garden-marker.is-selected .marker-aura {
   border: 2px solid var(--color-sun-gold);
-  background: rgba(183, 212, 119, 0.5);
+  background: color-mix(in srgb, var(--marker-top) 42%, transparent);
   animation: selected-marker 3s ease-in-out infinite;
+}
+
+.map-legend {
+  position: absolute;
+  right: clamp(24px, 3vw, 40px);
+  bottom: 72px;
+  z-index: 24;
+  width: 316px;
+  border: 1px solid rgba(39, 26, 0, 0.14);
+  border-radius: 18px;
+  background: rgba(250, 248, 241, 0.58);
+  padding: 13px 14px 14px;
+  color: var(--color-aged-sepia);
+  box-shadow: 0 16px 38px rgba(39, 26, 0, 0.16);
+  backdrop-filter: blur(18px) saturate(1.18);
+  transition:
+    opacity 220ms ease,
+    transform 260ms var(--ease-out);
+}
+.map-legend.is-muted {
+  opacity: 0.16;
+  pointer-events: none;
+  transform: translateY(8px);
+}
+.legend-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 3px 10px;
+  font-family: var(--font-pplxsansmono);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.legend-heading svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-terracotta);
+}
+.map-legend ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.map-legend li {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-moss-shadow);
+  font-size: 11px;
+  line-height: 1.15;
+}
+.legend-symbol {
+  --marker-top: #88b66d;
+  --marker-bottom: #3f6741;
+  --marker-edge: rgba(45, 79, 44, 0.78);
+  --marker-glow: rgba(122, 175, 101, 0.34);
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border: 2px solid rgba(255, 253, 244, 0.92);
+  border-radius: 50% 43% 53% 47% / 45% 54% 46% 55%;
+  background: linear-gradient(145deg, var(--marker-top), var(--marker-bottom));
+  box-shadow:
+    0 4px 10px rgba(39, 26, 0, 0.2),
+    0 0 12px var(--marker-glow);
+  color: var(--color-parchment);
+  outline: 1px solid var(--marker-edge);
+  transform: rotate(-5deg);
+}
+.legend-symbol svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2;
+  transform: rotate(5deg);
 }
 
 .garden-preview {
@@ -1544,6 +1758,9 @@ textarea:focus-visible {
   }
 }
 @media (max-width: 720px) {
+  .map-legend {
+    display: none;
+  }
   .map-header {
     gap: 8px;
     padding: max(12px, env(safe-area-inset-top)) 12px 0;
@@ -1565,6 +1782,10 @@ textarea:focus-visible {
     left: 12px;
     width: min(360px, calc(100vw - 24px));
     height: 228px;
+  }
+  .intro-drag-handle,
+  .intro-resize-handle {
+    display: none;
   }
   .garden-preview {
     right: 12px;

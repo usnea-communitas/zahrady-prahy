@@ -7,6 +7,8 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   type SyntheticEvent,
 } from 'react';
 import Image from 'next/image';
@@ -18,6 +20,8 @@ import {
   MapPin,
   Maximize2,
   Minimize2,
+  Move,
+  MoveDiagonal2,
   Music2,
   Pause,
   Play,
@@ -25,6 +29,10 @@ import {
   Search,
   SlidersHorizontal,
   Sprout,
+  School,
+  Tractor,
+  Trees,
+  House,
   Wheat,
   Check,
   X,
@@ -43,6 +51,13 @@ import {
 import { MapMotionLayer } from '@/components/map/MapMotionLayer';
 import { projectToPercent } from '@/lib/map/projection';
 
+type GardenCategory =
+  | 'community'
+  | 'urban-farm'
+  | 'education'
+  | 'courtyard'
+  | 'nature';
+
 type Garden = {
   id: string;
   name: string;
@@ -55,7 +70,24 @@ type Garden = {
   locationStatus?: string;
   sourceUrl: string;
   illustration: string;
+  category: GardenCategory;
 };
+
+const gardenCategoryMeta = {
+  community: { label: 'Komunitní zahrada', icon: Sprout },
+  'urban-farm': { label: 'Městské pěstování', icon: Tractor },
+  education: { label: 'Učení a děti', icon: School },
+  courtyard: { label: 'Vnitroblok', icon: House },
+  nature: { label: 'Přírodní areál', icon: Trees },
+} satisfies Record<GardenCategory, { label: string; icon: typeof Sprout }>;
+
+const gardenCategoryOrder: GardenCategory[] = [
+  'community',
+  'urban-farm',
+  'education',
+  'courtyard',
+  'nature',
+];
 
 const gardens: Garden[] = [
   {
@@ -69,7 +101,8 @@ const gardens: Garden[] = [
     lat: 50.1121511,
     lon: 14.4147114,
     sourceUrl: 'https://www.metrofarm.cz/metrofarm/',
-    illustration: '/gardens/metrofarm.webp',
+    illustration: '/gardens/metrofarm-illustrated.webp',
+    category: 'urban-farm',
   },
   {
     id: 'prales',
@@ -83,7 +116,8 @@ const gardens: Garden[] = [
     lon: 14.5607443,
     sourceUrl:
       'https://lesypraha.cz/vzdelavani/ekocentrum-prales/komunitni-zahrada/',
-    illustration: '/gardens/prales.webp',
+    illustration: '/gardens/prales-illustrated.webp',
+    category: 'education',
   },
   {
     id: 'kotlaska',
@@ -96,7 +130,8 @@ const gardens: Garden[] = [
     lat: 50.1071472,
     lon: 14.476603,
     sourceUrl: 'https://www.kckotlaska.cz/',
-    illustration: '/gardens/kotlaska.webp',
+    illustration: '/gardens/kotlaska-illustrated.webp',
+    category: 'community',
   },
   {
     id: 'troja',
@@ -109,7 +144,8 @@ const gardens: Garden[] = [
     lat: 50.1267793,
     lon: 14.4078329,
     sourceUrl: 'https://www.komunitnizahrada.cz/',
-    illustration: '/gardens/troja.webp',
+    illustration: '/gardens/troja-illustrated.webp',
+    category: 'community',
   },
   {
     id: 'mecislavka',
@@ -122,7 +158,8 @@ const gardens: Garden[] = [
     lat: 50.0649253,
     lon: 14.4442846,
     sourceUrl: 'https://www.vnitrobloky.cz/mecislavka',
-    illustration: '/gardens/mecislavka.webp',
+    illustration: '/gardens/mecislavka-illustrated.webp',
+    category: 'courtyard',
   },
   {
     id: 'vidimova',
@@ -135,7 +172,8 @@ const gardens: Garden[] = [
     lat: 50.0254095,
     lon: 14.5248575,
     sourceUrl: 'https://www.mapko.cz/4432-komunitni-zahrada-vidimova',
-    illustration: '/gardens/vidimova.webp',
+    illustration: '/gardens/vidimova-illustrated.webp',
+    category: 'courtyard',
   },
   {
     id: 'prokopka',
@@ -148,7 +186,8 @@ const gardens: Garden[] = [
     lat: 50.0398094,
     lon: 14.3437361,
     sourceUrl: 'https://www.zahradaprokopka.cz/',
-    illustration: '/gardens/prokopka.webp',
+    illustration: '/gardens/prokopka-illustrated.webp',
+    category: 'education',
   },
   {
     id: 'velky-haj',
@@ -163,15 +202,109 @@ const gardens: Garden[] = [
     locationStatus: 'orientační poloha',
     sourceUrl:
       'https://tucnak.praha4.cz/06-2026/pestujte-ovoce-a-zeleninu-v-nove-komunitni-zahrade',
-    illustration: '/gardens/velky-haj.webp',
+    illustration: '/gardens/velky-haj-illustrated.webp',
+    category: 'nature',
+  },
+  {
+    id: 'liboza',
+    name: 'Komunitní zahrada LIBÓZA',
+    district: 'Liboc',
+    area: 'Praha 6',
+    description:
+      'Sousedská zahrada u obory Hvězda s vyvýšenými záhony, jedlými keři, kompostem a dřevěným altánem.',
+    tags: ['záhony', 'kompost', 'akce'],
+    lat: 50.086202,
+    lon: 14.328564,
+    sourceUrl: 'https://www.napadprosestku.cz/napady/komunitni-zahrada-liboza/',
+    illustration: '/gardens/liboza-illustrated.webp',
+    category: 'community',
+  },
+  {
+    id: 'prazelenina',
+    name: 'Prazelenina',
+    district: 'Holešovice',
+    area: 'Praha 7',
+    description:
+      'Pěstitelský klub u Vltavy se společnými i vlastními záhony, nářadím a komunitní maringotkou.',
+    tags: ['záhony', 'akce', 'sousedství'],
+    lat: 50.106771,
+    lon: 14.438531,
+    sourceUrl: 'https://prazelenina.cz/',
+    illustration: '/gardens/prazelenina-illustrated.webp',
+    category: 'urban-farm',
+  },
+  {
+    id: 'na-plani',
+    name: 'Komunitní zahrada Na Pláni',
+    district: 'Malvazinky',
+    area: 'Praha 5',
+    description:
+      'Komunitní zahrada v obnoveném svažitém parku se zázemím pro sousedská setkání, cestami a výhledy.',
+    tags: ['veřejná', 'akce', 'sousedství'],
+    lat: 50.0620561,
+    lon: 14.3932811,
+    sourceUrl: 'https://www.praha5.cz/praha-5-otevrela-novy-park-na-plani/',
+    illustration: '/gardens/na-plani-illustrated.webp',
+    category: 'nature',
+  },
+  {
+    id: 'zizkovska-zahradka',
+    name: 'Žižkovská komunitní zahrádka',
+    district: 'Žižkov',
+    area: 'Praha 3',
+    description:
+      'Permakulturní zahrada se záhonky, dýňovištěm, jahodami, ovocnými stromy, kompostem a prostorem pro akce.',
+    tags: ['záhony', 'kompost', 'akce'],
+    lat: 50.085611,
+    lon: 14.465931,
+    sourceUrl: 'https://www.zizkovskazahradka.cz/',
+    illustration: '/gardens/zizkovska-zahradka-illustrated.webp',
+    category: 'community',
+  },
+  {
+    id: 'na-polske',
+    name: 'Komunitní zahrada Na Polské',
+    district: 'Čimice',
+    area: 'Praha 8',
+    description:
+      'Přírodní zahrada s jurtou, ekologickým pěstováním a venkovním zázemím pro děti.',
+    tags: ['pro děti', 'záhony', 'ekologie'],
+    lat: 50.13762,
+    lon: 14.4386,
+    sourceUrl: 'https://www.3udoli.cz/komunitni-zahrada/',
+    illustration: '/gardens/na-polske-illustrated.webp',
+    category: 'education',
   },
 ];
 
 type FilterId = 'children' | 'accessible' | 'compost' | 'events';
 type SoundState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
+type IntroInteractionMode = 'move' | 'resize';
+type IntroGeometry = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+type IntroInteraction = {
+  mode: IntroInteractionMode;
+  pointerId: number;
+  startX: number;
+  startY: number;
+  geometry: IntroGeometry;
+};
 
 const AUDIO_TARGET_VOLUME = 0.38;
 const WIDE_MAP_CONTENT_SCALE = 0.8;
+const INTRO_VIEWPORT_MARGIN = 12;
+const INTRO_MIN_WIDTH = 180;
+const INTRO_MIN_HEIGHT = 120;
+const INTRO_MINIMIZED_WIDTH = 104;
+const INTRO_MINIMIZED_HEIGHT = 56;
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), Math.max(min, max));
+}
 
 function projectToWideMapPercent(point: Garden) {
   const projected = projectToPercent(point);
@@ -215,6 +348,9 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioFadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const markerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const introCardRef = useRef<HTMLElement>(null);
+  const introInteractionRef = useRef<IntroInteraction | null>(null);
+  const introLiveGeometryRef = useRef<IntroGeometry | null>(null);
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -227,6 +363,11 @@ export default function Home() {
   const [motionPaused, setMotionPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [introMinimized, setIntroMinimized] = useState(false);
+  const [introGeometry, setIntroGeometry] = useState<IntroGeometry | null>(
+    null,
+  );
+  const [introInteractionMode, setIntroInteractionMode] =
+    useState<IntroInteractionMode | null>(null);
 
   const filteredGardens = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('cs');
@@ -379,6 +520,54 @@ export default function Home() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [pauseSound]);
 
+  useEffect(() => {
+    introLiveGeometryRef.current = introGeometry;
+  }, [introGeometry]);
+
+  useEffect(() => {
+    function keepIntroInViewport() {
+      setIntroGeometry((current) => {
+        if (!current) return current;
+
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const width = introMinimized
+          ? INTRO_MINIMIZED_WIDTH
+          : clamp(
+              current.width,
+              Math.min(INTRO_MIN_WIDTH, viewportWidth - 24),
+              viewportWidth - 24,
+            );
+        const height = introMinimized
+          ? INTRO_MINIMIZED_HEIGHT
+          : clamp(
+              current.height,
+              Math.min(INTRO_MIN_HEIGHT, viewportHeight - 24),
+              viewportHeight - 24,
+            );
+
+        return {
+          left: clamp(
+            current.left,
+            INTRO_VIEWPORT_MARGIN,
+            viewportWidth - width - INTRO_VIEWPORT_MARGIN,
+          ),
+          top: clamp(
+            current.top,
+            INTRO_VIEWPORT_MARGIN,
+            viewportHeight - height - INTRO_VIEWPORT_MARGIN,
+          ),
+          width: introMinimized ? current.width : width,
+          height: introMinimized ? current.height : height,
+        };
+      });
+    }
+
+    keepIntroInViewport();
+    window.addEventListener('resize', keepIntroInViewport);
+    return () => window.removeEventListener('resize', keepIntroInViewport);
+  }, [introMinimized]);
+
   function toggleFilter(filterId: FilterId) {
     setActiveFilters((current) => {
       const next = new Set(current);
@@ -420,6 +609,201 @@ export default function Home() {
     requestAnimationFrame(() => markerRefs.current[closingId]?.focus());
   }
 
+  function readIntroGeometry() {
+    const card = introCardRef.current;
+    if (!card) return null;
+
+    const rect = card.getBoundingClientRect();
+    return {
+      left: rect.left,
+      top: rect.top,
+      width: introMinimized ? (introGeometry?.width ?? 396) : rect.width,
+      height: introMinimized ? (introGeometry?.height ?? 264) : rect.height,
+    };
+  }
+
+  function beginIntroInteraction(
+    event: ReactPointerEvent<HTMLButtonElement>,
+    mode: IntroInteractionMode,
+  ) {
+    if (mode === 'resize' && introMinimized) return;
+
+    const geometry = readIntroGeometry();
+    if (!geometry) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    introInteractionRef.current = {
+      mode,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      geometry,
+    };
+    introLiveGeometryRef.current = geometry;
+    setIntroGeometry(geometry);
+    setIntroInteractionMode(mode);
+  }
+
+  function paintIntroGeometry(geometry: IntroGeometry) {
+    const card = introCardRef.current;
+    if (!card) return;
+
+    introLiveGeometryRef.current = geometry;
+    card.style.left = `${geometry.left}px`;
+    card.style.top = `${geometry.top}px`;
+    if (!introMinimized) {
+      card.style.width = `${geometry.width}px`;
+      card.style.height = `${geometry.height}px`;
+    }
+  }
+
+  function updateIntroInteraction(event: ReactPointerEvent<HTMLButtonElement>) {
+    const interaction = introInteractionRef.current;
+    if (!interaction || interaction.pointerId !== event.pointerId) return;
+
+    event.preventDefault();
+    const deltaX = event.clientX - interaction.startX;
+    const deltaY = event.clientY - interaction.startY;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    if (interaction.mode === 'move') {
+      const renderedWidth = introMinimized
+        ? INTRO_MINIMIZED_WIDTH
+        : interaction.geometry.width;
+      const renderedHeight = introMinimized
+        ? INTRO_MINIMIZED_HEIGHT
+        : interaction.geometry.height;
+
+      paintIntroGeometry({
+        ...interaction.geometry,
+        left: clamp(
+          interaction.geometry.left + deltaX,
+          INTRO_VIEWPORT_MARGIN,
+          viewportWidth - renderedWidth - INTRO_VIEWPORT_MARGIN,
+        ),
+        top: clamp(
+          interaction.geometry.top + deltaY,
+          INTRO_VIEWPORT_MARGIN,
+          viewportHeight - renderedHeight - INTRO_VIEWPORT_MARGIN,
+        ),
+      });
+      return;
+    }
+
+    const maxWidth = Math.max(
+      Math.min(INTRO_MIN_WIDTH, viewportWidth - 24),
+      viewportWidth - interaction.geometry.left - INTRO_VIEWPORT_MARGIN,
+    );
+    const maxHeight = Math.max(
+      Math.min(INTRO_MIN_HEIGHT, viewportHeight - 24),
+      viewportHeight - interaction.geometry.top - INTRO_VIEWPORT_MARGIN,
+    );
+
+    paintIntroGeometry({
+      ...interaction.geometry,
+      width: clamp(
+        interaction.geometry.width + deltaX,
+        Math.min(INTRO_MIN_WIDTH, maxWidth),
+        maxWidth,
+      ),
+      height: clamp(
+        interaction.geometry.height + deltaY,
+        Math.min(INTRO_MIN_HEIGHT, maxHeight),
+        maxHeight,
+      ),
+    });
+  }
+
+  function endIntroInteraction(event: ReactPointerEvent<HTMLButtonElement>) {
+    const interaction = introInteractionRef.current;
+    if (!interaction || interaction.pointerId !== event.pointerId) return;
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (introLiveGeometryRef.current) {
+      setIntroGeometry(introLiveGeometryRef.current);
+    }
+    introInteractionRef.current = null;
+    setIntroInteractionMode(null);
+  }
+
+  function adjustIntroWithKeyboard(
+    event: ReactKeyboardEvent<HTMLButtonElement>,
+    mode: IntroInteractionMode,
+  ) {
+    if (mode === 'resize' && introMinimized) return;
+
+    const direction = {
+      ArrowLeft: [-1, 0],
+      ArrowRight: [1, 0],
+      ArrowUp: [0, -1],
+      ArrowDown: [0, 1],
+    }[event.key];
+    if (!direction) return;
+
+    const geometry = readIntroGeometry();
+    if (!geometry) return;
+
+    event.preventDefault();
+    const step = event.shiftKey ? 24 : 8;
+    const [horizontal, vertical] = direction;
+
+    if (mode === 'move') {
+      const renderedWidth = introMinimized
+        ? INTRO_MINIMIZED_WIDTH
+        : geometry.width;
+      const renderedHeight = introMinimized
+        ? INTRO_MINIMIZED_HEIGHT
+        : geometry.height;
+
+      setIntroGeometry({
+        ...geometry,
+        left: clamp(
+          geometry.left + horizontal * step,
+          INTRO_VIEWPORT_MARGIN,
+          window.innerWidth - renderedWidth - INTRO_VIEWPORT_MARGIN,
+        ),
+        top: clamp(
+          geometry.top + vertical * step,
+          INTRO_VIEWPORT_MARGIN,
+          window.innerHeight - renderedHeight - INTRO_VIEWPORT_MARGIN,
+        ),
+      });
+      return;
+    }
+
+    const maxWidth = window.innerWidth - geometry.left - INTRO_VIEWPORT_MARGIN;
+    const maxHeight = window.innerHeight - geometry.top - INTRO_VIEWPORT_MARGIN;
+    setIntroGeometry({
+      ...geometry,
+      width: clamp(
+        geometry.width + horizontal * step,
+        Math.min(INTRO_MIN_WIDTH, maxWidth),
+        maxWidth,
+      ),
+      height: clamp(
+        geometry.height + vertical * step,
+        Math.min(INTRO_MIN_HEIGHT, maxHeight),
+        maxHeight,
+      ),
+    });
+  }
+
+  const introStyle = introGeometry
+    ? ({
+        left: `${introGeometry.left}px`,
+        top: `${introGeometry.top}px`,
+        ...(!introMinimized && {
+          width: `${introGeometry.width}px`,
+          height: `${introGeometry.height}px`,
+        }),
+      } as CSSProperties)
+    : undefined;
+
   return (
     <main className="map-experience">
       <a className="skip-link" href="#garden-list">
@@ -455,6 +839,8 @@ export default function Home() {
             {filteredGardens.map((garden) => {
               const isSelected = selectedId === garden.id;
               const position = projectToWideMapPercent(garden);
+              const category = gardenCategoryMeta[garden.category];
+              const CategoryIcon = category.icon;
 
               return (
                 <button
@@ -463,7 +849,9 @@ export default function Home() {
                     markerRefs.current[garden.id] = node;
                   }}
                   type="button"
-                  className={`garden-marker${isSelected ? ' is-selected' : ''}`}
+                  className={`garden-marker marker-${garden.category}${
+                    isSelected ? ' is-selected' : ''
+                  }`}
                   style={
                     {
                       left: `${position.x}%`,
@@ -476,17 +864,47 @@ export default function Home() {
                 >
                   <span className="marker-aura" aria-hidden="true" />
                   <span className="marker-core" aria-hidden="true">
-                    <Sprout />
+                    <CategoryIcon />
                   </span>
                   <span className="marker-label">
                     <strong>{garden.name}</strong>
-                    <small>{garden.district}</small>
+                    <small>
+                      {garden.district} · {category.label}
+                    </small>
                   </span>
                 </button>
               );
             })}
           </fieldset>
         </div>
+
+        <aside
+          className={`map-legend${selectedGarden ? ' is-muted' : ''}`}
+          aria-label="Legenda typů zahrad"
+        >
+          <div className="legend-heading">
+            <Flower2 aria-hidden="true" />
+            <strong>Typy míst</strong>
+          </div>
+          <ul>
+            {gardenCategoryOrder.map((categoryId) => {
+              const category = gardenCategoryMeta[categoryId];
+              const CategoryIcon = category.icon;
+
+              return (
+                <li key={categoryId}>
+                  <span
+                    className={`legend-symbol marker-${categoryId}`}
+                    aria-hidden="true"
+                  >
+                    <CategoryIcon />
+                  </span>
+                  <span>{category.label}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </aside>
 
         <header className="map-header">
           <a className="brand" href="#top" aria-label="Zahrady Prahy, domů">
@@ -654,10 +1072,33 @@ export default function Home() {
         <aside
           className={`intro-card${introMinimized ? ' is-minimized' : ''}${
             selectedGarden || filtersOpen ? ' is-quiet' : ''
+          }${introGeometry ? ' is-positioned' : ''}${
+            introInteractionMode ? ` is-${introInteractionMode}` : ''
           }`}
           id="top"
+          ref={introCardRef}
+          style={introStyle}
           aria-label="Pohlednice Zahrady Prahy"
         >
+          <span className="sr-only" id="intro-controls-help">
+            Šipkami ovládáte jemný posun nebo změnu velikosti. S klávesou Shift
+            se panel mění po větších krocích.
+          </span>
+          <button
+            className="intro-drag-handle"
+            type="button"
+            onPointerDown={(event) => beginIntroInteraction(event, 'move')}
+            onPointerMove={updateIntroInteraction}
+            onPointerUp={endIntroInteraction}
+            onPointerCancel={endIntroInteraction}
+            onLostPointerCapture={endIntroInteraction}
+            onKeyDown={(event) => adjustIntroWithKeyboard(event, 'move')}
+            aria-label="Přesunout pohlednici po mapě"
+            aria-describedby="intro-controls-help"
+            title="Přesunout"
+          >
+            <Move />
+          </button>
           <button
             id="intro-postcard"
             className="intro-postcard"
@@ -684,6 +1125,23 @@ export default function Home() {
           >
             {introMinimized ? <Maximize2 /> : <Minimize2 />}
           </button>
+          {!introMinimized && (
+            <button
+              className="intro-resize-handle"
+              type="button"
+              onPointerDown={(event) => beginIntroInteraction(event, 'resize')}
+              onPointerMove={updateIntroInteraction}
+              onPointerUp={endIntroInteraction}
+              onPointerCancel={endIntroInteraction}
+              onLostPointerCapture={endIntroInteraction}
+              onKeyDown={(event) => adjustIntroWithKeyboard(event, 'resize')}
+              aria-label="Změnit velikost pohlednice"
+              aria-describedby="intro-controls-help"
+              title="Změnit velikost"
+            >
+              <MoveDiagonal2 />
+            </button>
+          )}
         </aside>
 
         {filteredGardens.length === 0 && (
