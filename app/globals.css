@@ -1,18 +1,20 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+@import '../design/structured-variables.css';
+@import '../design/structured-theme.css';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --color-aged-sepia: #271a00;
-  --color-parchment: #faf8f5;
-  --color-fog: #d1cfc7;
+  --color-aged-sepia: var(--color-ink);
+  --color-parchment: var(--color-putty);
+  --color-fog: var(--color-vellum);
   --color-absolute-black: #000000;
   --color-pure-white: #ffffff;
-  --color-moss-shadow: #7c7464;
+  --color-moss-shadow: var(--color-graphite);
   --color-deep-forest: #23291b;
-  --color-teal-accent: #0f3639;
+  --color-teal-accent: var(--color-graphite);
   --color-river-glass: #63aeb3;
   --color-meadow: #75a65c;
   --color-young-leaf: #b7d477;
@@ -27,18 +29,18 @@
   --font-pplxsans: var(--font-interface-sans), Inter, -apple-system, sans-serif;
   --font-pplxsansmono:
     var(--font-interface-mono), 'JetBrains Mono', Consolas, monospace;
-  --font-pplxserif: Georgia, 'Times New Roman', serif;
+  --font-pplxserif: var(--font-gallery-serif), Georgia, 'Times New Roman', serif;
   --text-caption: 11px;
   --leading-caption: 1.2;
-  --text-body-sm: 12px;
-  --leading-body-sm: 1.2;
+  --text-body-sm: 15px;
+  --leading-body-sm: 1.5;
   --text-body: 15px;
   --leading-body: 1.2;
   --text-body-lg: 16px;
   --leading-body-lg: 1.2;
-  --text-heading-sm: 32px;
+  --text-heading-sm: 26px;
   --leading-heading-sm: 1.2;
-  --text-heading: 96px;
+  --text-heading: 43px;
   --leading-heading: 1.2;
   --font-weight-light: 300;
   --font-weight-regular: 400;
@@ -56,28 +58,28 @@
   --spacing-80: 80px;
   --spacing-180: 180px;
   --section-gap: 28px;
-  --card-padding: 40px;
-  --element-gap: 8px;
+  --card-padding: 24px;
+  --element-gap: 6px;
   --radius-md: 4px;
   --radius-xl: 12px;
   --radius-3xl: 40px;
-  --radius-cards: 12px;
-  --radius-other: 4px;
-  --radius-badges: 4px;
-  --radius-inputs: 4px;
-  --radius-buttons: 40px;
+  --radius-cards: 9px;
+  --radius-other: 2px;
+  --radius-badges: 2px;
+  --radius-inputs: 9px;
+  --radius-buttons: 28.8px;
   --surface-parchment-canvas: var(--color-parchment);
   --surface-pure-white-card: var(--color-pure-white);
   --surface-fog-divider: var(--color-fog);
   --surface-deep-forest-overlay: var(--color-deep-forest);
   --background: var(--color-parchment);
   --foreground: var(--color-aged-sepia);
-  --card: var(--color-pure-white);
+  --card: var(--color-bone);
   --card-foreground: var(--color-aged-sepia);
-  --popover: var(--color-pure-white);
+  --popover: var(--color-bone);
   --popover-foreground: var(--color-aged-sepia);
-  --primary: var(--color-teal-accent);
-  --primary-foreground: var(--color-pure-white);
+  --primary: var(--color-bone);
+  --primary-foreground: var(--color-ink);
   --secondary: var(--color-fog);
   --secondary-foreground: var(--color-slate-edge);
   --muted: #efede8;
@@ -88,7 +90,7 @@
   --border: rgba(39, 26, 0, 0.14);
   --input: rgba(39, 26, 0, 0.18);
   --ring: var(--color-teal-accent);
-  --radius: 12px;
+  --radius: 9px;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -174,7 +176,7 @@ textarea:focus-visible {
   top: 50%;
   left: 50%;
   z-index: 0;
-  width: max(100vw, calc(100svh * 1.776833));
+  width: min(100vw, calc(100svh * 1.776833));
   aspect-ratio: 1672 / 941;
   transform: translate(-50%, -50%);
   transform-origin: center;

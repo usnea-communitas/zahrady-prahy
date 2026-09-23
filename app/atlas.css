@@ -1,0 +1,428 @@
+/* Botanical atlas: readable parchment over the existing illustrated world. */
+.garden-marker.is-selected {
+  z-index: 8;
+}
+.garden-marker.is-selected .marker-label {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.marker-label strong {
+  font-size: 14px;
+}
+.marker-label small {
+  font-size: 12px;
+}
+.reveal-garden {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 14px;
+  color: var(--color-teal-accent);
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.reveal-garden svg {
+  width: 14px;
+  height: 14px;
+}
+.map-experience {
+  position: relative;
+}
+.intro-card:not(.is-positioned):not(.is-minimized) {
+  width: 320px;
+  height: 168px;
+}
+.map-header {
+  grid-template-columns: max-content minmax(240px, 480px) max-content;
+  justify-content: space-between;
+}
+.header-actions {
+  white-space: nowrap;
+}
+.map-navigation {
+  margin: 0;
+}
+.tag-list span {
+  font-size: 12px;
+}
+.preview-body .visit-note p {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #655e50;
+}
+@media (max-width: 1200px) {
+  .header-actions > button > span {
+    display: none;
+  }
+  .header-actions .sound-action {
+    display: grid;
+  }
+}
+@media (max-width: 1050px) {
+  .map-experience:has(.garden-preview) .garden-directory {
+    display: none;
+  }
+}
+.map-canvas::before {
+  content: '';
+  position: absolute;
+  inset: -32px;
+  z-index: -1;
+  background: url('/map/prague-storybook-vltava-v6-wide.webp') center / cover;
+  filter: blur(24px);
+  opacity: 0.62;
+}
+.map-plane {
+  touch-action: none;
+}
+.map-plane:focus-visible {
+  outline: 3px solid var(--color-teal-accent);
+  outline-offset: -4px;
+}
+.garden-marker {
+  transform: translate(-50%, -50%) scale(calc(1 / var(--scene-zoom, 1)));
+}
+.map-navigation {
+  position: absolute;
+  z-index: 25;
+  bottom: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid #ffffffa3;
+  border-radius: 12px;
+  background: #faf8f5bf;
+  backdrop-filter: blur(16px);
+}
+.map-navigation button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--color-aged-sepia);
+}
+.map-navigation button:hover:not(:disabled) {
+  background: #ffffffa8;
+}
+.map-navigation button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.map-navigation svg {
+  width: 17px;
+  height: 17px;
+}
+.map-legend {
+  width: 284px;
+  border-radius: 12px;
+  box-shadow: none;
+  background: #faf8f5cc;
+}
+.map-legend ul {
+  grid-template-columns: 1fr;
+  gap: 2px;
+}
+.legend-heading {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.legend-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px;
+  text-align: left;
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--color-aged-sepia);
+}
+.legend-filter small {
+  margin-left: auto;
+  font-size: 12px;
+}
+.legend-filter:hover,
+.legend-filter[aria-pressed='true'] {
+  background: #ffffffc4;
+}
+.legend-filter[aria-pressed='true'] {
+  outline: 1px solid var(--color-teal-accent);
+}
+.atlas-note {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 12px 6px 0;
+  color: #655e50;
+}
+.map-legend.is-muted {
+  visibility: hidden;
+}
+.intro-visual img {
+  object-fit: contain;
+  object-position: center;
+  transform: none;
+}
+.intro-visual {
+  background: #e8dfc8;
+}
+.intro-card.is-minimized .intro-visual img {
+  object-fit: cover;
+}
+.garden-directory {
+  position: absolute;
+  z-index: 27;
+  left: 24px;
+  top: 120px;
+  width: 350px;
+  max-height: calc(100svh - 200px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 24px 20px 16px;
+  border: 1px solid #ffffffbd;
+  border-radius: 12px;
+  background: #faf8f5ed;
+  backdrop-filter: blur(20px);
+  color: var(--color-aged-sepia);
+  scrollbar-width: thin;
+}
+.garden-directory[hidden] {
+  display: none;
+}
+.directory-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.directory-heading button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-fog);
+  border-radius: 4px;
+}
+.directory-heading button svg {
+  width: 16px;
+}
+.directory-eyebrow {
+  font-size: 12px;
+  color: #67785b;
+}
+.directory-heading h2 {
+  font-family: var(--font-pplxserif);
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1.12;
+  margin: 6px 0 0;
+}
+.directory-summary {
+  margin: 12px 0;
+  font-size: 13px;
+  color: #655e50;
+}
+.garden-directory ul {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+  display: grid;
+  gap: 6px;
+}
+.garden-directory li button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 72px 1fr 16px;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+.garden-directory li button:hover,
+.garden-directory li button[aria-pressed='true'] {
+  background: #fff;
+  border-color: #c6d0bc;
+}
+.directory-image {
+  position: relative;
+  display: block;
+  width: 72px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #e6e9da;
+}
+.directory-image img {
+  object-fit: cover;
+}
+.garden-directory li strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.garden-directory li small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #655e50;
+}
+.garden-directory li svg {
+  width: 15px;
+}
+.directory-footnote {
+  border-top: 1px solid #d1cfc7;
+  padding-top: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #655e50;
+}
+.text-action {
+  font-size: 14px;
+  color: var(--color-teal-accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.garden-preview {
+  max-height: calc(100svh - 148px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.preview-illustration {
+  height: 210px;
+}
+.preview-illustration::after {
+  background: linear-gradient(0deg, #271a0040, transparent 40%);
+}
+.illustration-caption {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  z-index: 2;
+  border-radius: 4px;
+  background: #faf8f5db;
+  padding: 5px 8px;
+  font-size: 12px;
+  color: var(--color-aged-sepia);
+}
+.preview-body {
+  padding: 24px;
+}
+.preview-body > p {
+  font-size: 16px;
+  line-height: 1.55;
+}
+.preview-meta {
+  font-size: 12px;
+}
+.visit-note {
+  margin: 20px 0;
+  padding: 14px 16px;
+  background: #edf0e6;
+  border-left: 2px solid #7d985e;
+  border-radius: 4px;
+}
+.visit-note strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+.visit-note p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #655e50;
+}
+.preview-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+.preview-actions .preview-button {
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  text-decoration: none;
+  flex: 1;
+  margin: 0;
+  justify-content: center;
+  gap: 8px;
+  background: #dfe8d4 !important;
+  border-color: #819472 !important;
+  font-size: 14px;
+}
+.preview-actions .preview-button svg {
+  margin-left: 0;
+  flex: 0 0 16px;
+}
+.preview-actions .preview-button:hover {
+  background: #cfdfbe !important;
+}
+.preview-actions svg,
+.source-link svg {
+  width: 16px;
+}
+.share-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  border: 1px solid #d1cfc7;
+  border-radius: 4px;
+}
+.share-button:hover {
+  background: #edf0e6;
+}
+.share-feedback {
+  display: block;
+  font-size: 12px;
+  color: #486540;
+  margin-top: 8px;
+}
+.share-feedback:empty {
+  display: none;
+}
+.source-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 18px;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  color: #655e50;
+}
+.map-footer {
+  background: #faf8f518;
+  backdrop-filter: blur(6px);
+  font-size: 12px;
+}
+.result-count,
+.prototype-note,
+.motion-toggle {
+  font-size: 12px;
+}
+@media (max-height: 740px) {
+  .preview-illustration {
+    height: 160px;
+  }
+  .garden-directory {
+    top: 100px;
+    max-height: calc(100svh - 165px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-plane,
+  .garden-directory,
+  .garden-preview {
+    scroll-behavior: auto;
+  }
+}

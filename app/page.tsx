@@ -9,11 +9,13 @@ import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
-  type SyntheticEvent,
 } from 'react';
 import Image from 'next/image';
 import {
   ArrowRight,
+  List,
+  Navigation,
+  Share2,
   Flower2,
   Leaf,
   LoaderCircle,
@@ -40,7 +42,6 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -49,36 +50,31 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { MapMotionLayer } from '@/components/map/MapMotionLayer';
-import { projectToPercent } from '@/lib/map/projection';
-
-type GardenCategory =
-  | 'community'
-  | 'urban-farm'
-  | 'education'
-  | 'courtyard'
-  | 'nature';
-
-type Garden = {
-  id: string;
-  name: string;
-  district: string;
-  area: string;
-  description: string;
-  tags: string[];
-  lat: number;
-  lon: number;
-  locationStatus?: string;
-  sourceUrl: string;
-  illustration: string;
-  category: GardenCategory;
-};
+import { MapViewport } from '@/components/map/MapViewport';
+import { registerGardenSearch } from '@/lib/webmcp';
+import {
+  emptyNavigation,
+  readAtlasUrl,
+  writeAtlasUrl,
+  gardenShareUrl,
+  type AtlasNavigation,
+} from '@/lib/atlas-navigation';
+import {
+  gardens,
+  filterOptions,
+  filterGardenCatalogue,
+  navigationUrl,
+  type GardenCategory,
+  type FilterId,
+} from '@/lib/gardens';
+import type { GardenVisit } from '@/lib/garden-visits';
 
 const gardenCategoryMeta = {
   community: { label: 'Komunitní zahrada', icon: Sprout },
-  'urban-farm': { label: 'Městské pěstování', icon: Tractor },
-  education: { label: 'Učení a děti', icon: School },
+  'urban-farm': { label: 'Městská farma', icon: Tractor },
+  education: { label: 'Vzdělávací zahrada', icon: School },
   courtyard: { label: 'Vnitroblok', icon: House },
-  nature: { label: 'Přírodní areál', icon: Trees },
+  nature: { label: 'Přírodní zahrada', icon: Trees },
 } satisfies Record<GardenCategory, { label: string; icon: typeof Sprout }>;
 
 const gardenCategoryOrder: GardenCategory[] = [
@@ -89,195 +85,6 @@ const gardenCategoryOrder: GardenCategory[] = [
   'nature',
 ];
 
-const gardens: Garden[] = [
-  {
-    id: 'metrofarm',
-    name: 'MetroFarm Císařský ostrov',
-    district: 'Císařský ostrov',
-    area: 'Praha 7',
-    description:
-      'Komunitní zahrada a městská farma s vlastními záhonky, společným políčkem, kompostem i zvířaty.',
-    tags: ['záhonky', 'dobrovolnictví', 'zvířata'],
-    lat: 50.1121511,
-    lon: 14.4147114,
-    sourceUrl: 'https://www.metrofarm.cz/metrofarm/',
-    illustration: '/gardens/metrofarm-illustrated.webp',
-    category: 'urban-farm',
-  },
-  {
-    id: 'prales',
-    name: 'Komunitní zahrada Prales',
-    district: 'Kbely',
-    area: 'Praha 19',
-    description:
-      'Bezbariérová zahrada ekocentra s vyvýšenými záhony, foliovníkem, dešťovou vodou a kompostem.',
-    tags: ['bezbariérové', 'kompost', 'ekocentrum'],
-    lat: 50.1336044,
-    lon: 14.5607443,
-    sourceUrl:
-      'https://lesypraha.cz/vzdelavani/ekocentrum-prales/komunitni-zahrada/',
-    illustration: '/gardens/prales-illustrated.webp',
-    category: 'education',
-  },
-  {
-    id: 'kotlaska',
-    name: 'Komunitní centrum a zahrada Kotlaska',
-    district: 'Libeň',
-    area: 'Praha 8',
-    description:
-      'Rozlehlá zahrada se starým sadem, komunitními záhonky, programem pro děti a kulturními akcemi.',
-    tags: ['sad', 'pro děti', 'akce'],
-    lat: 50.1071472,
-    lon: 14.476603,
-    sourceUrl: 'https://www.kckotlaska.cz/',
-    illustration: '/gardens/kotlaska-illustrated.webp',
-    category: 'community',
-  },
-  {
-    id: 'troja',
-    name: 'Komunitní zahrada Troja',
-    district: 'Podhoří',
-    area: 'Praha-Troja',
-    description:
-      'Místo pro sousedy a rodiny, které spojuje pěstování, veřejný kompostér, knihobudku a týpí.',
-    tags: ['rodiny', 'kompost', 'knihobudka'],
-    lat: 50.1267793,
-    lon: 14.4078329,
-    sourceUrl: 'https://www.komunitnizahrada.cz/',
-    illustration: '/gardens/troja-illustrated.webp',
-    category: 'community',
-  },
-  {
-    id: 'mecislavka',
-    name: 'Vnitroblok Mečislavka',
-    district: 'Nusle',
-    area: 'Praha 4',
-    description:
-      'Veřejně přístupná zahrada s vyvýšenými záhony, kompostérem, grilem a komunitní pecí na pizzu.',
-    tags: ['veřejná', 'kompost', 'pec'],
-    lat: 50.0649253,
-    lon: 14.4442846,
-    sourceUrl: 'https://www.vnitrobloky.cz/mecislavka',
-    illustration: '/gardens/mecislavka-illustrated.webp',
-    category: 'courtyard',
-  },
-  {
-    id: 'vidimova',
-    name: 'Komunitní zahrada Vidimova',
-    district: 'Chodov',
-    area: 'Praha 11',
-    description:
-      'Sousedská zahrada mezi domy, která vrací pěstování a společná setkání do sídliště.',
-    tags: ['sídliště', 'sousedství', 'záhony'],
-    lat: 50.0254095,
-    lon: 14.5248575,
-    sourceUrl: 'https://www.mapko.cz/4432-komunitni-zahrada-vidimova',
-    illustration: '/gardens/vidimova-illustrated.webp',
-    category: 'courtyard',
-  },
-  {
-    id: 'prokopka',
-    name: 'Zahrada Prokopka',
-    district: 'Velká Ohrada',
-    area: 'Praha 13',
-    description:
-      'Komunitní zahrada na školním pozemku, kde spolek Pro kořínky pořádá pěstební i sousedské akce.',
-    tags: ['školní', 'workshopy', 'sousedství'],
-    lat: 50.0398094,
-    lon: 14.3437361,
-    sourceUrl: 'https://www.zahradaprokopka.cz/',
-    illustration: '/gardens/prokopka-illustrated.webp',
-    category: 'education',
-  },
-  {
-    id: 'velky-haj',
-    name: 'Komunitní zahrada Velký háj',
-    district: 'Krč',
-    area: 'Praha 4',
-    description:
-      'Pětihhektarová zahrada u lesa se záhony, pergolou, květnatou loukou, včelími úly a výběhem pro koně.',
-    tags: ['nové místo', 'sad', 'záhony'],
-    lat: 50.0327,
-    lon: 14.4446,
-    locationStatus: 'orientační poloha',
-    sourceUrl:
-      'https://tucnak.praha4.cz/06-2026/pestujte-ovoce-a-zeleninu-v-nove-komunitni-zahrade',
-    illustration: '/gardens/velky-haj-illustrated.webp',
-    category: 'nature',
-  },
-  {
-    id: 'liboza',
-    name: 'Komunitní zahrada LIBÓZA',
-    district: 'Liboc',
-    area: 'Praha 6',
-    description:
-      'Sousedská zahrada u obory Hvězda s vyvýšenými záhony, jedlými keři, kompostem a dřevěným altánem.',
-    tags: ['záhony', 'kompost', 'akce'],
-    lat: 50.086202,
-    lon: 14.328564,
-    sourceUrl: 'https://www.napadprosestku.cz/napady/komunitni-zahrada-liboza/',
-    illustration: '/gardens/liboza-illustrated.webp',
-    category: 'community',
-  },
-  {
-    id: 'prazelenina',
-    name: 'Prazelenina',
-    district: 'Holešovice',
-    area: 'Praha 7',
-    description:
-      'Pěstitelský klub u Vltavy se společnými i vlastními záhony, nářadím a komunitní maringotkou.',
-    tags: ['záhony', 'akce', 'sousedství'],
-    lat: 50.106771,
-    lon: 14.438531,
-    sourceUrl: 'https://prazelenina.cz/',
-    illustration: '/gardens/prazelenina-illustrated.webp',
-    category: 'urban-farm',
-  },
-  {
-    id: 'na-plani',
-    name: 'Komunitní zahrada Na Pláni',
-    district: 'Malvazinky',
-    area: 'Praha 5',
-    description:
-      'Komunitní zahrada v obnoveném svažitém parku se zázemím pro sousedská setkání, cestami a výhledy.',
-    tags: ['veřejná', 'akce', 'sousedství'],
-    lat: 50.0620561,
-    lon: 14.3932811,
-    sourceUrl: 'https://www.praha5.cz/praha-5-otevrela-novy-park-na-plani/',
-    illustration: '/gardens/na-plani-illustrated.webp',
-    category: 'nature',
-  },
-  {
-    id: 'zizkovska-zahradka',
-    name: 'Žižkovská komunitní zahrádka',
-    district: 'Žižkov',
-    area: 'Praha 3',
-    description:
-      'Permakulturní zahrada se záhonky, dýňovištěm, jahodami, ovocnými stromy, kompostem a prostorem pro akce.',
-    tags: ['záhony', 'kompost', 'akce'],
-    lat: 50.085611,
-    lon: 14.465931,
-    sourceUrl: 'https://www.zizkovskazahradka.cz/',
-    illustration: '/gardens/zizkovska-zahradka-illustrated.webp',
-    category: 'community',
-  },
-  {
-    id: 'na-polske',
-    name: 'Komunitní zahrada Na Polské',
-    district: 'Čimice',
-    area: 'Praha 8',
-    description:
-      'Přírodní zahrada s jurtou, ekologickým pěstováním a venkovním zázemím pro děti.',
-    tags: ['pro děti', 'záhony', 'ekologie'],
-    lat: 50.13762,
-    lon: 14.4386,
-    sourceUrl: 'https://www.3udoli.cz/komunitni-zahrada/',
-    illustration: '/gardens/na-polske-illustrated.webp',
-    category: 'education',
-  },
-];
-
-type FilterId = 'children' | 'accessible' | 'compost' | 'events';
 type SoundState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 type IntroInteractionMode = 'move' | 'resize';
 type IntroGeometry = {
@@ -295,69 +102,53 @@ type IntroInteraction = {
 };
 
 const AUDIO_TARGET_VOLUME = 0.38;
-const WIDE_MAP_CONTENT_SCALE = 0.8;
 const INTRO_VIEWPORT_MARGIN = 12;
 const INTRO_MIN_WIDTH = 180;
 const INTRO_MIN_HEIGHT = 120;
 const INTRO_MINIMIZED_WIDTH = 104;
 const INTRO_MINIMIZED_HEIGHT = 56;
+const INTRO_DEFAULT_WIDTH = 396;
+const INTRO_DEFAULT_HEIGHT = 346;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), Math.max(min, max));
 }
 
-function projectToWideMapPercent(point: Garden) {
-  const projected = projectToPercent(point);
-
-  return {
-    x: 50 + (projected.x - 50) * WIDE_MAP_CONTENT_SCALE,
-    y: 50 + (projected.y - 50) * WIDE_MAP_CONTENT_SCALE,
-  };
+function uniqueVisitSources(visit: GardenVisit) {
+  return [visit.access, visit.hours, visit.entrance, visit.participation]
+    .flatMap((fact) => fact?.sources ?? [])
+    .filter(
+      (source, index, sources) =>
+        sources.findIndex((candidate) => candidate.url === source.url) ===
+        index,
+    );
 }
 
-const filterOptions: Array<{
-  id: FilterId;
-  label: string;
-  matches: (garden: Garden) => boolean;
-}> = [
-  {
-    id: 'children',
-    label: 'Pro děti',
-    matches: (garden) =>
-      garden.tags.includes('pro děti') || garden.tags.includes('rodiny'),
-  },
-  {
-    id: 'accessible',
-    label: 'Bezbariérové',
-    matches: (garden) => garden.tags.includes('bezbariérové'),
-  },
-  {
-    id: 'compost',
-    label: 'Kompost',
-    matches: (garden) => garden.tags.includes('kompost'),
-  },
-  {
-    id: 'events',
-    label: 'Akce',
-    matches: (garden) =>
-      garden.tags.includes('akce') || garden.tags.includes('workshopy'),
-  },
-];
-
 export default function Home() {
+  useEffect(registerGardenSearch, []);
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioFadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const markerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const introCardRef = useRef<HTMLElement>(null);
+  const mapCanvasRef = useRef<HTMLElement>(null);
+  const lastFocusRef = useRef<HTMLElement | null>(null);
   const introInteractionRef = useRef<IntroInteraction | null>(null);
   const introLiveGeometryRef = useRef<IntroGeometry | null>(null);
-  const [query, setQuery] = useState('');
-  const [selectedId, setSelectedId] = useState('');
+  const [navigation, setNavigation] =
+    useState<AtlasNavigation>(emptyNavigation);
+  const navigationRef = useRef<AtlasNavigation>(emptyNavigation);
+  const { query, selectedId, category: categoryFilter } = navigation;
+  const activeFilters = useMemo(
+    () => new Set(navigation.filters),
+    [navigation.filters],
+  );
+  const [listOpen, setListOpen] = useState(false);
+  const [shareStatus, setShareStatus] = useState('');
+  const [revealRequest, setRevealRequest] = useState(0);
+  const [preferencesReady, setPreferencesReady] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [activeFilters, setActiveFilters] = useState<Set<FilterId>>(new Set());
   const [addOpen, setAddOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [soundState, setSoundState] = useState<SoundState>('idle');
   const [mapLoaded, setMapLoaded] = useState(false);
   const [motionPaused, setMotionPaused] = useState(false);
@@ -368,28 +159,159 @@ export default function Home() {
   );
   const [introInteractionMode, setIntroInteractionMode] =
     useState<IntroInteractionMode | null>(null);
+  const [mapFullscreen, setMapFullscreen] = useState(false);
+  const [fullscreenStatus, setFullscreenStatus] = useState('');
 
-  const filteredGardens = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase('cs');
-    return gardens.filter((garden) => {
-      const matchesQuery =
-        !normalizedQuery ||
-        [garden.name, garden.district, garden.area, ...garden.tags]
-          .join(' ')
-          .toLocaleLowerCase('cs')
-          .includes(normalizedQuery);
-      const matchesFilters = [...activeFilters].every((activeId) =>
-        filterOptions.find((option) => option.id === activeId)?.matches(garden),
-      );
-
-      return matchesQuery && matchesFilters;
-    });
-  }, [activeFilters, query]);
+  const filteredGardens = useMemo(
+    () => filterGardenCatalogue(query, navigation.filters, categoryFilter),
+    [query, navigation.filters, categoryFilter],
+  );
 
   const selectedGarden =
     filteredGardens.find((garden) => garden.id === selectedId) ?? null;
+  const selectedVisit = selectedGarden?.visit ?? null;
   const isSoundPlaying = soundState === 'playing';
   const isMotionPaused = motionPaused || prefersReducedMotion;
+
+  /* oxlint-disable react/react-compiler -- Browser-only preferences and URL state must be restored after SSR hydration. */
+  useEffect(() => {
+    const restoreLink = () => {
+      const url = new URL(window.location.href);
+      const next = readAtlasUrl(
+        url,
+        gardens.map((garden) => garden.id),
+      );
+      if (
+        next.selectedId &&
+        !filterGardenCatalogue(next.query, next.filters, next.category).some(
+          (garden) => garden.id === next.selectedId,
+        )
+      )
+        next.selectedId = '';
+      navigationRef.current = next;
+      setNavigation(next);
+      setShareStatus('');
+      if (next.query || next.filters.length || next.category) setListOpen(true);
+      if (next.selectedId) setIntroMinimized(true);
+      const clean = writeAtlasUrl(url, next);
+      if (clean.href !== url.href)
+        window.history.replaceState(window.history.state, '', clean);
+    };
+    restoreLink();
+    window.addEventListener('popstate', restoreLink);
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem('prague-atlas-panel-v3') ?? 'null',
+      );
+      // oxlint-disable-next-line react/react-compiler -- Restore browser-only preferences after server hydration.
+      if (
+        saved &&
+        typeof saved.minimized === 'boolean' &&
+        !navigationRef.current.selectedId
+      )
+        setIntroMinimized(saved.minimized);
+      if (
+        saved?.geometry &&
+        ['left', 'top', 'width', 'height'].every((key) =>
+          Number.isFinite(saved.geometry[key]),
+        )
+      ) {
+        const width = clamp(
+          saved.geometry.width,
+          INTRO_MIN_WIDTH,
+          window.innerWidth - 24,
+        );
+        const height = clamp(
+          saved.geometry.height,
+          INTRO_MIN_HEIGHT,
+          window.innerHeight - 24,
+        );
+        setIntroGeometry({
+          width,
+          height,
+          left: clamp(saved.geometry.left, 12, window.innerWidth - width - 12),
+          top: clamp(saved.geometry.top, 12, window.innerHeight - height - 12),
+        });
+      }
+    } catch {
+      /* Preferences are optional, including in private browsing. */
+    }
+    setPreferencesReady(true);
+    return () => window.removeEventListener('popstate', restoreLink);
+  }, []);
+  /* oxlint-enable react/react-compiler */
+
+  useEffect(() => {
+    if (!preferencesReady) return;
+    try {
+      localStorage.setItem(
+        'prague-atlas-panel-v3',
+        JSON.stringify({ minimized: introMinimized, geometry: introGeometry }),
+      );
+    } catch {
+      /* Storage can be unavailable. */
+    }
+  }, [introMinimized, introGeometry, preferencesReady]);
+
+  const updateNavigation = useCallback(
+    (patch: Partial<AtlasNavigation>, mode: 'push' | 'replace' = 'replace') => {
+      const next = { ...navigationRef.current, ...patch };
+      if (
+        next.selectedId &&
+        !filterGardenCatalogue(next.query, next.filters, next.category).some(
+          (garden) => garden.id === next.selectedId,
+        )
+      )
+        next.selectedId = '';
+      navigationRef.current = next;
+      setNavigation(next);
+      setShareStatus('');
+      const url = writeAtlasUrl(new URL(window.location.href), next);
+      if (url.href !== window.location.href) {
+        if (mode === 'push')
+          window.history.pushState(window.history.state, '', url);
+        else window.history.replaceState(window.history.state, '', url);
+      }
+    },
+    [],
+  );
+
+  const selectGarden = useCallback(
+    (id: string) => {
+      if (id) {
+        const activeElement = document.activeElement;
+        if (activeElement instanceof HTMLElement)
+          lastFocusRef.current = activeElement;
+      }
+      updateNavigation({ selectedId: id }, 'push');
+      setIntroMinimized(true);
+      if (id)
+        requestAnimationFrame(() =>
+          document
+            .querySelector<HTMLButtonElement>('.preview-close')
+            ?.focus({ preventScroll: true }),
+        );
+    },
+    [updateNavigation],
+  );
+
+  async function shareGarden() {
+    if (!selectedGarden) return;
+    const url = gardenShareUrl(
+      new URL(window.location.href),
+      selectedGarden.id,
+    );
+    try {
+      await navigator.clipboard.writeText(url.href);
+      setShareStatus('Odkaz zkopírován.');
+    } catch {
+      setShareStatus('Odkaz můžete zkopírovat z adresního řádku.');
+    }
+  }
+
+  function resetFilters() {
+    updateNavigation({ query: '', filters: [], category: null });
+  }
 
   const cancelAudioFade = useCallback(() => {
     if (audioFadeTimerRef.current !== null) {
@@ -510,6 +432,20 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const syncFullscreen = () => {
+      const isFullscreen = document.fullscreenElement === mapCanvasRef.current;
+      setMapFullscreen(isFullscreen);
+      setFullscreenStatus(
+        isFullscreen ? 'Mapa je zobrazena přes celou obrazovku.' : '',
+      );
+    };
+    document.addEventListener('fullscreenchange', syncFullscreen);
+    syncFullscreen();
+    return () =>
+      document.removeEventListener('fullscreenchange', syncFullscreen);
+  }, []);
+
+  useEffect(() => {
     const handleVisibilityChange = () => {
       const audio = audioRef.current;
       if (document.hidden && audio && !audio.paused) pauseSound(audio);
@@ -569,17 +505,10 @@ export default function Home() {
   }, [introMinimized]);
 
   function toggleFilter(filterId: FilterId) {
-    setActiveFilters((current) => {
-      const next = new Set(current);
-      if (next.has(filterId)) next.delete(filterId);
-      else next.add(filterId);
-      return next;
-    });
-  }
-
-  function submitGarden(event: SyntheticEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSubmitted(true);
+    const next = new Set(navigationRef.current.filters);
+    if (next.has(filterId)) next.delete(filterId);
+    else next.add(filterId);
+    updateNavigation({ filters: [...next] });
   }
 
   async function toggleSound() {
@@ -603,11 +532,27 @@ export default function Home() {
     }
   }
 
-  function closePreview() {
+  const closePreview = useCallback(() => {
     const closingId = selectedId;
-    setSelectedId('');
-    requestAnimationFrame(() => markerRefs.current[closingId]?.focus());
-  }
+    const returnTarget = lastFocusRef.current;
+    selectGarden('');
+    requestAnimationFrame(() => {
+      const focusTarget = returnTarget?.isConnected
+        ? returnTarget
+        : markerRefs.current[closingId];
+      focusTarget?.focus({ preventScroll: true });
+      lastFocusRef.current = null;
+    });
+  }, [selectedId, selectGarden]);
+
+  useEffect(() => {
+    if (!selectedGarden || addOpen || aboutOpen) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closePreview();
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [selectedGarden, addOpen, aboutOpen, closePreview]);
 
   function readIntroGeometry() {
     const card = introCardRef.current;
@@ -617,8 +562,12 @@ export default function Home() {
     return {
       left: rect.left,
       top: rect.top,
-      width: introMinimized ? (introGeometry?.width ?? 396) : rect.width,
-      height: introMinimized ? (introGeometry?.height ?? 264) : rect.height,
+      width: introMinimized
+        ? (introGeometry?.width ?? INTRO_DEFAULT_WIDTH)
+        : rect.width,
+      height: introMinimized
+        ? (introGeometry?.height ?? INTRO_DEFAULT_HEIGHT)
+        : rect.height,
     };
   }
 
@@ -804,19 +753,178 @@ export default function Home() {
       } as CSSProperties)
     : undefined;
 
+  async function toggleMapFullscreen() {
+    const map = mapCanvasRef.current;
+    if (!map) return;
+
+    try {
+      if (document.fullscreenElement === map) await document.exitFullscreen();
+      else await map.requestFullscreen();
+    } catch {
+      setFullscreenStatus(
+        'Celou obrazovku se nepodařilo otevřít. Zkuste to prosím znovu.',
+      );
+    }
+  }
+
+  const introCard = (
+    <aside
+      className={`intro-card${introMinimized ? ' is-minimized' : ''}${
+        selectedGarden || filtersOpen || listOpen ? ' is-quiet' : ''
+      }${introGeometry ? ' is-positioned' : ''}${
+        introInteractionMode ? ` is-${introInteractionMode}` : ''
+      }`}
+      ref={introCardRef}
+      style={introStyle}
+      aria-label="Pohlednice Zahrady Prahy"
+    >
+      <span className="sr-only" id="intro-controls-help">
+        Šipkami ovládáte jemný posun nebo změnu velikosti. S klávesou Shift se
+        panel mění po větších krocích.
+      </span>
+      <button
+        className="intro-drag-handle"
+        type="button"
+        onPointerDown={(event) => beginIntroInteraction(event, 'move')}
+        onPointerMove={updateIntroInteraction}
+        onPointerUp={endIntroInteraction}
+        onPointerCancel={endIntroInteraction}
+        onLostPointerCapture={endIntroInteraction}
+        onKeyDown={(event) => adjustIntroWithKeyboard(event, 'move')}
+        aria-label="Přesunout pohlednici po mapě"
+        aria-describedby="intro-controls-help"
+        title="Přesunout"
+      >
+        <Move />
+      </button>
+      <button
+        id="intro-postcard"
+        className="intro-postcard"
+        type="button"
+        onClick={() => setAboutOpen(true)}
+        aria-label="Otevřít příběh mapy"
+        tabIndex={introMinimized ? -1 : 0}
+      >
+        <span className="intro-visual" aria-hidden="true">
+          <Image src="/zahrady-prahy-og.png" alt="" fill sizes="396px" />
+        </span>
+      </button>
+      <button
+        className="intro-minimize"
+        type="button"
+        onClick={() => setIntroMinimized((minimized) => !minimized)}
+        aria-label={
+          introMinimized
+            ? 'Rozbalit pohlednici Zahrady Prahy'
+            : 'Minimalizovat pohlednici Zahrady Prahy'
+        }
+        aria-expanded={!introMinimized}
+        aria-controls="intro-postcard"
+      >
+        {introMinimized ? <Maximize2 /> : <Minimize2 />}
+      </button>
+      {!introMinimized && (
+        <button
+          className="intro-resize-handle"
+          type="button"
+          onPointerDown={(event) => beginIntroInteraction(event, 'resize')}
+          onPointerMove={updateIntroInteraction}
+          onPointerUp={endIntroInteraction}
+          onPointerCancel={endIntroInteraction}
+          onLostPointerCapture={endIntroInteraction}
+          onKeyDown={(event) => adjustIntroWithKeyboard(event, 'resize')}
+          aria-label="Změnit velikost pohlednice"
+          aria-describedby="intro-controls-help"
+          title="Změnit velikost"
+        >
+          <MoveDiagonal2 />
+        </button>
+      )}
+      {!introMinimized && (
+        <div
+          className="map-legend intro-legend"
+          aria-label="Legenda typů zahrad"
+        >
+          <div className="legend-heading">
+            <Flower2 aria-hidden="true" />
+            <strong>Charakter místa</strong>
+          </div>
+          <ul>
+            {gardenCategoryOrder.map((categoryId) => {
+              const category = gardenCategoryMeta[categoryId];
+              const CategoryIcon = category.icon;
+
+              return (
+                <li key={categoryId}>
+                  <button
+                    type="button"
+                    className="legend-filter"
+                    aria-pressed={categoryFilter === categoryId}
+                    onClick={() =>
+                      updateNavigation({
+                        category:
+                          categoryFilter === categoryId ? null : categoryId,
+                      })
+                    }
+                  >
+                    <span
+                      className={`legend-symbol marker-${categoryId}`}
+                      aria-hidden="true"
+                    >
+                      <CategoryIcon />
+                    </span>
+                    <span>{category.label}</span>
+                    <small>
+                      {
+                        gardens.filter(
+                          (garden) => garden.category === categoryId,
+                        ).length
+                      }
+                    </small>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="atlas-note">
+            Ilustrovaný atlas · polohy na kresbě jsou orientační.
+          </p>
+        </div>
+      )}
+    </aside>
+  );
+
   return (
     <main className="map-experience">
-      <a className="skip-link" href="#garden-list">
+      <a
+        className="skip-link"
+        href="#garden-list"
+        onClick={() => {
+          setListOpen(true);
+          setIntroMinimized(true);
+          if (selectedGarden) setRevealRequest((request) => request + 1);
+        }}
+      >
         Přeskočit mapu a zobrazit seznam zahrad
       </a>
 
       <section
+        ref={mapCanvasRef}
         className={`map-canvas${selectedGarden ? ' has-selection' : ''}${
           filtersOpen ? ' filters-open' : ''
-        }`}
+        }${mapFullscreen ? ' is-map-fullscreen' : ''}`}
         aria-label="Ilustrovaná mapa Prahy"
       >
-        <div className="map-plane">
+        <MapViewport
+          focusTarget={
+            selectedGarden
+              ? { id: selectedGarden.id, ...selectedGarden.artPosition }
+              : undefined
+          }
+          revealRequest={revealRequest}
+          isFullscreen={mapFullscreen}
+          onToggleFullscreen={toggleMapFullscreen}
+        >
           <Image
             className="map-art"
             src="/map/prague-storybook-vltava-v6-wide.webp"
@@ -838,7 +946,7 @@ export default function Home() {
             <legend className="sr-only">Zahrady na mapě</legend>
             {filteredGardens.map((garden) => {
               const isSelected = selectedId === garden.id;
-              const position = projectToWideMapPercent(garden);
+              const position = garden.artPosition;
               const category = gardenCategoryMeta[garden.category];
               const CategoryIcon = category.icon;
 
@@ -858,7 +966,7 @@ export default function Home() {
                       top: `${position.y}%`,
                     } as CSSProperties
                   }
-                  onClick={() => setSelectedId(garden.id)}
+                  onClick={() => selectGarden(garden.id)}
                   aria-label={`${garden.name}, ${garden.area}, otevřít detail`}
                   aria-pressed={isSelected}
                 >
@@ -876,35 +984,11 @@ export default function Home() {
               );
             })}
           </fieldset>
-        </div>
+        </MapViewport>
 
-        <aside
-          className={`map-legend${selectedGarden ? ' is-muted' : ''}`}
-          aria-label="Legenda typů zahrad"
-        >
-          <div className="legend-heading">
-            <Flower2 aria-hidden="true" />
-            <strong>Typy míst</strong>
-          </div>
-          <ul>
-            {gardenCategoryOrder.map((categoryId) => {
-              const category = gardenCategoryMeta[categoryId];
-              const CategoryIcon = category.icon;
-
-              return (
-                <li key={categoryId}>
-                  <span
-                    className={`legend-symbol marker-${categoryId}`}
-                    aria-hidden="true"
-                  >
-                    <CategoryIcon />
-                  </span>
-                  <span>{category.label}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </aside>
+        <output className="sr-only" aria-live="polite">
+          {fullscreenStatus}
+        </output>
 
         <header className="map-header">
           <a className="brand" href="#top" aria-label="Zahrady Prahy, domů">
@@ -921,7 +1005,12 @@ export default function Home() {
             <Search aria-hidden="true" />
             <Input
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                updateNavigation({ query: event.target.value.slice(0, 200) });
+                setListOpen(true);
+                setIntroMinimized(true);
+                if (selectedGarden) setRevealRequest((request) => request + 1);
+              }}
               placeholder="Hledat zahradu nebo čtvrť…"
               aria-label="Hledat zahradu nebo čtvrť"
             />
@@ -929,19 +1018,42 @@ export default function Home() {
               <button
                 className="clear-search"
                 type="button"
-                onClick={() => setQuery('')}
+                onClick={() => updateNavigation({ query: '' })}
                 aria-label="Vymazat hledání"
               >
                 <X />
               </button>
             ) : (
               <span className="search-count">
-                {filteredGardens.length} míst
+                {filteredGardens.length}{' '}
+                {filteredGardens.length === 1
+                  ? 'místo'
+                  : filteredGardens.length >= 2 && filteredGardens.length <= 4
+                    ? 'místa'
+                    : 'míst'}
               </span>
             )}
           </search>
 
           <div className="header-actions">
+            <Button
+              className="glass-button"
+              variant="outline"
+              size="lg"
+              aria-expanded={listOpen}
+              aria-controls="garden-list"
+              aria-label={
+                listOpen ? 'Zavřít seznam zahrad' : 'Zobrazit seznam zahrad'
+              }
+              onClick={() => {
+                setListOpen((open) => !open);
+                setIntroMinimized(true);
+                if (selectedGarden) setRevealRequest((request) => request + 1);
+              }}
+            >
+              <List />
+              <span>Seznam</span>
+            </Button>
             <button
               className={`header-sound is-${soundState}`}
               type="button"
@@ -1027,10 +1139,10 @@ export default function Home() {
               className="add-button"
               size="lg"
               onClick={() => setAddOpen(true)}
-              aria-label="Přidat zahradu"
+              aria-label="Přidávání zahrad připravujeme"
             >
               <Plus />
-              <span>Přidat zahradu</span>
+              <span>Přidat místo · brzy</span>
             </Button>
           </div>
         </header>
@@ -1061,7 +1173,7 @@ export default function Home() {
             <button
               className="clear-filters"
               type="button"
-              onClick={() => setActiveFilters(new Set())}
+              onClick={() => updateNavigation({ filters: [] })}
               tabIndex={filtersOpen ? 0 : -1}
             >
               Zrušit vše
@@ -1069,86 +1181,18 @@ export default function Home() {
           )}
         </div>
 
-        <aside
-          className={`intro-card${introMinimized ? ' is-minimized' : ''}${
-            selectedGarden || filtersOpen ? ' is-quiet' : ''
-          }${introGeometry ? ' is-positioned' : ''}${
-            introInteractionMode ? ` is-${introInteractionMode}` : ''
-          }`}
-          id="top"
-          ref={introCardRef}
-          style={introStyle}
-          aria-label="Pohlednice Zahrady Prahy"
-        >
-          <span className="sr-only" id="intro-controls-help">
-            Šipkami ovládáte jemný posun nebo změnu velikosti. S klávesou Shift
-            se panel mění po větších krocích.
-          </span>
-          <button
-            className="intro-drag-handle"
-            type="button"
-            onPointerDown={(event) => beginIntroInteraction(event, 'move')}
-            onPointerMove={updateIntroInteraction}
-            onPointerUp={endIntroInteraction}
-            onPointerCancel={endIntroInteraction}
-            onLostPointerCapture={endIntroInteraction}
-            onKeyDown={(event) => adjustIntroWithKeyboard(event, 'move')}
-            aria-label="Přesunout pohlednici po mapě"
-            aria-describedby="intro-controls-help"
-            title="Přesunout"
-          >
-            <Move />
-          </button>
-          <button
-            id="intro-postcard"
-            className="intro-postcard"
-            type="button"
-            onClick={() => setAboutOpen(true)}
-            aria-label="Otevřít příběh mapy"
-            tabIndex={introMinimized ? -1 : 0}
-          >
-            <span className="intro-visual" aria-hidden="true">
-              <Image src="/zahrady-prahy-og.png" alt="" fill sizes="396px" />
-            </span>
-          </button>
-          <button
-            className="intro-minimize"
-            type="button"
-            onClick={() => setIntroMinimized((minimized) => !minimized)}
-            aria-label={
-              introMinimized
-                ? 'Rozbalit pohlednici Zahrady Prahy'
-                : 'Minimalizovat pohlednici Zahrady Prahy'
-            }
-            aria-expanded={!introMinimized}
-            aria-controls="intro-postcard"
-          >
-            {introMinimized ? <Maximize2 /> : <Minimize2 />}
-          </button>
-          {!introMinimized && (
-            <button
-              className="intro-resize-handle"
-              type="button"
-              onPointerDown={(event) => beginIntroInteraction(event, 'resize')}
-              onPointerMove={updateIntroInteraction}
-              onPointerUp={endIntroInteraction}
-              onPointerCancel={endIntroInteraction}
-              onLostPointerCapture={endIntroInteraction}
-              onKeyDown={(event) => adjustIntroWithKeyboard(event, 'resize')}
-              aria-label="Změnit velikost pohlednice"
-              aria-describedby="intro-controls-help"
-              title="Změnit velikost"
-            >
-              <MoveDiagonal2 />
-            </button>
-          )}
-        </aside>
-
         {filteredGardens.length === 0 && (
           <output className="empty-state" aria-live="polite">
             <Sprout aria-hidden="true" />
             <strong>Nic jsme nenašli.</strong>
             <span>Zkuste jiný název nebo čtvrť.</span>
+            <button
+              type="button"
+              className="text-action"
+              onClick={resetFilters}
+            >
+              Zrušit hledání a filtry
+            </button>
           </output>
         )}
 
@@ -1157,6 +1201,7 @@ export default function Home() {
             key={selectedGarden.id}
             className="garden-preview"
             aria-live="polite"
+            aria-label={selectedGarden.name}
           >
             <button
               className="preview-close"
@@ -1166,48 +1211,156 @@ export default function Home() {
             >
               <X />
             </button>
-            <div className="preview-illustration" aria-hidden="true">
-              <Image
-                src={selectedGarden.illustration}
-                alt=""
-                fill
-                sizes="368px"
-              />
-              <span className="preview-glyph">
-                <Leaf />
-              </span>
-            </div>
-            <div className="preview-body">
-              <div className="preview-meta">
-                <span>
-                  <MapPin /> {selectedGarden.district}
+            <div className="preview-scroll">
+              <div className="preview-illustration">
+                <Image
+                  src={selectedGarden.illustration}
+                  alt={`Umělecká ilustrace zahrady ${selectedGarden.name}, nikoli přesný plán`}
+                  fill
+                  sizes="420px"
+                />
+                <span className="preview-glyph">
+                  <Leaf />
                 </span>
-                <span className="verified-dot">
-                  {selectedGarden.locationStatus ?? 'ověřeno'}
-                </span>
+                <span className="illustration-caption">Umělecká ilustrace</span>
               </div>
-              <h2>{selectedGarden.name}</h2>
-              <p>{selectedGarden.description}</p>
-              <div className="tag-list" aria-label="Vlastnosti zahrady">
-                {selectedGarden.tags.map((tag) => (
-                  <span key={tag}>{tag}</span>
-                ))}
+              <div className="preview-body">
+                <div className="preview-meta">
+                  <span>
+                    <MapPin /> {selectedGarden.district}
+                  </span>
+                  <span className="verified-dot">
+                    {selectedGarden.locationStatus ?? 'veřejný zdroj'}
+                  </span>
+                </div>
+                <h2>{selectedGarden.name}</h2>
+                <button
+                  type="button"
+                  className="reveal-garden"
+                  onClick={() => setRevealRequest((request) => request + 1)}
+                >
+                  <MapPin /> Ukázat na kreslené mapě
+                </button>
+                <p>{selectedGarden.description}</p>
+                <div className="tag-list" aria-label="Vlastnosti zahrady">
+                  {selectedGarden.tags.map((tag) => (
+                    <span key={tag}>{tag}</span>
+                  ))}
+                </div>
+                {selectedVisit && (
+                  <div className="visit-note">
+                    <div className="visit-note-heading">
+                      <strong>Návštěva</strong>
+                      <span>
+                        Zdroje zkontrolovány {selectedVisit.access.checkedAt}
+                      </span>
+                    </div>
+                    <dl className="visit-facts">
+                      <div className="visit-fact">
+                        <dt>Kdy přijít</dt>
+                        <dd>
+                          {selectedVisit.hours.text}
+                          {selectedVisit.hours.appliesTo && (
+                            <small>{selectedVisit.hours.appliesTo}</small>
+                          )}
+                        </dd>
+                      </div>
+                      <div className="visit-fact">
+                        <dt>Vstup</dt>
+                        <dd>
+                          {selectedVisit.access.text}
+                          {selectedVisit.access.appliesTo && (
+                            <small>{selectedVisit.access.appliesTo}</small>
+                          )}
+                        </dd>
+                      </div>
+                      {selectedVisit.entrance && (
+                        <div className="visit-fact">
+                          <dt>Kde</dt>
+                          <dd>
+                            {selectedVisit.entrance.text}
+                            {selectedVisit.entrance.appliesTo && (
+                              <small>{selectedVisit.entrance.appliesTo}</small>
+                            )}
+                          </dd>
+                        </div>
+                      )}
+                      {selectedVisit.participation && (
+                        <div className="visit-fact">
+                          <dt>Zapojení</dt>
+                          <dd>
+                            {selectedVisit.participation.text}
+                            {selectedVisit.participation.appliesTo && (
+                              <small>
+                                {selectedVisit.participation.appliesTo}
+                              </small>
+                            )}
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
+                    <p className="visit-disclaimer">
+                      Podle uvedených zdrojů. Před cestou ověřte případné změny;
+                      poloha na kresbě je orientační
+                      {selectedGarden.locationStatus ? ' (také přibližná)' : ''}
+                      .
+                    </p>
+                    <div className="visit-sources">
+                      {uniqueVisitSources(selectedVisit).map((source) => (
+                        <a
+                          key={source.url}
+                          href={source.url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {source.label} <ArrowRight />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="preview-actions">
+                  <a
+                    className="preview-button"
+                    href={navigationUrl(selectedGarden)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Navigation /> Otevřít v mapě
+                  </a>
+                  <button
+                    type="button"
+                    className="share-button"
+                    onClick={shareGarden}
+                    aria-label="Zkopírovat odkaz na zahradu"
+                  >
+                    <Share2 />
+                  </button>
+                </div>
+                <output className="share-feedback" aria-live="polite">
+                  {shareStatus}
+                </output>
+                <a
+                  className="source-link"
+                  href={selectedGarden.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Zdroj a informace o návštěvě <ArrowRight />
+                </a>
               </div>
-              <a
-                className="preview-button preview-link"
-                href={selectedGarden.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Prozkoumat zahradu <ArrowRight />
-              </a>
             </div>
           </aside>
         )}
 
         <footer className="map-footer">
           <output className="result-count">
-            <i aria-hidden="true" /> {filteredGardens.length} objevených míst
+            <i aria-hidden="true" /> {filteredGardens.length}{' '}
+            {filteredGardens.length === 1
+              ? 'objevené místo'
+              : filteredGardens.length >= 2 && filteredGardens.length <= 4
+                ? 'objevená místa'
+                : 'objevených míst'}
           </output>
           <div className="footer-meta">
             <button
@@ -1241,102 +1394,104 @@ export default function Home() {
             </a>
           </div>
         </footer>
-      </section>
 
-      <section className="sr-only" id="garden-list" aria-label="Seznam zahrad">
-        <h2>Seznam zahrad</h2>
-        <ul>
-          {filteredGardens.map((garden) => (
-            <li key={garden.id}>{garden.name}</li>
-          ))}
-        </ul>
-      </section>
-
-      <Dialog
-        open={addOpen}
-        onOpenChange={(open) => {
-          setAddOpen(open);
-          if (!open) setSubmitted(false);
-        }}
-      >
-        <DialogContent className="add-garden-dialog">
-          {submitted ? (
-            <section className="submission-success" aria-live="polite">
-              <span className="success-icon" aria-hidden="true">
-                <Check />
-              </span>
-              <DialogHeader>
-                <DialogTitle>Děkujeme. Tip jsme přijali.</DialogTitle>
-                <DialogDescription>
-                  Než se zahrada objeví na mapě, ověříme místo i uvedené
-                  informace. Potom vám dáme vědět.
-                </DialogDescription>
-              </DialogHeader>
-              <Button
-                className="dialog-primary"
-                onClick={() => setAddOpen(false)}
-              >
-                Zpět na mapu
-              </Button>
-            </section>
-          ) : (
-            <>
-              <DialogHeader>
-                <span className="dialog-eyebrow">Nový tip na mapu</span>
-                <DialogTitle>Znáte zahradu, která tu chybí?</DialogTitle>
-                <DialogDescription>
-                  Pošlete nám místo a kontakt. Každý tip před zveřejněním osobně
-                  ověříme.
-                </DialogDescription>
-              </DialogHeader>
-              <form className="garden-form" onSubmit={submitGarden}>
-                <div className="form-grid">
-                  <div className="form-field">
-                    <Label htmlFor="garden-name">Název zahrady</Label>
-                    <Input
-                      id="garden-name"
-                      name="gardenName"
-                      placeholder="Např. Zahrada u parku"
-                      required
-                    />
-                  </div>
-                  <div className="form-field">
-                    <Label htmlFor="garden-place">Adresa nebo místo</Label>
-                    <Input
-                      id="garden-place"
-                      name="gardenPlace"
-                      placeholder="Ulice, čtvrť nebo bod"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="form-field">
-                  <Label htmlFor="garden-note">Co o místě víte?</Label>
-                  <textarea
-                    id="garden-note"
-                    name="gardenNote"
-                    placeholder="Krátký popis, odkaz nebo kontakt na provozovatele…"
-                    rows={4}
-                    required
-                  />
-                </div>
-                <div className="form-field">
-                  <Label htmlFor="garden-email">Váš e-mail</Label>
-                  <Input
-                    id="garden-email"
-                    name="gardenEmail"
-                    type="email"
-                    placeholder="pro případ doplnění informací"
-                    required
-                  />
-                  <small>Nezveřejníme ho a nepoužijeme k ničemu jinému.</small>
-                </div>
-                <Button className="dialog-primary" type="submit" size="lg">
-                  Odeslat ke schválení <ArrowRight />
-                </Button>
-              </form>
-            </>
+        <section
+          className="garden-directory"
+          id="garden-list"
+          aria-label="Seznam zahrad"
+          hidden={!listOpen}
+        >
+          <div className="directory-heading">
+            <div>
+              <span className="directory-eyebrow">Zelená místa Prahy</span>
+              <h2>Kam dnes?</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setListOpen(false)}
+              aria-label="Zavřít seznam"
+            >
+              <X />
+            </button>
+          </div>
+          <p className="directory-summary" aria-live="polite">
+            {filteredGardens.length} z {gardens.length} míst
+            {categoryFilter
+              ? ` · ${gardenCategoryMeta[categoryFilter].label}`
+              : ''}
+          </p>
+          {(query || categoryFilter || activeFilters.size > 0) && (
+            <button
+              className="text-action"
+              type="button"
+              onClick={resetFilters}
+            >
+              Zrušit hledání a filtry
+            </button>
           )}
+          <ul>
+            {filteredGardens.map((garden) => (
+              <li key={garden.id}>
+                <button
+                  type="button"
+                  aria-pressed={selectedId === garden.id}
+                  onClick={() => selectGarden(garden.id)}
+                >
+                  <span className="directory-image">
+                    <Image src={garden.illustration} alt="" fill sizes="72px" />
+                  </span>
+                  <span>
+                    <strong>{garden.name}</strong>
+                    <small>
+                      {garden.district} · {garden.area}
+                    </small>
+                  </span>
+                  <ArrowRight />
+                </button>
+              </li>
+            ))}
+          </ul>
+          {filteredGardens.length === 0 && (
+            <p>Žádné místo neodpovídá výběru. Zkuste ubrat některý filtr.</p>
+          )}
+          <p className="directory-footnote">
+            Vyberte místo a naplánujte si návštěvu.
+          </p>
+        </section>
+      </section>
+
+      <div className="gallery-caption" id="top">
+        <div>
+          <h1>Zahrady Prahy</h1>
+          <p>Praha roste společně.</p>
+        </div>
+        <div className="gallery-postcard-slot">{introCard}</div>
+        <button
+          className="gallery-seal"
+          type="button"
+          onClick={() => setAboutOpen(true)}
+          aria-label="O mapě Zahrady Prahy"
+        >
+          <Leaf aria-hidden="true" />
+        </button>
+      </div>
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="add-garden-dialog">
+          <DialogHeader>
+            <span className="dialog-eyebrow">
+              <Sprout /> Mapa roste postupně
+            </span>
+            <DialogTitle>Přijímání tipů připravujeme.</DialogTitle>
+            <DialogDescription>
+              Nová místa bude možné navrhovat, až bude připravené jejich
+              ukládání a osobní schvalování. Zatím zde žádné tipy ani kontaktní
+              údaje nepřijímáme.
+            </DialogDescription>
+          </DialogHeader>
+          <Button className="dialog-primary" onClick={() => setAddOpen(false)}>
+            Zpět k objevování <ArrowRight />
+          </Button>
         </DialogContent>
       </Dialog>
 
@@ -1381,8 +1536,9 @@ export default function Home() {
             </DialogTitle>
             <DialogDescription>
               Body na mapě odkazují na skutečná pražská místa. Vybíráme je z
-              veřejných zdrojů a každý údaj před zveřejněním kontrolujeme. U
-              připravovaných projektů vždy označujeme orientační polohu.
+              veřejných zdrojů, které najdete u každé zahrady. Kresba je
+              umělecký atlas, ne navigační mapa. Pro skutečnou polohu použijte
+              odkaz v detailu.
             </DialogDescription>
           </DialogHeader>
           <ol className="how-list">
@@ -1404,7 +1560,9 @@ export default function Home() {
               </span>
               <div className="how-step-copy">
                 <strong>Rozklikněte místo</strong>
-                <small>Každá zahrada má vlastní příběh a ověřený zdroj.</small>
+                <small>
+                  Prohlédněte si ilustraci, zdroj a skutečnou polohu.
+                </small>
               </div>
               <span className="how-step-number" aria-hidden="true">
                 02
@@ -1415,10 +1573,8 @@ export default function Home() {
                 <Flower2 />
               </span>
               <div className="how-step-copy">
-                <strong>Přidejte tip</strong>
-                <small>
-                  Nové zahrady nejprve ověříme a teprve potom zveřejníme.
-                </small>
+                <strong>Nová místa postupně</strong>
+                <small>Přijímání a schvalování vašich tipů připravujeme.</small>
               </div>
               <span className="how-step-number" aria-hidden="true">
                 03

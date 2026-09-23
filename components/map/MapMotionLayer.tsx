@@ -47,16 +47,24 @@ export function MapMotionLayer({ paused, quiet, ready }: MapMotionLayerProps) {
       focusable="false"
     >
       <defs>
-        <clipPath id="vltava-water-corridor" clipPathUnits="userSpaceOnUse">
+        <mask
+          id="vltava-water-corridor"
+          maskUnits="userSpaceOnUse"
+          x="0"
+          y="0"
+          width="1672"
+          height="941"
+          style={{ maskType: 'luminance' }}
+        >
           <path
             d={VLTAVA_WIDE_CENTERLINE_PATH}
             fill="none"
-            stroke="black"
-            strokeWidth="56"
+            stroke="white"
+            strokeWidth="66"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-        </clipPath>
+        </mask>
       </defs>
 
       <g className={styles.shimmer}>
@@ -116,7 +124,7 @@ export function MapMotionLayer({ paused, quiet, ready }: MapMotionLayerProps) {
           />
         </g>
 
-        <g clipPath="url(#vltava-water-corridor)">
+        <g mask="url(#vltava-water-corridor)">
           <image
             className={styles.boat}
             href="/map/motion/boat-ochre.webp"
