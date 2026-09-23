@@ -35,3 +35,12 @@ Desktop browser QA performed at 1440 × 900: maximum zoom, Prales/Prokopka selec
 Selection/camera behavior was reviewed with Astra Ultra: preserve zoom, reveal the selected marker inside the unobstructed area, do not override subsequent manual panning, and keep camera motion out of URL history. Search/category/feature filters now round-trip through the URL together; shared garden links intentionally omit the sender's filters.
 
 Next independent increments: periodic source refresh (the current check date is 6. 9. 2026); approved suggestions with private moderation when the owner enables storage; curated walking routes based on verified public access. Mobile remains deferred.
+
+## Opravy — 2026-09-23
+
+- Zvuková krajina se spouští jen tlačítkem s notou (žádné automatické spuštění ani start po prvním kliknutí), audio má `preload="none"`.
+- Minimalizace nebo přesunutí pohlednice už neposouvá mapu (rezervované místo v řádku s nadpisem).
+- Pohlednice je 107 kB WebP místo 1,8 MB PNG; náhled pro sociální sítě je 239 kB JPEG.
+- Během načítání ilustrované mapy se zobrazí rozmazaný náhled (1,5 kB) a „Načítám mapu…“.
+- Telefon (≤ 720 px, `app/mobile.css`): mapa přes celou obrazovku, detail zahrady a seznam jako spodní panely, tlačítko „Otevřít v mapě“ vždy dole na dosah, vybraná zahrada zůstává nad panelem; na výšku se mapa otevírá přiblížená a posouvá se tažením.
+- Úklid: odstraněny nepoužité mapy (`prague-garden-map.webp`, `map/prague-illustrated-v2.webp`), nepoužité komponenty `components/ui` a závislosti (recharts, date-fns, cmdk, embla, input-otp, react-day-picker, react-resizable-panels, @shadcn/react).

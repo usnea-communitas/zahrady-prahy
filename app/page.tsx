@@ -160,6 +160,9 @@ export default function Home() {
   const [introInteractionMode, setIntroInteractionMode] =
     useState<IntroInteractionMode | null>(null);
   const [mapFullscreen, setMapFullscreen] = useState(false);
+  const [postcardSlotHeight, setPostcardSlotHeight] = useState<number | null>(
+    null,
+  );
   const [fullscreenStatus, setFullscreenStatus] = useState('');
 
   const filteredGardens = useMemo(
@@ -361,67 +364,8 @@ export default function Home() {
 
   useEffect(() => cancelAudioFade, [cancelAudioFade]);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    let disposed = false;
-    let waitingForGesture = false;
-
-    const removeUnlockListeners = () => {
-      window.removeEventListener('pointerdown', unlockSound, true);
-      window.removeEventListener('keydown', unlockSound, true);
-    };
-
-    const attemptAutoplay = async () => {
-      if (disposed) return;
-
-      cancelAudioFade();
-      audio.volume = 0;
-      setSoundState('loading');
-
-      try {
-        await audio.play();
-        waitingForGesture = false;
-        removeUnlockListeners();
-      } catch (error) {
-        if (disposed) return;
-        if (error instanceof DOMException && error.name === 'AbortError')
-          return;
-
-        waitingForGesture = true;
-        setSoundState('paused');
-        window.addEventListener('pointerdown', unlockSound, {
-          capture: true,
-          once: true,
-        });
-        window.addEventListener('keydown', unlockSound, {
-          capture: true,
-          once: true,
-        });
-      }
-    };
-
-    function unlockSound(event: Event) {
-      if (!waitingForGesture) return;
-      waitingForGesture = false;
-      removeUnlockListeners();
-      if (
-        event.target instanceof Element &&
-        event.target.closest('.header-sound')
-      ) {
-        return;
-      }
-      void attemptAutoplay();
-    }
-
-    void attemptAutoplay();
-
-    return () => {
-      disposed = true;
-      removeUnlockListeners();
-    };
-  }, [cancelAudioFade]);
+  // The soundscape starts only when the visitor presses the sound button:
+  // no autoplay and no start on the first click anywhere on the page.
 
   useEffect(() => {
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -459,6 +403,25 @@ export default function Home() {
   useEffect(() => {
     introLiveGeometryRef.current = introGeometry;
   }, [introGeometry]);
+
+  useEffect(() => {
+    const card = introCardRef.current;
+    if (!card || introMinimized || introGeometry) return;
+    const measure = () => {
+      const height = Math.round(card.getBoundingClientRect().height);
+      if (height > 0) setPostcardSlotHeight(height);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [introMinimized, introGeometry]);
+
+  useEffect(() => {
+    // the map may finish loading before hydration, when onLoad has already fired
+    const art = document.querySelector<HTMLImageElement>('.map-art');
+    if (art?.complete && art.naturalWidth > 0) setMapLoaded(true);
+  }, []);
 
   useEffect(() => {
     function keepIntroInViewport() {
@@ -806,7 +769,7 @@ export default function Home() {
         tabIndex={introMinimized ? -1 : 0}
       >
         <span className="intro-visual" aria-hidden="true">
-          <Image src="/zahrady-prahy-og.png" alt="" fill sizes="396px" />
+          <Image src="/zahrady-prahy-postcard.webp" alt="" fill sizes="396px" />
         </span>
       </button>
       <button
@@ -925,6 +888,15 @@ export default function Home() {
           isFullscreen={mapFullscreen}
           onToggleFullscreen={toggleMapFullscreen}
         >
+          {!mapLoaded && (
+            // eslint-disable-next-line @next/next/no-img-element -- 1.5 kB inline placeholder
+            <img
+              className="map-art-placeholder"
+              src="/map/prague-storybook-vltava-v6-placeholder.webp"
+              alt=""
+              aria-hidden="true"
+            />
+          )}
           <Image
             className="map-art"
             src="/map/prague-storybook-vltava-v6-wide.webp"
@@ -933,6 +905,7 @@ export default function Home() {
             priority
             sizes="100vw"
             onLoad={() => setMapLoaded(true)}
+            onError={() => setMapLoaded(true)}
           />
           <div className="map-wash" aria-hidden="true" />
           <div className="paper-grain" aria-hidden="true" />
@@ -985,6 +958,12 @@ export default function Home() {
             })}
           </fieldset>
         </MapViewport>
+
+        {!mapLoaded && (
+          <div className="map-loading" role="status">
+            <LoaderCircle aria-hidden="true" /> Načítám mapu…
+          </div>
+        )}
 
         <output className="sr-only" aria-live="polite">
           {fullscreenStatus}
@@ -1087,7 +1066,7 @@ export default function Home() {
             <audio
               ref={audioRef}
               loop
-              preload="auto"
+              preload="none"
               onPlaying={() => {
                 setSoundState('playing');
                 const audio = audioRef.current;
@@ -1465,7 +1444,14 @@ export default function Home() {
           <h1>Zahrady Prahy</h1>
           <p>Praha roste společně.</p>
         </div>
-        <div className="gallery-postcard-slot">{introCard}</div>
+        <div
+          className="gallery-postcard-slot"
+          style={
+            postcardSlotHeight ? { minHeight: postcardSlotHeight } : undefined
+          }
+        >
+          {introCard}
+        </div>
         <button
           className="gallery-seal"
           type="button"

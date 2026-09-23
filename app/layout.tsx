@@ -4,6 +4,7 @@ import './globals.css';
 import './atlas.css';
 // Apply the supplied gallery theme after the atlas's structural rules.
 import './gallery.css';
+import './mobile.css';
 
 const gallerySerif = Playfair_Display({
   variable: '--font-gallery-serif',
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
     locale: 'cs_CZ',
     images: [
       {
-        url: '/zahrady-prahy-og.png',
+        url: '/zahrady-prahy-og.jpg',
         width: 1200,
         height: 630,
         alt: 'Ilustrovaná Praha s rozsvícenou komunitní zahradou',
@@ -52,7 +53,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Zahrady Prahy',
     description: 'Praha roste společně.',
-    images: ['/zahrady-prahy-og.png'],
+    images: ['/zahrady-prahy-og.jpg'],
   },
 };
 

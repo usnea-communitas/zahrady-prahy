@@ -6,13 +6,30 @@ export type MapRect = {
   bottom: number;
 };
 
+const MAP_ASPECT = 1672 / 941;
+
+/** Zoom at which the illustration fills the whole frame (1 on landscape screens). */
+export function coverZoom(viewportWidth: number, viewportHeight: number) {
+  const width = Math.min(viewportWidth, viewportHeight * MAP_ASPECT);
+  if (!(width > 0)) return 1;
+  return Math.max(1, viewportWidth / width, (viewportHeight * MAP_ASPECT) / width);
+}
+
+/** Highest zoom: 2.4× on wide screens, more on phones where the map starts covered. */
+export function maxMapZoom(viewportWidth: number, viewportHeight: number) {
+  return Math.max(2.4, coverZoom(viewportWidth, viewportHeight) * 1.6);
+}
+
 export function boundMapView(
   view: MapView,
   viewportWidth: number,
   viewportHeight: number,
   usable?: MapRect,
 ): MapView {
-  const zoom = Math.max(1, Math.min(2.4, view.zoom));
+  const zoom = Math.max(
+    1,
+    Math.min(maxMapZoom(viewportWidth, viewportHeight), view.zoom),
+  );
   const width = Math.min(viewportWidth, viewportHeight * (1672 / 941));
   const maxX = Math.max(0, (width * zoom - viewportWidth) / 2);
   const maxY = Math.max(

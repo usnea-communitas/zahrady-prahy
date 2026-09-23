@@ -1,0 +1,195 @@
+/* Phone layout (≤ 720 px): the map fills the screen, the title card and postcard
+ * step aside, and the garden detail and the list open as bottom sheets.
+ * Loaded after the other stylesheets, so it only has to override. */
+@media (max-width: 720px) {
+  .map-experience {
+    min-height: 100svh;
+    padding: 0 !important;
+    gap: 0 !important;
+    justify-content: flex-start !important;
+  }
+  .map-experience .map-canvas {
+    width: 100vw !important;
+    height: 100svh !important;
+    min-height: 100svh !important;
+    aspect-ratio: auto !important;
+    border-radius: 0 !important;
+  }
+
+  /* Title row: keep the h1 for screen readers and search engines only. */
+  .map-experience .gallery-caption {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .gallery-postcard-slot,
+  .gallery-seal {
+    display: none !important;
+  }
+
+  /* Header: brand + search on the first row, actions under it on the right. */
+  .map-experience .map-header {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px !important;
+    inset: max(10px, env(safe-area-inset-top)) 10px auto !important;
+    padding: 0 !important;
+  }
+  .map-experience .map-header .brand {
+    flex: none;
+  }
+  .map-experience .map-header .search-shell {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto !important;
+    max-width: none !important;
+    height: 44px;
+  }
+  .map-experience .map-header .header-actions {
+    flex: 1 0 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .map-experience .header-actions button,
+  .map-experience .header-actions .glass-button,
+  .map-experience .header-actions .add-button,
+  .map-experience .header-actions .header-sound {
+    width: 42px !important;
+    height: 42px !important;
+    padding: 0 !important;
+  }
+  .map-experience .filter-tray {
+    top: 116px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: none !important;
+    overflow-x: auto;
+  }
+
+  /* One-finger drag pans the map (buttons zoom). */
+  .map-experience .map-plane {
+    touch-action: none;
+  }
+
+  /* Zoom controls and footer sit at the bottom edge. */
+  .map-experience .map-navigation button > span {
+    display: none;
+  }
+  .map-experience .map-navigation {
+    left: 50% !important;
+    right: auto !important;
+    bottom: calc(52px + env(safe-area-inset-bottom)) !important;
+    transform: translateX(-50%) !important;
+  }
+  .map-experience .map-footer {
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+  }
+  .map-experience .map-footer .footer-meta {
+    display: none;
+  }
+
+  /* Garden detail as a bottom sheet. */
+  .map-experience .garden-preview {
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 60 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: 62svh !important;
+    border-radius: 22px 22px 0 0 !important;
+    box-shadow: 0 -12px 40px rgba(39, 26, 0, 0.18) !important;
+    animation: sheet-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .map-experience .garden-preview .preview-scroll {
+    max-height: 62svh !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .map-experience .garden-preview .preview-illustration {
+    height: 120px !important;
+  }
+  .map-experience .garden-preview .preview-body {
+    padding: 18px 18px 0 !important;
+  }
+  .map-experience .garden-preview .preview-body h2 {
+    font-size: 26px !important;
+  }
+  /* "Otevřít v mapě" stays reachable at the bottom of the sheet. */
+  .map-experience .garden-preview .preview-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-inline: -18px;
+    padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--color-bone, #f4f2ee) 78%, transparent);
+  }
+  .map-experience .garden-preview .preview-button {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 48px;
+  }
+
+  /* Garden list as a bottom sheet. */
+  .map-experience .garden-directory {
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 55 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: 58svh !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    border-radius: 22px 22px 0 0 !important;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    box-shadow: 0 -12px 40px rgba(39, 26, 0, 0.18) !important;
+    animation: sheet-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .map-experience .garden-directory[hidden] {
+    display: none !important;
+  }
+
+  /* While a sheet is open, the bottom controls step back. */
+  .map-canvas.has-selection .map-navigation,
+  .map-canvas.has-selection .map-footer,
+  .map-canvas:has(.garden-directory:not([hidden])) .map-navigation,
+  .map-canvas:has(.garden-directory:not([hidden])) .map-footer {
+    display: none !important;
+  }
+  .map-canvas.has-selection .garden-directory {
+    display: none !important;
+  }
+
+  @keyframes sheet-up {
+    from {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+}
+@media (max-width: 720px) and (prefers-reduced-motion: reduce) {
+  .map-experience .garden-preview,
+  .map-experience .garden-directory {
+    animation: none;
+  }
+}

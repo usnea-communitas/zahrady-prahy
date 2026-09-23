@@ -12,11 +12,27 @@ import { Maximize2, Minimize2, Minus, Plus, RotateCcw } from 'lucide-react';
 
 import {
   boundMapView,
+  coverZoom,
+  maxMapZoom,
   revealMapPoint,
   type MapView as View,
   type MapRect,
 } from '@/lib/map/viewport';
 const initialView: View = { zoom: 1, x: 0, y: 0 };
+/** Default overview: whole map on wide screens, map filling the screen on portrait phones. */
+function homeView(): View {
+  const frame = mapFrame();
+  return {
+    // portrait phones: closer than the thin full-width strip, but not so close
+    // that most gardens start off-screen (drag pans, the list lists all)
+    zoom:
+      frame.height > frame.width
+        ? Math.min(coverZoom(frame.width, frame.height), 1.6)
+        : 1,
+    x: 0,
+    y: 0,
+  };
+}
 function mapFrame() {
   return (
     document.querySelector('.map-canvas')?.getBoundingClientRect() ?? {
@@ -42,10 +58,20 @@ function usableMapArea(frame = mapFrame()): MapRect {
     .querySelector('.garden-preview')
     ?.getBoundingClientRect();
   if (header?.height) bounds.top = header.bottom - frame.top + 16;
-  if (directory?.width) bounds.left = directory.right - frame.left + 20;
-  if (detail?.width) bounds.right = detail.left - frame.left - 20;
+  // side panels on wide screens, bottom sheets (full width) on phones
+  const isSheet = (rect: DOMRect) => rect.width > frame.width - 40;
+  if (directory?.width) {
+    if (isSheet(directory))
+      bounds.bottom = Math.min(bounds.bottom, directory.top - frame.top - 16);
+    else bounds.left = directory.right - frame.left + 20;
+  }
+  if (detail?.width) {
+    if (isSheet(detail))
+      bounds.bottom = Math.min(bounds.bottom, detail.top - frame.top - 16);
+    else bounds.right = detail.left - frame.left - 20;
+  }
   if (bounds.right - bounds.left < 160) bounds.left = 20;
-  if (bounds.bottom - bounds.top < 180) bounds.bottom = frame.height - 60;
+  if (bounds.bottom - bounds.top < 90) bounds.bottom = frame.height - 60;
   return bounds;
 }
 
@@ -63,6 +89,8 @@ export function MapViewport({
   onToggleFullscreen?: () => void;
 }) {
   const [view, setView] = useState(initialView);
+  const [maxZoom, setMaxZoom] = useState(2.4);
+  const placed = useRef(false);
   const drag = useRef<{ id: number; x: number; y: number; view: View } | null>(
     null,
   );
@@ -98,6 +126,14 @@ export function MapViewport({
   useEffect(() => {
     const resize = () => {
       const frame = mapFrame();
+      setMaxZoom(maxMapZoom(frame.width, frame.height));
+      if (!placed.current) {
+        placed.current = true;
+        if (targetX === undefined || targetY === undefined) {
+          setView(homeView());
+          return;
+        }
+      }
       setView((current) =>
         targetX !== undefined && targetY !== undefined
           ? revealMapPoint(
@@ -154,14 +190,14 @@ export function MapViewport({
             zoomBy(event.key === '-' ? -0.2 : 0.2);
           } else if (event.key === '0') {
             event.preventDefault();
-            setView(initialView);
+            setView(homeView());
           }
         }}
         onPointerDown={(event) => {
           if (
             event.button !== 0 ||
             (event.target as Element).closest('button') ||
-            (view.zoom === 1 && !targetId)
+            (view.zoom <= 1 && !targetId)
           )
             return;
           event.preventDefault();
@@ -226,14 +262,14 @@ export function MapViewport({
         <button
           type="button"
           onClick={() => zoomBy(0.2)}
-          disabled={view.zoom >= 2.4}
+          disabled={view.zoom >= maxZoom - 0.001}
           aria-label="Přiblížit mapu"
         >
           <Plus />
         </button>
         <button
           type="button"
-          onClick={() => setView(initialView)}
+          onClick={() => setView(homeView())}
           aria-label="Vrátit přiblížení a posun na výchozí přehled"
           title="Výchozí přehled (klávesa 0)"
         >
