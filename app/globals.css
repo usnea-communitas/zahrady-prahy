@@ -298,7 +298,7 @@ textarea:focus-visible {
 }
 .brand small {
   font-family: var(--font-pplxsansmono);
-  font-size: 10px;
+  font-size: var(--text-caption);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -349,7 +349,7 @@ textarea:focus-visible {
   flex: none;
   color: var(--color-moss-shadow);
   font-family: var(--font-pplxsansmono);
-  font-size: 10px;
+  font-size: var(--text-caption);
   font-weight: 500;
   letter-spacing: 0;
 }
@@ -506,7 +506,7 @@ textarea:focus-visible {
   padding: 0 8px;
   color: var(--color-moss-shadow);
   font-family: var(--font-pplxsansmono);
-  font-size: 10px;
+  font-size: var(--text-caption);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -712,7 +712,7 @@ textarea:focus-visible {
   gap: 8px;
   color: var(--color-moss-shadow);
   font-family: var(--font-pplxsansmono);
-  font-size: 10px;
+  font-size: var(--text-caption);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -881,7 +881,7 @@ textarea:focus-visible {
   margin-top: 4px;
   color: var(--color-moss-shadow);
   font-family: var(--font-pplxsansmono);
-  font-size: 10px;
+  font-size: var(--text-caption);
   letter-spacing: 0;
 }
 .garden-marker:hover .marker-core,
@@ -933,7 +933,7 @@ textarea:focus-visible {
   gap: 7px;
   margin: 0 3px 10px;
   font-family: var(--font-pplxsansmono);
-  font-size: 10px;
+  font-size: var(--text-caption);
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
@@ -1085,7 +1085,7 @@ textarea:focus-visible {
   gap: 16px;
   color: var(--color-moss-shadow);
   font-family: var(--font-pplxsansmono);
-  font-size: 10px;
+  font-size: var(--text-caption);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -1133,7 +1133,7 @@ textarea:focus-visible {
   padding: 6px 8px;
   color: var(--color-aged-sepia);
   font-family: var(--font-pplxsansmono);
-  font-size: 10px;
+  font-size: var(--text-caption);
   font-weight: 400;
   letter-spacing: 0;
 }
@@ -1222,7 +1222,7 @@ textarea:focus-visible {
   padding: 0 16px;
   color: var(--color-aged-sepia);
   font-family: var(--font-pplxsansmono);
-  font-size: 10px;
+  font-size: var(--text-caption);
   font-weight: 400;
   letter-spacing: 0;
   backdrop-filter: blur(10px) saturate(1.12);
@@ -1490,7 +1490,7 @@ textarea:focus-visible {
 .form-field small {
   color: var(--color-moss-shadow);
   font-family: var(--font-pplxsansmono);
-  font-size: 10px;
+  font-size: var(--text-caption);
   letter-spacing: 0;
 }
 .dialog-primary {
@@ -1604,7 +1604,7 @@ textarea:focus-visible {
 .how-step-number {
   color: rgba(69, 91, 56, 0.5);
   font-family: var(--font-pplxsansmono);
-  font-size: 10px;
+  font-size: var(--text-caption);
   letter-spacing: 0.08em;
 }
 .how-list li:nth-child(2) .how-step-number {

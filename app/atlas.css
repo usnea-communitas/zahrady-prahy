@@ -167,7 +167,9 @@
 }
 .intro-visual img {
   object-fit: contain;
-  object-position: center;
+  /* Dolní výřez: nápis zapečený v ilustraci se do pásu pohlednice nevejde
+     celý, tak ho neukazujeme useknutý. */
+  object-position: center bottom;
   transform: none;
 }
 .intro-visual {
@@ -328,7 +330,6 @@
   margin: 20px 0;
   padding: 14px 16px;
   background: #edf0e6;
-  border-left: 2px solid #7d985e;
   border-radius: 4px;
 }
 .visit-note strong {
