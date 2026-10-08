@@ -326,8 +326,6 @@ body {
   gap: 12px;
   padding: 15px 16px 14px;
   border: 1px solid rgba(89, 88, 85, 0.24);
-  border-left: 3px solid
-    color-mix(in srgb, var(--color-meadow) 72%, var(--color-ink));
   border-radius: var(--radius-links);
   background: rgba(239, 237, 225, 0.72);
 }
@@ -374,13 +372,13 @@ body {
   display: block;
   margin-top: 2px;
   color: var(--color-graphite);
-  font-size: 10px;
+  font-size: var(--text-caption);
   line-height: 1.35;
 }
 .visit-disclaimer {
   margin: 0 !important;
   color: var(--color-graphite);
-  font-size: 10px !important;
+  font-size: var(--text-caption) !important;
   line-height: 1.4 !important;
 }
 .visit-sources {
@@ -869,7 +867,9 @@ body {
 }
 .intro-legend .atlas-note {
   margin: 7px 0 0;
-  font-size: 9.5px;
+  /* Místo pro úchyt změny velikosti v pravém dolním rohu karty. */
+  padding-right: 36px;
+  font-size: var(--text-caption);
   line-height: 1.35;
 }
 .intro-card.is-minimized .intro-postcard {
@@ -1023,7 +1023,7 @@ body {
   }
   .intro-legend .legend-filter {
     padding: 2px 1px;
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .intro-legend .legend-symbol {
     width: 20px;
@@ -1031,7 +1031,7 @@ body {
   }
   .intro-legend .atlas-note {
     margin-top: 5px;
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .visit-note {
     gap: 9px;
