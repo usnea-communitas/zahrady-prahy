@@ -47,3 +47,27 @@ await test('garden shares never carry incompatible filters or search', () => {
   );
   assert.equal(url.href, 'https://example.test/?zahrada=liboza');
 });
+await test('?garden= is accepted as an alias of ?zahrada= and normalised away', () => {
+  const state = readAtlasUrl(new URL('https://example.test/?garden=liboza'), [
+    'liboza',
+  ]);
+  assert.equal(state.selectedId, 'liboza');
+  // The canonical parameter wins when both are present.
+  assert.equal(
+    readAtlasUrl(
+      new URL('https://example.test/?zahrada=prales&garden=liboza'),
+      ['liboza', 'prales'],
+    ).selectedId,
+    'prales',
+  );
+  const clean = writeAtlasUrl(
+    new URL('https://example.test/?garden=liboza'),
+    state,
+  );
+  assert.equal(clean.href, 'https://example.test/?zahrada=liboza');
+  assert.equal(
+    readAtlasUrl(new URL('https://example.test/?garden=missing'), ['liboza'])
+      .selectedId,
+    '',
+  );
+});

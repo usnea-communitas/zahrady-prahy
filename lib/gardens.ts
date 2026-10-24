@@ -1,4 +1,14 @@
+/**
+ * The garden catalogue and the shared search/filter logic.
+ *
+ * Names, districts and street addresses are proper nouns and stay in Czech.
+ * Everything else a visitor reads is bilingual (`{ cs, en }`). `lat`/`lon`
+ * are public-source coordinates used for the real-map link; `artPositions`
+ * are editorial placements on the illustration and are never used for
+ * navigation.
+ */
 import { gardenVisits, type GardenVisit } from './garden-visits.ts';
+import type { Locale, Localized } from './i18n.ts';
 
 export type GardenCategory =
   | 'community'
@@ -7,32 +17,96 @@ export type GardenCategory =
   | 'courtyard'
   | 'nature';
 
+export const categoryLabels: Record<GardenCategory, Localized> = {
+  community: { cs: 'Komunitní zahrada', en: 'Community garden' },
+  'urban-farm': { cs: 'Městská farma', en: 'Urban farm' },
+  education: { cs: 'Vzdělávací zahrada', en: 'Educational garden' },
+  courtyard: { cs: 'Vnitroblok', en: 'Courtyard garden' },
+  nature: { cs: 'Přírodní zahrada', en: 'Natural garden' },
+};
+
+export type GardenTag =
+  | 'beds'
+  | 'volunteering'
+  | 'animals'
+  | 'compost'
+  | 'accessible'
+  | 'eco-centre'
+  | 'orchard'
+  | 'children'
+  | 'events'
+  | 'families'
+  | 'book-box'
+  | 'public'
+  | 'oven'
+  | 'housing-estate'
+  | 'neighbourhood'
+  | 'school'
+  | 'workshops'
+  | 'new-place'
+  | 'ecology';
+
+export const tagLabels: Record<GardenTag, Localized> = {
+  beds: { cs: 'záhonky', en: 'garden beds' },
+  volunteering: { cs: 'dobrovolnictví', en: 'volunteering' },
+  animals: { cs: 'zvířata', en: 'animals' },
+  compost: { cs: 'kompost', en: 'compost' },
+  accessible: { cs: 'bezbariérové', en: 'wheelchair accessible' },
+  'eco-centre': { cs: 'ekocentrum', en: 'eco-centre' },
+  orchard: { cs: 'sad', en: 'orchard' },
+  children: { cs: 'pro děti', en: 'for children' },
+  events: { cs: 'akce', en: 'events' },
+  families: { cs: 'rodiny', en: 'families' },
+  'book-box': { cs: 'knihobudka', en: 'book exchange box' },
+  public: { cs: 'veřejná', en: 'public' },
+  oven: { cs: 'pec', en: 'oven' },
+  'housing-estate': { cs: 'sídliště', en: 'housing estate' },
+  neighbourhood: { cs: 'sousedství', en: 'neighbourhood' },
+  school: { cs: 'školní', en: 'school grounds' },
+  workshops: { cs: 'workshopy', en: 'workshops' },
+  'new-place': { cs: 'nové místo', en: 'new place' },
+  ecology: { cs: 'ekologie', en: 'ecology' },
+};
+
 export type Garden = {
   artPosition: { x: number; y: number };
   id: string;
+  /** Proper name as the garden calls itself (Czech). */
   name: string;
+  /** Optional English gloss of the name, shown next to it in the English UI. */
+  gloss?: string;
+  /** Neighbourhood, a proper noun. */
   district: string;
-  area: string;
-  description: string;
-  tags: string[];
+  /** Administrative district, e.g. Praha 7 / Prague 7. */
+  area: Localized;
+  description: Localized;
+  tags: GardenTag[];
   lat: number;
   lon: number;
-  locationStatus?: string;
+  locationStatus?: Localized;
   sourceUrl: string;
   illustration: string;
   category: GardenCategory;
   visit: GardenVisit;
 };
 
+const prague = (number: string | number): Localized => ({
+  cs: `Praha ${number}`,
+  en: `Prague ${number}`,
+});
+
 const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'metrofarm',
     name: 'MetroFarm Císařský ostrov',
+    gloss: 'MetroFarm on Císařský Island',
     district: 'Císařský ostrov',
-    area: 'Praha 7',
-    description:
-      'Komunitní zahrada a městská farma s vlastními záhonky, společným políčkem, kompostem i zvířaty.',
-    tags: ['záhonky', 'dobrovolnictví', 'zvířata', 'kompost'],
+    area: prague(7),
+    description: {
+      cs: 'Komunitní zahrada a městská farma s vlastními záhonky, společným políčkem, kompostem i zvířaty.',
+      en: 'A community garden and urban farm with individual beds, a shared field, compost and animals.',
+    },
+    tags: ['beds', 'volunteering', 'animals', 'compost'],
     lat: 50.1121511,
     lon: 14.4147114,
     sourceUrl: 'https://www.metrofarm.cz/metrofarm/',
@@ -42,11 +116,14 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'prales',
     name: 'Komunitní zahrada Prales',
+    gloss: 'Prales Community Garden',
     district: 'Kbely',
-    area: 'Praha 19',
-    description:
-      'Bezbariérová zahrada ekocentra s vyvýšenými záhony, foliovníkem, dešťovou vodou a kompostem.',
-    tags: ['bezbariérové', 'kompost', 'ekocentrum'],
+    area: prague(19),
+    description: {
+      cs: 'Bezbariérová zahrada ekocentra s vyvýšenými záhony, foliovníkem, dešťovou vodou a kompostem.',
+      en: 'A wheelchair-accessible eco-centre garden with raised beds, a polytunnel, rainwater and compost.',
+    },
+    tags: ['accessible', 'compost', 'eco-centre'],
     lat: 50.1336044,
     lon: 14.5607443,
     sourceUrl:
@@ -57,11 +134,14 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'kotlaska',
     name: 'Komunitní centrum a zahrada Kotlaska',
+    gloss: 'Kotlaska Community Centre and Garden',
     district: 'Libeň',
-    area: 'Praha 8',
-    description:
-      'Rozlehlá zahrada se starým sadem, komunitními záhonky, programem pro děti a kulturními akcemi.',
-    tags: ['sad', 'pro děti', 'akce'],
+    area: prague(8),
+    description: {
+      cs: 'Rozlehlá zahrada se starým sadem, komunitními záhonky, programem pro děti a kulturními akcemi.',
+      en: 'A spacious garden with an old orchard, community beds, a programme for children and cultural events.',
+    },
+    tags: ['orchard', 'children', 'events'],
     lat: 50.1071472,
     lon: 14.476603,
     sourceUrl: 'https://www.kckotlaska.cz/',
@@ -71,11 +151,14 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'troja',
     name: 'Komunitní zahrada Troja',
+    gloss: 'Troja Community Garden',
     district: 'Podhoří',
-    area: 'Praha-Troja',
-    description:
-      'Místo pro sousedy a rodiny, které spojuje pěstování, veřejný kompostér, knihobudku a týpí.',
-    tags: ['rodiny', 'kompost', 'knihobudka'],
+    area: { cs: 'Praha-Troja', en: 'Prague-Troja' },
+    description: {
+      cs: 'Místo pro sousedy a rodiny, které spojuje pěstování, veřejný kompostér, knihobudku a týpí.',
+      en: 'A place for neighbours and families that brings together growing, a public composter, a book exchange box and a tipi.',
+    },
+    tags: ['families', 'compost', 'book-box'],
     lat: 50.1267793,
     lon: 14.4078329,
     sourceUrl: 'https://www.komunitnizahrada.cz/',
@@ -85,11 +168,14 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'mecislavka',
     name: 'Vnitroblok Mečislavka',
+    gloss: 'Mečislavka Courtyard',
     district: 'Nusle',
-    area: 'Praha 4',
-    description:
-      'Veřejně přístupná zahrada s vyvýšenými záhony, kompostérem, grilem a komunitní pecí na pizzu.',
-    tags: ['veřejná', 'kompost', 'pec'],
+    area: prague(4),
+    description: {
+      cs: 'Veřejně přístupná zahrada s vyvýšenými záhony, kompostérem, grilem a komunitní pecí na pizzu.',
+      en: 'A publicly accessible garden with raised beds, a composter, a grill and a community pizza oven.',
+    },
+    tags: ['public', 'compost', 'oven'],
     lat: 50.0649253,
     lon: 14.4442846,
     sourceUrl: 'https://www.vnitrobloky.cz/mecislavka',
@@ -99,11 +185,14 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'vidimova',
     name: 'Komunitní zahrada Vidimova',
+    gloss: 'Vidimova Community Garden',
     district: 'Chodov',
-    area: 'Praha 11',
-    description:
-      'Sousedská zahrada mezi domy, která vrací pěstování a společná setkání do sídliště.',
-    tags: ['sídliště', 'sousedství', 'záhony'],
+    area: prague(11),
+    description: {
+      cs: 'Sousedská zahrada mezi domy, která vrací pěstování a společná setkání do sídliště.',
+      en: 'A neighbourhood garden between apartment blocks that brings growing and shared gatherings back to the housing estate.',
+    },
+    tags: ['housing-estate', 'neighbourhood', 'beds'],
     lat: 50.0254095,
     lon: 14.5248575,
     sourceUrl: 'https://www.kokoza.cz/projekty/komunitni-zahrada-vidimova/',
@@ -113,11 +202,14 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'prokopka',
     name: 'Zahrada Prokopka',
+    gloss: 'Prokopka Garden',
     district: 'Velká Ohrada',
-    area: 'Praha 13',
-    description:
-      'Komunitní zahrada na školním pozemku, kde spolek Pro kořínky pořádá pěstební i sousedské akce.',
-    tags: ['školní', 'workshopy', 'sousedství'],
+    area: prague(13),
+    description: {
+      cs: 'Komunitní zahrada na školním pozemku, kde spolek Pro kořínky pořádá pěstební i sousedské akce.',
+      en: 'A community garden on school grounds where the association Pro kořínky holds growing and neighbourhood events.',
+    },
+    tags: ['school', 'workshops', 'neighbourhood'],
     lat: 50.0398094,
     lon: 14.3437361,
     sourceUrl: 'https://www.zahradaprokopka.cz/',
@@ -127,14 +219,17 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'velky-haj',
     name: 'Komunitní zahrada Velký háj',
+    gloss: 'Velký háj Community Garden',
     district: 'Krč',
-    area: 'Praha 4',
-    description:
-      'Pětihektarová zahrada u lesa se záhony, pergolou, květnatou loukou, včelími úly a výběhem pro koně.',
-    tags: ['nové místo', 'sad', 'záhony'],
+    area: prague(4),
+    description: {
+      cs: 'Pětihektarová zahrada u lesa se záhony, pergolou, květnatou loukou, včelími úly a výběhem pro koně.',
+      en: 'A five-hectare garden by the forest with beds, a pergola, a flower meadow, beehives and a horse paddock.',
+    },
+    tags: ['new-place', 'orchard', 'beds'],
     lat: 50.0327,
     lon: 14.4446,
-    locationStatus: 'orientační poloha',
+    locationStatus: { cs: 'orientační poloha', en: 'approximate location' },
     sourceUrl:
       'https://tucnak.praha4.cz/06-2026/pestujte-ovoce-a-zeleninu-v-nove-komunitni-zahrade',
     illustration: '/gardens/velky-haj-illustrated.webp',
@@ -143,11 +238,14 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'liboza',
     name: 'Komunitní zahrada LIBÓZA',
+    gloss: 'LIBÓZA Community Garden',
     district: 'Liboc',
-    area: 'Praha 6',
-    description:
-      'Sousedská zahrada u obory Hvězda s vyvýšenými záhony, jedlými keři, kompostem a dřevěným altánem.',
-    tags: ['záhony', 'kompost', 'akce'],
+    area: prague(6),
+    description: {
+      cs: 'Sousedská zahrada u obory Hvězda s vyvýšenými záhony, jedlými keři, kompostem a dřevěným altánem.',
+      en: 'A neighbourhood garden by the Hvězda game reserve with raised beds, edible shrubs, compost and a wooden gazebo.',
+    },
+    tags: ['beds', 'compost', 'events'],
     lat: 50.086202,
     lon: 14.328564,
     sourceUrl: 'https://www.napadprosestku.cz/napady/komunitni-zahrada-liboza/',
@@ -158,10 +256,12 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
     id: 'prazelenina',
     name: 'Prazelenina',
     district: 'Holešovice',
-    area: 'Praha 7',
-    description:
-      'Pěstitelský klub u Vltavy se společnými i vlastními záhony, nářadím a komunitní maringotkou.',
-    tags: ['záhony', 'akce', 'sousedství'],
+    area: prague(7),
+    description: {
+      cs: 'Pěstitelský klub u Vltavy se společnými i vlastními záhony, nářadím a komunitní maringotkou.',
+      en: 'A growers’ club by the Vltava with shared and individual beds, tools and a community caravan.',
+    },
+    tags: ['beds', 'events', 'neighbourhood'],
     lat: 50.106771,
     lon: 14.438531,
     sourceUrl: 'https://prazelenina.cz/',
@@ -171,11 +271,14 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'na-plani',
     name: 'Komunitní zahrada Na Pláni',
+    gloss: 'Na Pláni Community Garden',
     district: 'Malvazinky',
-    area: 'Praha 5',
-    description:
-      'Komunitní zahrada v obnoveném svažitém parku se zázemím pro sousedská setkání, cestami a výhledy.',
-    tags: ['veřejná', 'akce', 'sousedství'],
+    area: prague(5),
+    description: {
+      cs: 'Komunitní zahrada v obnoveném svažitém parku se zázemím pro sousedská setkání, cestami a výhledy.',
+      en: 'A community garden in a restored hillside park with facilities for neighbourhood gatherings, paths and views.',
+    },
+    tags: ['public', 'events', 'neighbourhood'],
     lat: 50.0620561,
     lon: 14.3932811,
     sourceUrl: 'https://www.praha5.cz/praha-5-otevrela-novy-park-na-plani/',
@@ -185,11 +288,14 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'zizkovska-zahradka',
     name: 'Žižkovská komunitní zahrádka',
+    gloss: 'Žižkov Community Garden',
     district: 'Žižkov',
-    area: 'Praha 3',
-    description:
-      'Permakulturní zahrada se záhonky, dýňovištěm, jahodami, ovocnými stromy, kompostem a prostorem pro akce.',
-    tags: ['záhony', 'kompost', 'akce'],
+    area: prague(3),
+    description: {
+      cs: 'Permakulturní zahrada se záhonky, dýňovištěm, jahodami, ovocnými stromy, kompostem a prostorem pro akce.',
+      en: 'A permaculture garden with beds, a pumpkin patch, strawberries, fruit trees, compost and space for events.',
+    },
+    tags: ['beds', 'compost', 'events'],
     lat: 50.085611,
     lon: 14.465931,
     sourceUrl: 'https://www.zizkovskazahradka.cz/',
@@ -199,11 +305,14 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
   {
     id: 'na-polske',
     name: 'Komunitní zahrada Na Polské',
+    gloss: 'Na Polské Community Garden',
     district: 'Čimice',
-    area: 'Praha 8',
-    description:
-      'Přírodní zahrada s jurtou, ekologickým pěstováním a venkovním zázemím pro děti.',
-    tags: ['pro děti', 'záhony', 'ekologie'],
+    area: prague(8),
+    description: {
+      cs: 'Přírodní zahrada s jurtou, ekologickým pěstováním a venkovním zázemím pro děti.',
+      en: 'A natural garden with a yurt, ecological growing and outdoor facilities for children.',
+    },
+    tags: ['children', 'beds', 'ecology'],
     lat: 50.13762,
     lon: 14.4386,
     sourceUrl: 'https://www.3udoli.cz/komunitni-zahrada/',
@@ -238,44 +347,59 @@ export const gardens: Garden[] = gardenRecords.map((garden) => ({
 export type FilterId = 'children' | 'accessible' | 'compost' | 'events';
 export const filterOptions: Array<{
   id: FilterId;
-  label: string;
+  label: Localized;
   matches: (garden: Garden) => boolean;
 }> = [
   {
     id: 'children',
-    label: 'Pro děti',
+    label: { cs: 'Pro děti', en: 'For children' },
     matches: (garden) =>
-      garden.tags.includes('pro děti') || garden.tags.includes('rodiny'),
+      garden.tags.includes('children') || garden.tags.includes('families'),
   },
   {
     id: 'accessible',
-    label: 'Bezbariérové',
-    matches: (garden) => garden.tags.includes('bezbariérové'),
+    label: { cs: 'Bezbariérové', en: 'Wheelchair accessible' },
+    matches: (garden) => garden.tags.includes('accessible'),
   },
   {
     id: 'compost',
-    label: 'Kompost',
-    matches: (garden) => garden.tags.includes('kompost'),
+    label: { cs: 'Kompost', en: 'Compost' },
+    matches: (garden) => garden.tags.includes('compost'),
   },
   {
     id: 'events',
-    label: 'Akce',
+    label: { cs: 'Akce', en: 'Events' },
     matches: (garden) =>
-      garden.tags.includes('akce') || garden.tags.includes('workshopy'),
+      garden.tags.includes('events') || garden.tags.includes('workshops'),
   },
 ];
 
 export function normalizeSearch(value: string) {
   return value
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .toLocaleLowerCase('cs')
     .trim();
 }
-export function matchesSearch(garden: Garden, query: string) {
-  const haystack = normalizeSearch(
-    [garden.name, garden.district, garden.area, ...garden.tags].join(' '),
+
+/** Words of both languages are searchable regardless of the interface language. */
+function searchHaystack(garden: Garden) {
+  const locales: Locale[] = ['cs', 'en'];
+  return normalizeSearch(
+    [
+      garden.name,
+      garden.gloss ?? '',
+      garden.district,
+      ...locales.map((locale) => garden.area[locale]),
+      ...locales.map((locale) => categoryLabels[garden.category][locale]),
+      ...garden.tags.flatMap((tag) =>
+        locales.map((locale) => tagLabels[tag][locale]),
+      ),
+    ].join(' '),
   );
+}
+export function matchesSearch(garden: Garden, query: string) {
+  const haystack = searchHaystack(garden);
   return normalizeSearch(query)
     .split(/\s+/)
     .every((word) => haystack.includes(word));

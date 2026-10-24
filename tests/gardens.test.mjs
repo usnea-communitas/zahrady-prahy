@@ -4,11 +4,22 @@ import { existsSync, readFileSync } from 'node:fs';
 import {
   gardens,
   artPositions,
+  categoryLabels,
   matchesSearch,
   normalizeSearch,
   filterOptions,
   navigationUrl,
+  tagLabels,
 } from '../lib/gardens.ts';
+import { GARDEN_VISIT_CHECKED_AT } from '../lib/garden-visits.ts';
+import { locales } from '../lib/i18n.ts';
+
+const isBilingual = (value) =>
+  value &&
+  typeof value === 'object' &&
+  locales.every(
+    (locale) => typeof value[locale] === 'string' && value[locale].length > 0,
+  );
 
 await test('all 13 gardens have unique IDs, real coordinates and existing illustrations', () => {
   assert.equal(gardens.length, 13);
@@ -28,27 +39,48 @@ await test('all 13 gardens have unique IDs, real coordinates and existing illust
   }
   assert.equal(Object.keys(artPositions).length, gardens.length);
 });
+await test('every reader-facing catalogue field exists in both languages', () => {
+  for (const garden of gardens) {
+    assert.ok(isBilingual(garden.description), garden.id);
+    assert.ok(isBilingual(garden.area), garden.id);
+    if (garden.locationStatus) assert.ok(isBilingual(garden.locationStatus));
+    for (const tag of garden.tags) assert.ok(isBilingual(tagLabels[tag]), tag);
+    assert.ok(isBilingual(categoryLabels[garden.category]));
+  }
+  for (const option of filterOptions) assert.ok(isBilingual(option.label));
+});
 await test('every garden has sourced visit facts and explicit gaps', () => {
   const factsFor = (visit) =>
     [visit.access, visit.hours, visit.entrance, visit.participation].filter(
       Boolean,
     );
 
+  assert.match(GARDEN_VISIT_CHECKED_AT, /^\d{4}-\d{2}-\d{2}$/);
   for (const garden of gardens) {
     assert.ok(garden.visit);
-    assert.equal(garden.visit.access.checkedAt, '6. 9. 2026');
-    assert.equal(garden.visit.hours.checkedAt, '6. 9. 2026');
+    assert.equal(garden.visit.access.checkedAt, GARDEN_VISIT_CHECKED_AT);
+    assert.equal(garden.visit.hours.checkedAt, GARDEN_VISIT_CHECKED_AT);
     for (const fact of factsFor(garden.visit)) {
-      assert.ok(fact.text.length > 10);
+      assert.ok(isBilingual(fact.text), garden.id);
+      for (const locale of locales) assert.ok(fact.text[locale].length > 10);
+      if (fact.appliesTo) assert.ok(isBilingual(fact.appliesTo), garden.id);
       assert.ok(['published', 'not-found', 'not-checked'].includes(fact.state));
       assert.ok(fact.sources.length > 0);
-      for (const source of fact.sources)
+      for (const source of fact.sources) {
         assert.equal(new URL(source.url).protocol, 'https:');
+        assert.ok(isBilingual(source.label), source.url);
+      }
     }
-    for (const fact of factsFor(garden.visit).filter(
-      (candidate) => candidate.state === 'published',
-    ))
-      assert.ok(fact.sources.length > 0);
+  }
+});
+await test('an admitted gap in one language is never filled in the other', () => {
+  // A `not-found` hours fact says "we did not find" in both languages, so a
+  // translation can never turn an honest gap into an invented schedule.
+  for (const garden of gardens) {
+    const fact = garden.visit.hours;
+    if (fact.state !== 'not-found') continue;
+    assert.match(fact.text.cs, /nenašli/, garden.id);
+    assert.match(fact.text.en, /did not find/, garden.id);
   }
 });
 await test('search is accent-insensitive, case-insensitive and matches words in any order', () => {
@@ -70,6 +102,16 @@ await test('search is accent-insensitive, case-insensitive and matches words in 
       .length,
     0,
   );
+});
+await test('search understands Czech and English words alike', () => {
+  const ids = (query) =>
+    gardens.filter((garden) => matchesSearch(garden, query)).map((g) => g.id);
+  assert.deepEqual(ids('bezbariérové'), ['prales']);
+  assert.deepEqual(ids('wheelchair'), ['prales']);
+  assert.deepEqual(ids('Prague 7').sort(), ['metrofarm', 'prazelenina']);
+  assert.deepEqual(ids('praha 7').sort(), ['metrofarm', 'prazelenina']);
+  assert.ok(ids('urban farm').includes('metrofarm'));
+  assert.ok(ids('mestska farma').includes('metrofarm'));
 });
 await test('compost includes MetroFarm and courtyard does not include Vidimova', () => {
   const metrofarm = gardens.find((garden) => garden.id === 'metrofarm');
@@ -98,9 +140,16 @@ await test('no fake submission confirmation or personal-data collection remains'
     new URL('../app/page.tsx', import.meta.url),
     'utf8',
   );
+  const dictionary = readFileSync(
+    new URL('../lib/i18n.ts', import.meta.url),
+    'utf8',
+  );
   assert.ok(!page.includes('Tip jsme přijali'));
+  assert.ok(!dictionary.includes('Tip jsme přijali'));
   assert.ok(!page.includes('name="gardenEmail"'));
-  assert.ok(page.includes('Přijímání tipů připravujeme.'));
+  assert.ok(page.includes('t.addDialog.title'));
+  assert.ok(dictionary.includes('Přijímání tipů připravujeme.'));
+  assert.ok(dictionary.includes('Suggestions are being prepared.'));
 });
 await test('boat corridor uses a stroked luminance mask rather than stroke inside clipPath', () => {
   const layer = readFileSync(

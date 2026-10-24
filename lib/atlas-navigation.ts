@@ -22,12 +22,21 @@ const categoryIds = [
 ];
 const filterIds = ['children', 'accessible', 'compost', 'events'];
 
+/** The canonical share parameter. Links generated before the English
+ * interface existed use it, so it stays. */
+export const GARDEN_PARAM = 'zahrada';
+/** English alias accepted on input; it is normalised to `zahrada`. */
+export const GARDEN_PARAM_ALIAS = 'garden';
+
 /** URL input is untrusted. Unknown IDs never become UI state. */
 export function readAtlasUrl(
   url: URL,
   gardenIds: readonly string[],
 ): AtlasNavigation {
-  const selected = url.searchParams.get('zahrada') ?? '';
+  const selected =
+    url.searchParams.get(GARDEN_PARAM) ??
+    url.searchParams.get(GARDEN_PARAM_ALIAS) ??
+    '';
   const category = url.searchParams.get('typ');
   return {
     query: (url.searchParams.get('q') ?? '').slice(0, 200),
@@ -41,12 +50,12 @@ export function readAtlasUrl(
   };
 }
 
-/** Preserve unrelated query parameters, but own the four atlas parameters. */
+/** Preserve unrelated query parameters, but own the atlas parameters. */
 export function writeAtlasUrl(current: URL, state: AtlasNavigation): URL {
   const url = new URL(current);
   const values: Record<string, string> = {
     q: state.query,
-    zahrada: state.selectedId,
+    [GARDEN_PARAM]: state.selectedId,
     typ: state.category ?? '',
     filtry: [...new Set(state.filters)].sort().join(','),
   };
@@ -54,12 +63,14 @@ export function writeAtlasUrl(current: URL, state: AtlasNavigation): URL {
     if (value) url.searchParams.set(key, value);
     else url.searchParams.delete(key);
   }
+  // The alias is only ever read; the canonical parameter carries the state.
+  url.searchParams.delete(GARDEN_PARAM_ALIAS);
   return url;
 }
 
 /** A garden share is independent of the sender's search and filters. */
 export function gardenShareUrl(current: URL, id: string): URL {
   const url = new URL(current.origin + current.pathname);
-  url.searchParams.set('zahrada', id);
+  url.searchParams.set(GARDEN_PARAM, id);
   return url;
 }

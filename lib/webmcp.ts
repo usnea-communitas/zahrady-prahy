@@ -25,7 +25,7 @@ export function registerGardenSearch() {
         {
           name: 'search_prague_gardens',
           description:
-            'Search the garden catalogue by Czech name, district or feature. Returns source and geographic map links. Does not submit suggestions or change the map.',
+            'Search the garden catalogue by name, district or feature, in Czech or English, ignoring diacritics. Returns descriptions in both languages, the source and a geographic map link. Does not submit suggestions or change the map.',
           inputSchema: {
             type: 'object',
             properties: { query: { type: 'string', maxLength: 200 } },
@@ -51,12 +51,15 @@ export function registerGardenSearch() {
               .map((garden) => ({
                 id: garden.id,
                 name: garden.name,
+                ...(garden.gloss ? { nameInEnglish: garden.gloss } : {}),
                 district: garden.district,
-                description: garden.description,
+                area: garden.area.en,
+                description: garden.description.en,
+                descriptionInCzech: garden.description.cs,
                 source: garden.sourceUrl,
                 mapUrl: navigationUrl(garden),
                 locationNote:
-                  garden.locationStatus ??
+                  garden.locationStatus?.en ??
                   'Public-source coordinates; entrance and access not independently verified.',
               }));
           },
