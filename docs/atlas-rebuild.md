@@ -21,7 +21,7 @@ Preserves the supplied palette, illustrated Prague, 13 garden illustrations, mus
 - Device-local postcard geometry preference, smaller unobtrusive default and uncropped framing.
 - SVG boat corridor changed from a stroked clipPath to a luminance mask.
 - Honest pending-suggestions dialog, with no form or false success state.
-- Source-backed visit panel in each garden detail: “Návštěva”, “Kdy přijít”, “Vstup”, optional location/participation notes, check date and direct source links. Missing schedules are shown honestly instead of guessed.
+- Source-backed visit panel in each garden detail: “Visiting”, “When to come”, “Access”, optional location/participation notes, check date and direct source links. Missing schedules are shown honestly instead of guessed.
 - Scrollable detail panel so longer visit notes and source links remain reachable above the glass footer.
 - Focus return now goes to the list item that opened a garden (with the marker as fallback). Fullscreen failure is announced through an `aria-live` status instead of failing silently.
 - Feature-detected read-only WebMCP catalogue search. No supported browser WebMCP validation context was used; do not claim its integration was verified.
@@ -34,13 +34,19 @@ Desktop browser QA performed at 1440 × 900: maximum zoom, Prales/Prokopka selec
 
 Selection/camera behavior was reviewed with Astra Ultra: preserve zoom, reveal the selected marker inside the unobstructed area, do not override subsequent manual panning, and keep camera motion out of URL history. Search/category/feature filters now round-trip through the URL together; shared garden links intentionally omit the sender's filters.
 
-Next independent increments: periodic source refresh (the current check date is 6. 9. 2026); approved suggestions with private moderation when the owner enables storage; curated walking routes based on verified public access. Mobile remains deferred.
+Next independent increments: periodic source refresh (the current check date is 6 September 2026); approved suggestions with private moderation when the owner enables storage; curated walking routes based on verified public access. Mobile remains deferred.
 
-## Opravy — 2026-09-23
+## Fixes — 2026-09-23
 
-- Zvuková krajina se spouští jen tlačítkem s notou (žádné automatické spuštění ani start po prvním kliknutí), audio má `preload="none"`.
-- Minimalizace nebo přesunutí pohlednice už neposouvá mapu (rezervované místo v řádku s nadpisem).
-- Pohlednice je 107 kB WebP místo 1,8 MB PNG; náhled pro sociální sítě je 239 kB JPEG.
-- Během načítání ilustrované mapy se zobrazí rozmazaný náhled (1,5 kB) a „Načítám mapu…“.
-- Telefon (≤ 720 px, `app/mobile.css`): mapa přes celou obrazovku, detail zahrady a seznam jako spodní panely, tlačítko „Otevřít v mapě“ vždy dole na dosah, vybraná zahrada zůstává nad panelem; na výšku se mapa otevírá přiblížená a posouvá se tažením.
-- Úklid: odstraněny nepoužité mapy (`prague-garden-map.webp`, `map/prague-illustrated-v2.webp`), nepoužité komponenty `components/ui` a závislosti (recharts, date-fns, cmdk, embla, input-otp, react-day-picker, react-resizable-panels, @shadcn/react).
+- The soundscape starts only from the note button (no autoplay and no start on the first click anywhere); the audio element has `preload="none"`.
+- Minimising or moving the postcard no longer shifts the map (the title row reserves its space).
+- The postcard is a 107 kB WebP instead of a 1.8 MB PNG; the social preview is a 239 kB JPEG.
+- While the illustrated map loads, a blurred 1.5 kB preview and a "Loading the map…" notice are shown.
+- Phone layout (≤ 720 px, `app/mobile.css`): the map fills the screen, the garden detail and the list open as bottom sheets, the "Open in a map" button stays within reach at the bottom, the selected garden stays above the sheet; in portrait the map opens zoomed in and is panned by dragging.
+- Clean-up: removed unused maps (`prague-garden-map.webp`, `map/prague-illustrated-v2.webp`), unused `components/ui` components and dependencies (recharts, date-fns, cmdk, embla, input-otp, react-day-picker, react-resizable-panels, @shadcn/react).
+
+## Localisation — 2026-10-24
+
+- English is the default interface language; Czech is available through the CS/EN switcher in the header and remembered in the browser (`localStorage` key `zahrady.lang`). See `lib/i18n.ts` and `components/i18n/`.
+- Catalogue content (`lib/gardens.ts`, `lib/garden-visits.ts`) is bilingual at the data level; garden names, neighbourhoods and street addresses stay in Czech as proper nouns. Where the Czech admits a gap, the English admits the same gap.
+- Share links keep `?zahrada=`; `?garden=` is accepted as an alias.

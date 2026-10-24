@@ -2,7 +2,7 @@
 
 <!-- impeccable:product-schema 1 -->
 
-> Návrh připravený z toho, co Martin o projektu řekl, a z dokumentace v repozitáři. Zkontroluj a oprav, co nesedí.
+> Drafted from what the owner said about the project and from the documentation in the repository. Check it and correct what does not fit.
 
 ## Platform
 
@@ -10,44 +10,46 @@ web
 
 ## Users
 
-Lidé, kteří chtějí sami objevovat pražské komunitní zahrady a městskou přírodu. Organizované procházky ani workshopy nebyly zvoleny jako cíl; atlas slouží samostatnému prozkoumávání.
+People who want to discover Prague's community gardens and urban nature on their own. Guided walks and workshops were not chosen as a goal; the atlas serves independent exploration. The interface is in English by default, with Czech fully available.
 
 ## Product Purpose
 
-Ilustrovaný interaktivní atlas 13 pražských komunitních zahrad. Projekt spolku Usnea communitas, z. s.
+An illustrated interactive atlas of 13 Prague community gardens. A project of Usnea communitas, z. s., a Czech nonprofit association.
 
 ## Positioning
 
-Pohádkově ilustrovaná mapa Prahy, ve které je každá praktická informace o návštěvě doložená zdrojem a datem ověření. Chybějící údaje se poctivě ukazují jako chybějící, nikdy se nedomýšlejí.
+A storybook-style illustrated map of Prague in which every practical piece of visiting information is backed by a source and a verification date. Missing data is honestly shown as missing, never guessed.
 
 ## Operating Context
 
-- Primárně počítač; telefonní rozložení existuje (`app/mobile.css`, opravy 2026-09-23).
-- Mapa, vyhledávání bez ohledu na diakritiku, filtry kategorií, sdílitelné odkazy `?zahrada=`.
-- Zvuková krajina se spouští jen tlačítkem s notou, nikdy automaticky.
+- Primarily desktop; a phone layout exists (`app/mobile.css`, fixes of 2026-09-23).
+- Map, diacritics-insensitive search in both languages, category filters, shareable `?zahrada=` links (`?garden=` accepted as an alias).
+- The soundscape starts only from the note button, never automatically.
+- Language: English by default, Czech via the CS/EN switcher in the header; the choice is remembered in the browser (`zahrady.lang`), nothing is sent anywhere.
 
 ## Capabilities and Constraints
 
-- Zpětná vazba a sběr osobních údajů jsou na Martinovo přání vypnuté. Formulář návrhů zůstává poctivě nedostupný, bez falešného „odesláno“.
-- Bez databáze a bez předplatného.
-- Katalog: `lib/gardens.ts`. Praktické údaje o návštěvě: `lib/garden-visits.ts`, každý se zdrojem a datem kontroly. `not-found` znamená „pravidelný rozvrh nenalezen“, ne „zavřeno“.
-- Pozice zahrad na ilustraci (`artPositions`) jsou redakční umístění, ne navigace. Pro cestu slouží odkazy na skutečnou mapu.
-- Ovládání klávesnicí, návrat fokusu a hlášení přes `aria-live` jsou implementované a mají zůstat zachované.
+- Feedback and personal-data collection are switched off at the owner's request. The suggestion form stays honestly unavailable, with no false "sent" state.
+- No database and no subscription.
+- Catalogue: `lib/gardens.ts`. Practical visiting information: `lib/garden-visits.ts`, each fact with a source and a check date, in both languages. `not-found` means "no regular schedule found", not "closed".
+- Garden positions on the illustration (`artPositions`) are editorial placements, not navigation. Links to a real map serve for the journey.
+- Keyboard navigation, focus return and `aria-live` announcements are implemented and must be preserved.
 
 ## Brand Commitments
 
-- Stávající vizuální systém je zdokumentovaný v `design/README.md` a `design/structured-*`. Ilustrovaná Praha, 13 ilustrací zahrad, hudba a animace se zachovávají.
-- Ilustrace jsou umělecké ztvárnění, ne dokumentární fotografie, a tak se i označují.
-- Patička si drží průhlednost, o kterou Martin požádal.
+- The existing visual system is documented in `design/README.md` and `design/structured-*`. The illustrated Prague, the 13 garden illustrations, the music and the animation are preserved.
+- Illustrations are artistic renderings, not documentary photographs, and are labelled as such.
+- The footer keeps the transparency the owner asked for.
+- "Zahrady Prahy" stays the brand name in both languages, with "Gardens of Prague" alongside it in English.
 
 ## Evidence on Hand
 
-- Ilustrace a mapy v `public/`, provenience a prompty v `docs/visual-generation-prompts.md`.
-- Ověřené údaje o návštěvách (datum kontroly 6. 9. 2026).
-- Žádné reference, citace návštěvníků ani statistiky neexistují; nevymýšlet je.
+- Illustrations and maps in `public/`; provenance and prompts in `docs/visual-generation-prompts.md`; media licence in `LICENSE-ASSETS.md`.
+- Verified visiting information (check date 6 September 2026).
+- No testimonials, visitor quotes or statistics exist; do not invent them.
 
 ## Product Principles
 
-1. Pravdivost před plností: radši přiznaný chybějící údaj než odhad.
-2. Ilustrace je zážitek, ne navigační podklad.
-3. Klid: nic se nespouští samo, nic nesbírá data.
+1. Truthfulness over completeness: an admitted missing value is better than a guess.
+2. The illustration is an experience, not a navigation layer.
+3. Calm: nothing starts by itself, nothing collects data.

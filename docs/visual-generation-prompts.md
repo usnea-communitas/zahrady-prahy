@@ -1,10 +1,20 @@
 # Visual generation provenance
 
+This file records how the project's illustrations and the soundscape were
+made: the tool, the mode and the exact production prompt for each asset.
+It exists so that the media's origin is transparent and reproducible. The
+licence for all of these assets is in [`LICENSE-ASSETS.md`](../LICENSE-ASSETS.md)
+(CC BY-NC-SA 4.0).
+
+Intermediate working files (`work/`) and the tools' original output files
+are deliberately not committed; only converted production assets live in
+`public/`.
+
 ## Production Prague background
 
 - Mode: built-in image generation, image edit.
 - Input guide: `work/prague-storybook-river-guide.png`, created from the previous storybook artwork and the exact OpenStreetMap Vltava path in `lib/map/geometry.generated.ts`.
-- Original generated file: `C:/Users/marti/.codex/generated_images/01a05212-8f96-7fc1-8602-4ca6bbf902da/exec-71005987-d02a-4a11-8494-347646d87b43.png`.
+- Original generated file: kept outside the repository (the generation tool's local output folder); only the converted production asset is committed.
 - Workspace production asset: `public/map/prague-storybook-vltava-v5.webp`.
 
 Exact production prompt:
@@ -41,7 +51,7 @@ Create a seamless-loop instrumental soundscape for an illustrated interactive ma
 
 - Mode: built-in image generation, image edit/outpainting.
 - Edit target: `public/map/prague-storybook-vltava-v5.webp`.
-- Original generated file: `C:/Users/marti/OneDrive/Dokumenty/ChatGPT/Neziskovka Usnea/map-candidates/prague-storybook-vltava-zoomed-out-25pct-v1.png`.
+- Original generated file: kept outside the repository (`prague-storybook-vltava-zoomed-out-25pct-v1.png` in the owner's map-candidates folder); only the converted production asset is committed.
 - Workspace production asset: `public/map/prague-storybook-vltava-v6-wide.webp`.
 
 Exact production prompt:
@@ -63,7 +73,7 @@ Avoid: labels, lettering, captions, symbols, pins, UI, buttons, borders, frames,
 ## Animated tree cluster overlay
 
 - Mode: built-in image generation, transparent sprite.
-- Original generated file: `C:/Users/marti/.codex/generated_images/01a05bb7-51f7-79d2-b594-df56eb0d5890/exec-15a8c69f-39c4-4bec-8314-2d3c255f2484.png`.
+- Original generated file: kept outside the repository (the generation tool's local output folder); only the resized production asset is committed.
 - Workspace production asset: `public/map/motion/tree-cluster-v1.png` (mechanically resized to 384 × 256 px, RGBA preserved).
 
 Exact production prompt:
