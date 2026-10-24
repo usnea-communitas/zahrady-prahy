@@ -183,6 +183,12 @@ body {
 .header-sound.is-playing::before {
   display: none;
 }
+.preview-gloss {
+  margin: -8px 0 12px !important;
+  color: var(--color-graphite) !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
 .garden-directory,
 .garden-preview,
 .map-legend,
@@ -779,6 +785,45 @@ body {
 .filter-tray button:hover,
 .filter-tray button.is-active {
   background: rgba(255, 255, 255, 0.64) !important;
+}
+/* Language switcher: one capsule with two segments, same bone surface and
+ * hairline as the other header controls; the active language is filled. */
+.language-switcher {
+  display: inline-flex;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: var(--radius-buttons);
+  background: rgba(231, 229, 228, 0.56);
+  box-shadow: 0 10px 30px rgba(39, 26, 0, 0.1);
+  backdrop-filter: blur(20px) saturate(1.12);
+  -webkit-backdrop-filter: blur(20px) saturate(1.12);
+  height: var(--gallery-control-size);
+  box-sizing: border-box;
+  align-items: center;
+}
+.header-actions .language-switcher button {
+  height: calc(var(--gallery-control-size) - 6px) !important;
+  min-width: 42px;
+  padding-inline: 12px !important;
+  border: 0 !important;
+  border-radius: calc(var(--radius-buttons) - 2px);
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  color: var(--color-graphite) !important;
+  font: 500 12px var(--font-helvetica-now);
+  letter-spacing: 0.04em;
+}
+.header-actions .language-switcher button:hover {
+  background: rgba(255, 255, 255, 0.64) !important;
+  color: var(--color-ink) !important;
+}
+.header-actions .language-switcher button[aria-pressed='true'] {
+  background: var(--color-graphite) !important;
+  color: var(--color-paper) !important;
 }
 .intro-card {
   position: fixed;

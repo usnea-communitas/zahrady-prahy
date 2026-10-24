@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { Maximize2, Minimize2, Minus, Plus, RotateCcw } from 'lucide-react';
 
+import { useT } from '@/components/i18n/LocaleProvider';
 import {
   boundMapView,
   coverZoom,
@@ -88,6 +89,7 @@ export function MapViewport({
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
 }) {
+  const t = useT();
   const [view, setView] = useState(initialView);
   const [maxZoom, setMaxZoom] = useState(2.4);
   const placed = useRef(false);
@@ -161,8 +163,8 @@ export function MapViewport({
       <div
         className="map-plane"
         role="application"
-        aria-roledescription="interaktivní mapa"
-        aria-label="Mapa: šipkami posun, plus a minus přiblížení, klávesou 0 celá mapa"
+        aria-roledescription={t.map.planeRole}
+        aria-label={t.map.planeLabel}
         tabIndex={0}
         style={
           {
@@ -233,45 +235,43 @@ export function MapViewport({
         {children}
       </div>
       <fieldset className="map-navigation">
-        <legend className="sr-only">Přiblížení mapy</legend>
+        <legend className="sr-only">{t.map.zoomLegend}</legend>
         <button
           type="button"
           onClick={() => zoomBy(-0.2)}
           disabled={view.zoom <= 1}
-          aria-label="Oddálit mapu"
+          aria-label={t.map.zoomOut}
         >
           <Minus />
         </button>
         <button
           type="button"
           onClick={() => onToggleFullscreen?.()}
-          title={
-            isFullscreen
-              ? 'Vrátit mapu do rámu'
-              : 'Zobrazit celou mapu přes celou obrazovku'
-          }
+          title={isFullscreen ? t.map.fullscreenExit : t.map.fullscreenEnter}
           aria-label={
-            isFullscreen
-              ? 'Vrátit mapu do rámu'
-              : 'Zobrazit celou mapu přes celou obrazovku'
+            isFullscreen ? t.map.fullscreenExit : t.map.fullscreenEnter
           }
         >
           {isFullscreen ? <Minimize2 /> : <Maximize2 />}
-          <span>{isFullscreen ? 'Vrátit mapu' : 'Celá mapa'}</span>
+          <span>
+            {isFullscreen
+              ? t.map.fullscreenExitShort
+              : t.map.fullscreenEnterShort}
+          </span>
         </button>
         <button
           type="button"
           onClick={() => zoomBy(0.2)}
           disabled={view.zoom >= maxZoom - 0.001}
-          aria-label="Přiblížit mapu"
+          aria-label={t.map.zoomIn}
         >
           <Plus />
         </button>
         <button
           type="button"
           onClick={() => setView(homeView())}
-          aria-label="Vrátit přiblížení a posun na výchozí přehled"
-          title="Výchozí přehled (klávesa 0)"
+          aria-label={t.map.resetView}
+          title={t.map.resetViewTitle}
         >
           <RotateCcw />
         </button>

@@ -51,6 +51,8 @@ import {
 } from '@/components/ui/dialog';
 import { MapMotionLayer } from '@/components/map/MapMotionLayer';
 import { MapViewport } from '@/components/map/MapViewport';
+import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
+import { useLocale } from '@/components/i18n/LocaleProvider';
 import { registerGardenSearch } from '@/lib/webmcp';
 import {
   emptyNavigation,
@@ -60,22 +62,25 @@ import {
   type AtlasNavigation,
 } from '@/lib/atlas-navigation';
 import {
+  categoryLabels,
   gardens,
   filterOptions,
   filterGardenCatalogue,
   navigationUrl,
+  tagLabels,
   type GardenCategory,
   type FilterId,
 } from '@/lib/gardens';
 import type { GardenVisit } from '@/lib/garden-visits';
+import { formatDate } from '@/lib/i18n';
 
-const gardenCategoryMeta = {
-  community: { label: 'Komunitní zahrada', icon: Sprout },
-  'urban-farm': { label: 'Městská farma', icon: Tractor },
-  education: { label: 'Vzdělávací zahrada', icon: School },
-  courtyard: { label: 'Vnitroblok', icon: House },
-  nature: { label: 'Přírodní zahrada', icon: Trees },
-} satisfies Record<GardenCategory, { label: string; icon: typeof Sprout }>;
+const gardenCategoryIcons = {
+  community: Sprout,
+  'urban-farm': Tractor,
+  education: School,
+  courtyard: House,
+  nature: Trees,
+} satisfies Record<GardenCategory, typeof Sprout>;
 
 const gardenCategoryOrder: GardenCategory[] = [
   'community',
@@ -126,6 +131,7 @@ function uniqueVisitSources(visit: GardenVisit) {
 
 export default function Home() {
   useEffect(registerGardenSearch, []);
+  const { locale, t } = useLocale();
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioFadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const markerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -143,7 +149,9 @@ export default function Home() {
     [navigation.filters],
   );
   const [listOpen, setListOpen] = useState(false);
-  const [shareStatus, setShareStatus] = useState('');
+  const [shareStatus, setShareStatus] = useState<
+    'copied' | 'fallback' | ''
+  >('');
   const [revealRequest, setRevealRequest] = useState(0);
   const [preferencesReady, setPreferencesReady] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -163,7 +171,9 @@ export default function Home() {
   const [postcardSlotHeight, setPostcardSlotHeight] = useState<number | null>(
     null,
   );
-  const [fullscreenStatus, setFullscreenStatus] = useState('');
+  const [fullscreenStatus, setFullscreenStatus] = useState<
+    'on' | 'failed' | ''
+  >('');
 
   const filteredGardens = useMemo(
     () => filterGardenCatalogue(query, navigation.filters, categoryFilter),
@@ -306,9 +316,9 @@ export default function Home() {
     );
     try {
       await navigator.clipboard.writeText(url.href);
-      setShareStatus('Odkaz zkopírován.');
+      setShareStatus('copied');
     } catch {
-      setShareStatus('Odkaz můžete zkopírovat z adresního řádku.');
+      setShareStatus('fallback');
     }
   }
 
@@ -379,9 +389,7 @@ export default function Home() {
     const syncFullscreen = () => {
       const isFullscreen = document.fullscreenElement === mapCanvasRef.current;
       setMapFullscreen(isFullscreen);
-      setFullscreenStatus(
-        isFullscreen ? 'Mapa je zobrazena přes celou obrazovku.' : '',
-      );
+      setFullscreenStatus(isFullscreen ? 'on' : '');
     };
     document.addEventListener('fullscreenchange', syncFullscreen);
     syncFullscreen();
@@ -417,9 +425,9 @@ export default function Home() {
     return () => observer.disconnect();
   }, [introMinimized, introGeometry]);
 
-  useEffect(() => {
-    // the map may finish loading before hydration, when onLoad has already fired
-    const art = document.querySelector<HTMLImageElement>('.map-art');
+  // The map may finish loading before hydration, when onLoad has already
+  // fired; the ref callback sees the element's state as soon as it mounts.
+  const mapArtRef = useCallback((art: HTMLImageElement | null) => {
     if (art?.complete && art.naturalWidth > 0) setMapLoaded(true);
   }, []);
 
@@ -724,9 +732,7 @@ export default function Home() {
       if (document.fullscreenElement === map) await document.exitFullscreen();
       else await map.requestFullscreen();
     } catch {
-      setFullscreenStatus(
-        'Celou obrazovku se nepodařilo otevřít. Zkuste to prosím znovu.',
-      );
+      setFullscreenStatus('failed');
     }
   }
 
@@ -739,11 +745,10 @@ export default function Home() {
       }`}
       ref={introCardRef}
       style={introStyle}
-      aria-label="Pohlednice Zahrady Prahy"
+      aria-label={t.intro.label}
     >
       <span className="sr-only" id="intro-controls-help">
-        Šipkami ovládáte jemný posun nebo změnu velikosti. S klávesou Shift se
-        panel mění po větších krocích.
+        {t.intro.controlsHelp}
       </span>
       <button
         className="intro-drag-handle"
@@ -754,9 +759,9 @@ export default function Home() {
         onPointerCancel={endIntroInteraction}
         onLostPointerCapture={endIntroInteraction}
         onKeyDown={(event) => adjustIntroWithKeyboard(event, 'move')}
-        aria-label="Přesunout pohlednici po mapě"
+        aria-label={t.intro.move}
         aria-describedby="intro-controls-help"
-        title="Přesunout"
+        title={t.intro.moveShort}
       >
         <Move />
       </button>
@@ -765,7 +770,7 @@ export default function Home() {
         className="intro-postcard"
         type="button"
         onClick={() => setAboutOpen(true)}
-        aria-label="Otevřít příběh mapy"
+        aria-label={t.intro.openStory}
         tabIndex={introMinimized ? -1 : 0}
       >
         <span className="intro-visual" aria-hidden="true">
@@ -776,11 +781,7 @@ export default function Home() {
         className="intro-minimize"
         type="button"
         onClick={() => setIntroMinimized((minimized) => !minimized)}
-        aria-label={
-          introMinimized
-            ? 'Rozbalit pohlednici Zahrady Prahy'
-            : 'Minimalizovat pohlednici Zahrady Prahy'
-        }
+        aria-label={introMinimized ? t.intro.expand : t.intro.minimize}
         aria-expanded={!introMinimized}
         aria-controls="intro-postcard"
       >
@@ -796,26 +797,22 @@ export default function Home() {
           onPointerCancel={endIntroInteraction}
           onLostPointerCapture={endIntroInteraction}
           onKeyDown={(event) => adjustIntroWithKeyboard(event, 'resize')}
-          aria-label="Změnit velikost pohlednice"
+          aria-label={t.intro.resize}
           aria-describedby="intro-controls-help"
-          title="Změnit velikost"
+          title={t.intro.resizeShort}
         >
           <MoveDiagonal2 />
         </button>
       )}
       {!introMinimized && (
-        <div
-          className="map-legend intro-legend"
-          aria-label="Legenda typů zahrad"
-        >
+        <div className="map-legend intro-legend" aria-label={t.intro.legendLabel}>
           <div className="legend-heading">
             <Flower2 aria-hidden="true" />
-            <strong>Charakter místa</strong>
+            <strong>{t.intro.legendTitle}</strong>
           </div>
           <ul>
             {gardenCategoryOrder.map((categoryId) => {
-              const category = gardenCategoryMeta[categoryId];
-              const CategoryIcon = category.icon;
+              const CategoryIcon = gardenCategoryIcons[categoryId];
 
               return (
                 <li key={categoryId}>
@@ -836,7 +833,7 @@ export default function Home() {
                     >
                       <CategoryIcon />
                     </span>
-                    <span>{category.label}</span>
+                    <span>{categoryLabels[categoryId][locale]}</span>
                     <small>
                       {
                         gardens.filter(
@@ -849,9 +846,7 @@ export default function Home() {
               );
             })}
           </ul>
-          <p className="atlas-note">
-            Ilustrovaný atlas · polohy na kresbě jsou orientační.
-          </p>
+          <p className="atlas-note">{t.intro.note}</p>
         </div>
       )}
     </aside>
@@ -868,7 +863,7 @@ export default function Home() {
           if (selectedGarden) setRevealRequest((request) => request + 1);
         }}
       >
-        Přeskočit mapu a zobrazit seznam zahrad
+        {t.skipLink}
       </a>
 
       <section
@@ -876,7 +871,7 @@ export default function Home() {
         className={`map-canvas${selectedGarden ? ' has-selection' : ''}${
           filtersOpen ? ' filters-open' : ''
         }${mapFullscreen ? ' is-map-fullscreen' : ''}`}
-        aria-label="Ilustrovaná mapa Prahy"
+        aria-label={t.map.canvasLabel}
       >
         <MapViewport
           focusTarget={
@@ -898,9 +893,10 @@ export default function Home() {
             />
           )}
           <Image
+            ref={mapArtRef}
             className="map-art"
             src="/map/prague-storybook-vltava-v6-wide.webp"
-            alt="Široký pohádkově ilustrovaný pohled na Prahu se zvětšenými památkami a Vltavou"
+            alt={t.map.artAlt}
             fill
             priority
             sizes="100vw"
@@ -916,12 +912,11 @@ export default function Home() {
           />
 
           <fieldset className="garden-markers">
-            <legend className="sr-only">Zahrady na mapě</legend>
+            <legend className="sr-only">{t.map.markersLegend}</legend>
             {filteredGardens.map((garden) => {
               const isSelected = selectedId === garden.id;
               const position = garden.artPosition;
-              const category = gardenCategoryMeta[garden.category];
-              const CategoryIcon = category.icon;
+              const CategoryIcon = gardenCategoryIcons[garden.category];
 
               return (
                 <button
@@ -940,7 +935,10 @@ export default function Home() {
                     } as CSSProperties
                   }
                   onClick={() => selectGarden(garden.id)}
-                  aria-label={`${garden.name}, ${garden.area}, otevřít detail`}
+                  aria-label={t.map.markerLabel(
+                    garden.name,
+                    garden.area[locale],
+                  )}
                   aria-pressed={isSelected}
                 >
                   <span className="marker-aura" aria-hidden="true" />
@@ -950,7 +948,7 @@ export default function Home() {
                   <span className="marker-label">
                     <strong>{garden.name}</strong>
                     <small>
-                      {garden.district} · {category.label}
+                      {garden.district} · {categoryLabels[garden.category][locale]}
                     </small>
                   </span>
                 </button>
@@ -960,23 +958,27 @@ export default function Home() {
         </MapViewport>
 
         {!mapLoaded && (
-          <div className="map-loading" role="status">
-            <LoaderCircle aria-hidden="true" /> Načítám mapu…
-          </div>
+          <output className="map-loading">
+            <LoaderCircle aria-hidden="true" /> {t.map.loading}
+          </output>
         )}
 
         <output className="sr-only" aria-live="polite">
-          {fullscreenStatus}
+          {fullscreenStatus === 'on'
+            ? t.map.fullscreenOn
+            : fullscreenStatus === 'failed'
+              ? t.map.fullscreenFailed
+              : ''}
         </output>
 
         <header className="map-header">
-          <a className="brand" href="#top" aria-label="Zahrady Prahy, domů">
+          <a className="brand" href="#top" aria-label={t.header.home}>
             <span className="brand-mark" aria-hidden="true">
               <Leaf />
             </span>
             <span>
-              <strong>Zahrady</strong>
-              <small>Prahy</small>
+              <strong>{t.header.brand}</strong>
+              <small>{t.header.brandSub}</small>
             </span>
           </a>
 
@@ -990,40 +992,34 @@ export default function Home() {
                 setIntroMinimized(true);
                 if (selectedGarden) setRevealRequest((request) => request + 1);
               }}
-              placeholder="Hledat zahradu nebo čtvrť…"
-              aria-label="Hledat zahradu nebo čtvrť"
+              placeholder={t.header.searchPlaceholder}
+              aria-label={t.header.searchLabel}
             />
             {query ? (
               <button
                 className="clear-search"
                 type="button"
                 onClick={() => updateNavigation({ query: '' })}
-                aria-label="Vymazat hledání"
+                aria-label={t.header.clearSearch}
               >
                 <X />
               </button>
             ) : (
               <span className="search-count">
-                {filteredGardens.length}{' '}
-                {filteredGardens.length === 1
-                  ? 'místo'
-                  : filteredGardens.length >= 2 && filteredGardens.length <= 4
-                    ? 'místa'
-                    : 'míst'}
+                {t.header.placesCount(filteredGardens.length)}
               </span>
             )}
           </search>
 
           <div className="header-actions">
+            <LanguageSwitcher />
             <Button
               className="glass-button"
               variant="outline"
               size="lg"
               aria-expanded={listOpen}
               aria-controls="garden-list"
-              aria-label={
-                listOpen ? 'Zavřít seznam zahrad' : 'Zobrazit seznam zahrad'
-              }
+              aria-label={listOpen ? t.header.listClose : t.header.listOpen}
               onClick={() => {
                 setListOpen((open) => !open);
                 setIntroMinimized(true);
@@ -1031,24 +1027,16 @@ export default function Home() {
               }}
             >
               <List />
-              <span>Seznam</span>
+              <span>{t.header.list}</span>
             </Button>
             <button
               className={`header-sound is-${soundState}`}
               type="button"
               onClick={toggleSound}
-              aria-label={
-                isSoundPlaying
-                  ? 'Pozastavit zvukovou krajinu Zahrady nad Vltavou'
-                  : 'Přehrát zvukovou krajinu Zahrady nad Vltavou'
-              }
+              aria-label={isSoundPlaying ? t.sound.pause : t.sound.play}
               aria-pressed={isSoundPlaying}
               aria-busy={soundState === 'loading'}
-              title={
-                isSoundPlaying
-                  ? 'Pozastavit zvukovou krajinu'
-                  : 'Přehrát zvukovou krajinu'
-              }
+              title={isSoundPlaying ? t.sound.pauseShort : t.sound.playShort}
             >
               <Music2 className="sound-note" aria-hidden="true" />
               <span className="sound-action" aria-hidden="true">
@@ -1061,7 +1049,7 @@ export default function Home() {
                 )}
               </span>
             </button>
-            {/* Instrumentální zvuková krajina neobsahuje mluvené slovo. */}
+            {/* The instrumental soundscape contains no spoken word, so there is nothing to caption. */}
             {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
             <audio
               ref={audioRef}
@@ -1088,11 +1076,11 @@ export default function Home() {
             </audio>
             <output className="sr-only" aria-live="polite">
               {soundState === 'loading'
-                ? 'Načítám zvukovou krajinu…'
+                ? t.sound.loading
                 : soundState === 'error'
-                  ? 'Zvuk se nepodařilo přehrát.'
+                  ? t.sound.error
                   : isSoundPlaying
-                    ? 'Zvuková krajina hraje.'
+                    ? t.sound.playing
                     : ''}
             </output>
             <Button
@@ -1102,12 +1090,10 @@ export default function Home() {
               onClick={() => setFiltersOpen((open) => !open)}
               aria-expanded={filtersOpen}
               aria-controls="garden-filters"
-              aria-label={`Filtry zahrad${
-                activeFilters.size ? `, ${activeFilters.size} aktivní` : ''
-              }`}
+              aria-label={t.header.filtersLabel(activeFilters.size)}
             >
               <SlidersHorizontal />
-              <span>Filtry</span>
+              <span>{t.header.filters}</span>
               {activeFilters.size > 0 && (
                 <span className="active-filter-count">
                   {activeFilters.size}
@@ -1118,10 +1104,10 @@ export default function Home() {
               className="add-button"
               size="lg"
               onClick={() => setAddOpen(true)}
-              aria-label="Přidávání zahrad připravujeme"
+              aria-label={t.header.addLabel}
             >
               <Plus />
-              <span>Přidat místo · brzy</span>
+              <span>{t.header.add}</span>
             </Button>
           </div>
         </header>
@@ -1131,7 +1117,7 @@ export default function Home() {
           id="garden-filters"
           aria-hidden={!filtersOpen}
         >
-          <span className="filter-title">Ukázat místa</span>
+          <span className="filter-title">{t.filterTray.title}</span>
           {filterOptions.map((option) => {
             const isActive = activeFilters.has(option.id);
             return (
@@ -1144,7 +1130,7 @@ export default function Home() {
                 tabIndex={filtersOpen ? 0 : -1}
               >
                 {isActive && <Check />}
-                {option.label}
+                {option.label[locale]}
               </button>
             );
           })}
@@ -1155,7 +1141,7 @@ export default function Home() {
               onClick={() => updateNavigation({ filters: [] })}
               tabIndex={filtersOpen ? 0 : -1}
             >
-              Zrušit vše
+              {t.filterTray.clearAll}
             </button>
           )}
         </div>
@@ -1163,14 +1149,14 @@ export default function Home() {
         {filteredGardens.length === 0 && (
           <output className="empty-state" aria-live="polite">
             <Sprout aria-hidden="true" />
-            <strong>Nic jsme nenašli.</strong>
-            <span>Zkuste jiný název nebo čtvrť.</span>
+            <strong>{t.empty.title}</strong>
+            <span>{t.empty.hint}</span>
             <button
               type="button"
               className="text-action"
               onClick={resetFilters}
             >
-              Zrušit hledání a filtry
+              {t.empty.reset}
             </button>
           </output>
         )}
@@ -1186,7 +1172,7 @@ export default function Home() {
               className="preview-close"
               type="button"
               onClick={closePreview}
-              aria-label="Zavřít detail zahrady"
+              aria-label={t.preview.close}
             >
               <X />
             </button>
@@ -1194,14 +1180,16 @@ export default function Home() {
               <div className="preview-illustration">
                 <Image
                   src={selectedGarden.illustration}
-                  alt={`Umělecká ilustrace zahrady ${selectedGarden.name}, nikoli přesný plán`}
+                  alt={t.preview.illustrationAlt(selectedGarden.name)}
                   fill
                   sizes="420px"
                 />
                 <span className="preview-glyph">
                   <Leaf />
                 </span>
-                <span className="illustration-caption">Umělecká ilustrace</span>
+                <span className="illustration-caption">
+                  {t.preview.illustrationCaption}
+                </span>
               </div>
               <div className="preview-body">
                 <div className="preview-meta">
@@ -1209,69 +1197,79 @@ export default function Home() {
                     <MapPin /> {selectedGarden.district}
                   </span>
                   <span className="verified-dot">
-                    {selectedGarden.locationStatus ?? 'veřejný zdroj'}
+                    {selectedGarden.locationStatus?.[locale] ??
+                      t.preview.publicSource}
                   </span>
                 </div>
-                <h2>{selectedGarden.name}</h2>
+                <h2 lang="cs">{selectedGarden.name}</h2>
+                {locale !== 'cs' && selectedGarden.gloss && (
+                  <p className="preview-gloss">{selectedGarden.gloss}</p>
+                )}
                 <button
                   type="button"
                   className="reveal-garden"
                   onClick={() => setRevealRequest((request) => request + 1)}
                 >
-                  <MapPin /> Ukázat na kreslené mapě
+                  <MapPin /> {t.preview.showOnMap}
                 </button>
-                <p>{selectedGarden.description}</p>
-                <div className="tag-list" aria-label="Vlastnosti zahrady">
+                <p>{selectedGarden.description[locale]}</p>
+                <div className="tag-list" aria-label={t.preview.tagsLabel}>
                   {selectedGarden.tags.map((tag) => (
-                    <span key={tag}>{tag}</span>
+                    <span key={tag}>{tagLabels[tag][locale]}</span>
                   ))}
                 </div>
                 {selectedVisit && (
                   <div className="visit-note">
                     <div className="visit-note-heading">
-                      <strong>Návštěva</strong>
+                      <strong>{t.preview.visit}</strong>
                       <span>
-                        Zdroje zkontrolovány {selectedVisit.access.checkedAt}
+                        {t.preview.sourcesChecked(
+                          formatDate(selectedVisit.access.checkedAt, locale),
+                        )}
                       </span>
                     </div>
                     <dl className="visit-facts">
                       <div className="visit-fact">
-                        <dt>Kdy přijít</dt>
+                        <dt>{t.preview.when}</dt>
                         <dd>
-                          {selectedVisit.hours.text}
+                          {selectedVisit.hours.text[locale]}
                           {selectedVisit.hours.appliesTo && (
-                            <small>{selectedVisit.hours.appliesTo}</small>
+                            <small>{selectedVisit.hours.appliesTo[locale]}</small>
                           )}
                         </dd>
                       </div>
                       <div className="visit-fact">
-                        <dt>Vstup</dt>
+                        <dt>{t.preview.access}</dt>
                         <dd>
-                          {selectedVisit.access.text}
+                          {selectedVisit.access.text[locale]}
                           {selectedVisit.access.appliesTo && (
-                            <small>{selectedVisit.access.appliesTo}</small>
+                            <small>
+                              {selectedVisit.access.appliesTo[locale]}
+                            </small>
                           )}
                         </dd>
                       </div>
                       {selectedVisit.entrance && (
                         <div className="visit-fact">
-                          <dt>Kde</dt>
+                          <dt>{t.preview.where}</dt>
                           <dd>
-                            {selectedVisit.entrance.text}
+                            {selectedVisit.entrance.text[locale]}
                             {selectedVisit.entrance.appliesTo && (
-                              <small>{selectedVisit.entrance.appliesTo}</small>
+                              <small>
+                                {selectedVisit.entrance.appliesTo[locale]}
+                              </small>
                             )}
                           </dd>
                         </div>
                       )}
                       {selectedVisit.participation && (
                         <div className="visit-fact">
-                          <dt>Zapojení</dt>
+                          <dt>{t.preview.participation}</dt>
                           <dd>
-                            {selectedVisit.participation.text}
+                            {selectedVisit.participation.text[locale]}
                             {selectedVisit.participation.appliesTo && (
                               <small>
-                                {selectedVisit.participation.appliesTo}
+                                {selectedVisit.participation.appliesTo[locale]}
                               </small>
                             )}
                           </dd>
@@ -1279,9 +1277,10 @@ export default function Home() {
                       )}
                     </dl>
                     <p className="visit-disclaimer">
-                      Podle uvedených zdrojů. Před cestou ověřte případné změny;
-                      poloha na kresbě je orientační
-                      {selectedGarden.locationStatus ? ' (také přibližná)' : ''}
+                      {t.preview.disclaimer}
+                      {selectedGarden.locationStatus
+                        ? t.preview.disclaimerAlsoApprox
+                        : ''}
                       .
                     </p>
                     <div className="visit-sources">
@@ -1292,7 +1291,7 @@ export default function Home() {
                           target="_blank"
                           rel="noreferrer"
                         >
-                          {source.label} <ArrowRight />
+                          {source.label[locale]} <ArrowRight />
                         </a>
                       ))}
                     </div>
@@ -1305,19 +1304,23 @@ export default function Home() {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <Navigation /> Otevřít v mapě
+                    <Navigation /> {t.preview.openInMap}
                   </a>
                   <button
                     type="button"
                     className="share-button"
                     onClick={shareGarden}
-                    aria-label="Zkopírovat odkaz na zahradu"
+                    aria-label={t.preview.share}
                   >
                     <Share2 />
                   </button>
                 </div>
                 <output className="share-feedback" aria-live="polite">
-                  {shareStatus}
+                  {shareStatus === 'copied'
+                    ? t.preview.shareCopied
+                    : shareStatus === 'fallback'
+                      ? t.preview.shareFallback
+                      : ''}
                 </output>
                 <a
                   className="source-link"
@@ -1325,7 +1328,7 @@ export default function Home() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Zdroj a informace o návštěvě <ArrowRight />
+                  {t.preview.sourceLink} <ArrowRight />
                 </a>
               </div>
             </div>
@@ -1334,12 +1337,7 @@ export default function Home() {
 
         <footer className="map-footer">
           <output className="result-count">
-            <i aria-hidden="true" /> {filteredGardens.length}{' '}
-            {filteredGardens.length === 1
-              ? 'objevené místo'
-              : filteredGardens.length >= 2 && filteredGardens.length <= 4
-                ? 'objevená místa'
-                : 'objevených míst'}
+            <i aria-hidden="true" /> {t.footer.discovered(filteredGardens.length)}
           </output>
           <div className="footer-meta">
             <button
@@ -1349,18 +1347,16 @@ export default function Home() {
               disabled={prefersReducedMotion}
               aria-pressed={isMotionPaused}
               title={
-                prefersReducedMotion
-                  ? 'Pohyb je vypnutý podle nastavení systému'
-                  : undefined
+                prefersReducedMotion ? t.footer.motionSystemTitle : undefined
               }
             >
               {isMotionPaused ? <Play /> : <Pause />}
               <span>
                 {prefersReducedMotion
-                  ? 'Pohyb omezen systémem'
+                  ? t.footer.motionSystem
                   : isMotionPaused
-                    ? 'Rozpohybovat mapu'
-                    : 'Pozastavit pohyb'}
+                    ? t.footer.motionResume
+                    : t.footer.motionPause}
               </span>
             </button>
             <a
@@ -1369,7 +1365,7 @@ export default function Home() {
               target="_blank"
               rel="noreferrer"
             >
-              © OpenStreetMap contributors
+              {t.footer.osm}
             </a>
           </div>
         </footer>
@@ -1377,27 +1373,25 @@ export default function Home() {
         <section
           className="garden-directory"
           id="garden-list"
-          aria-label="Seznam zahrad"
+          aria-label={t.directory.label}
           hidden={!listOpen}
         >
           <div className="directory-heading">
             <div>
-              <span className="directory-eyebrow">Zelená místa Prahy</span>
-              <h2>Kam dnes?</h2>
+              <span className="directory-eyebrow">{t.directory.eyebrow}</span>
+              <h2>{t.directory.title}</h2>
             </div>
             <button
               type="button"
               onClick={() => setListOpen(false)}
-              aria-label="Zavřít seznam"
+              aria-label={t.directory.close}
             >
               <X />
             </button>
           </div>
           <p className="directory-summary" aria-live="polite">
-            {filteredGardens.length} z {gardens.length} míst
-            {categoryFilter
-              ? ` · ${gardenCategoryMeta[categoryFilter].label}`
-              : ''}
+            {t.directory.summary(filteredGardens.length, gardens.length)}
+            {categoryFilter ? ` · ${categoryLabels[categoryFilter][locale]}` : ''}
           </p>
           {(query || categoryFilter || activeFilters.size > 0) && (
             <button
@@ -1405,7 +1399,7 @@ export default function Home() {
               type="button"
               onClick={resetFilters}
             >
-              Zrušit hledání a filtry
+              {t.empty.reset}
             </button>
           )}
           <ul>
@@ -1420,9 +1414,9 @@ export default function Home() {
                     <Image src={garden.illustration} alt="" fill sizes="72px" />
                   </span>
                   <span>
-                    <strong>{garden.name}</strong>
+                    <strong lang="cs">{garden.name}</strong>
                     <small>
-                      {garden.district} · {garden.area}
+                      {garden.district} · {garden.area[locale]}
                     </small>
                   </span>
                   <ArrowRight />
@@ -1430,19 +1424,15 @@ export default function Home() {
               </li>
             ))}
           </ul>
-          {filteredGardens.length === 0 && (
-            <p>Žádné místo neodpovídá výběru. Zkuste ubrat některý filtr.</p>
-          )}
-          <p className="directory-footnote">
-            Vyberte místo a naplánujte si návštěvu.
-          </p>
+          {filteredGardens.length === 0 && <p>{t.directory.noMatch}</p>}
+          <p className="directory-footnote">{t.directory.footnote}</p>
         </section>
       </section>
 
       <div className="gallery-caption" id="top">
         <div>
-          <h1>Zahrady Prahy</h1>
-          <p>Praha roste společně.</p>
+          <h1>{t.caption.title}</h1>
+          <p>{t.caption.subtitle}</p>
         </div>
         <div
           className="gallery-postcard-slot"
@@ -1456,33 +1446,32 @@ export default function Home() {
           className="gallery-seal"
           type="button"
           onClick={() => setAboutOpen(true)}
-          aria-label="O mapě Zahrady Prahy"
+          aria-label={t.caption.about}
         >
           <Leaf aria-hidden="true" />
         </button>
       </div>
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="add-garden-dialog">
+        <DialogContent
+          className="add-garden-dialog"
+          closeLabel={t.dialog.close}
+        >
           <DialogHeader>
             <span className="dialog-eyebrow">
-              <Sprout /> Mapa roste postupně
+              <Sprout /> {t.addDialog.eyebrow}
             </span>
-            <DialogTitle>Přijímání tipů připravujeme.</DialogTitle>
-            <DialogDescription>
-              Nová místa bude možné navrhovat, až bude připravené jejich
-              ukládání a osobní schvalování. Zatím zde žádné tipy ani kontaktní
-              údaje nepřijímáme.
-            </DialogDescription>
+            <DialogTitle>{t.addDialog.title}</DialogTitle>
+            <DialogDescription>{t.addDialog.description}</DialogDescription>
           </DialogHeader>
           <Button className="dialog-primary" onClick={() => setAddOpen(false)}>
-            Zpět k objevování <ArrowRight />
+            {t.addDialog.back} <ArrowRight />
           </Button>
         </DialogContent>
       </Dialog>
 
       <Dialog open={aboutOpen} onOpenChange={setAboutOpen}>
-        <DialogContent className="about-dialog">
+        <DialogContent className="about-dialog" closeLabel={t.dialog.close}>
           <div className="about-botanical-field" aria-hidden="true">
             <Image
               className="about-canopy about-canopy-left"
@@ -1515,17 +1504,12 @@ export default function Home() {
               <span className="dialog-eyebrow-icon" aria-hidden="true">
                 <Leaf />
               </span>
-              Jak mapa funguje
+              {t.aboutDialog.eyebrow}
             </span>
             <DialogTitle>
-              Každá zahrada je <span>malý živý svět.</span>
+              {t.aboutDialog.titleStart} <span>{t.aboutDialog.titleAccent}</span>
             </DialogTitle>
-            <DialogDescription>
-              Body na mapě odkazují na skutečná pražská místa. Vybíráme je z
-              veřejných zdrojů, které najdete u každé zahrady. Kresba je
-              umělecký atlas, ne navigační mapa. Pro skutečnou polohu použijte
-              odkaz v detailu.
-            </DialogDescription>
+            <DialogDescription>{t.aboutDialog.description}</DialogDescription>
           </DialogHeader>
           <ol className="how-list">
             <li>
@@ -1533,8 +1517,8 @@ export default function Home() {
                 <Search />
               </span>
               <div className="how-step-copy">
-                <strong>Objevujte</strong>
-                <small>Hledejte podle názvu, čtvrti nebo vlastností.</small>
+                <strong>{t.aboutDialog.step1Title}</strong>
+                <small>{t.aboutDialog.step1Text}</small>
               </div>
               <span className="how-step-number" aria-hidden="true">
                 01
@@ -1545,10 +1529,8 @@ export default function Home() {
                 <Sprout />
               </span>
               <div className="how-step-copy">
-                <strong>Rozklikněte místo</strong>
-                <small>
-                  Prohlédněte si ilustraci, zdroj a skutečnou polohu.
-                </small>
+                <strong>{t.aboutDialog.step2Title}</strong>
+                <small>{t.aboutDialog.step2Text}</small>
               </div>
               <span className="how-step-number" aria-hidden="true">
                 02
@@ -1559,8 +1541,8 @@ export default function Home() {
                 <Flower2 />
               </span>
               <div className="how-step-copy">
-                <strong>Nová místa postupně</strong>
-                <small>Přijímání a schvalování vašich tipů připravujeme.</small>
+                <strong>{t.aboutDialog.step3Title}</strong>
+                <small>{t.aboutDialog.step3Text}</small>
               </div>
               <span className="how-step-number" aria-hidden="true">
                 03

@@ -63,6 +63,14 @@
     height: 42px !important;
     padding: 0 !important;
   }
+  /* The language capsule keeps both segments readable at thumb size. */
+  .map-experience .header-actions .language-switcher {
+    height: 42px;
+  }
+  .map-experience .header-actions .language-switcher button {
+    width: 38px !important;
+    height: 36px !important;
+  }
   .map-experience .filter-tray {
     top: 116px !important;
     left: 10px !important;
