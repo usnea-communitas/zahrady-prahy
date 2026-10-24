@@ -3,6 +3,7 @@
 **A living, illustrated map of Prague's community gardens.**
 
 [![Code: MIT](https://img.shields.io/badge/code-MIT-4c7a3a.svg)](LICENSE)
+[![CI](https://github.com/usnea-communitas/zahrady-prahy/actions/workflows/ci.yml/badge.svg)](https://github.com/usnea-communitas/zahrady-prahy/actions/workflows/ci.yml)
 [![Media: CC BY-NC-SA 4.0](https://img.shields.io/badge/media-CC%20BY--NC--SA%204.0-8a6d3b.svg)](LICENSE-ASSETS.md)
 [![Node 22](https://img.shields.io/badge/node-%3E%3D22.13-5f8f3e.svg)](package.json)
 [![Languages: EN · CS](https://img.shields.io/badge/languages-EN%20%C2%B7%20CS-6a7d8a.svg)](#localisation)
