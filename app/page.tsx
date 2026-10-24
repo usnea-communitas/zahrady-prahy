@@ -149,9 +149,9 @@ export default function Home() {
     [navigation.filters],
   );
   const [listOpen, setListOpen] = useState(false);
-  const [shareStatus, setShareStatus] = useState<
-    'copied' | 'fallback' | ''
-  >('');
+  const [shareStatus, setShareStatus] = useState<'copied' | 'fallback' | ''>(
+    '',
+  );
   const [revealRequest, setRevealRequest] = useState(0);
   const [preferencesReady, setPreferencesReady] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -805,7 +805,10 @@ export default function Home() {
         </button>
       )}
       {!introMinimized && (
-        <div className="map-legend intro-legend" aria-label={t.intro.legendLabel}>
+        <div
+          className="map-legend intro-legend"
+          aria-label={t.intro.legendLabel}
+        >
           <div className="legend-heading">
             <Flower2 aria-hidden="true" />
             <strong>{t.intro.legendTitle}</strong>
@@ -948,7 +951,8 @@ export default function Home() {
                   <span className="marker-label">
                     <strong>{garden.name}</strong>
                     <small>
-                      {garden.district} · {categoryLabels[garden.category][locale]}
+                      {garden.district} ·{' '}
+                      {categoryLabels[garden.category][locale]}
                     </small>
                   </span>
                 </button>
@@ -1234,7 +1238,9 @@ export default function Home() {
                         <dd>
                           {selectedVisit.hours.text[locale]}
                           {selectedVisit.hours.appliesTo && (
-                            <small>{selectedVisit.hours.appliesTo[locale]}</small>
+                            <small>
+                              {selectedVisit.hours.appliesTo[locale]}
+                            </small>
                           )}
                         </dd>
                       </div>
@@ -1337,7 +1343,8 @@ export default function Home() {
 
         <footer className="map-footer">
           <output className="result-count">
-            <i aria-hidden="true" /> {t.footer.discovered(filteredGardens.length)}
+            <i aria-hidden="true" />{' '}
+            {t.footer.discovered(filteredGardens.length)}
           </output>
           <div className="footer-meta">
             <button
@@ -1391,7 +1398,9 @@ export default function Home() {
           </div>
           <p className="directory-summary" aria-live="polite">
             {t.directory.summary(filteredGardens.length, gardens.length)}
-            {categoryFilter ? ` · ${categoryLabels[categoryFilter][locale]}` : ''}
+            {categoryFilter
+              ? ` · ${categoryLabels[categoryFilter][locale]}`
+              : ''}
           </p>
           {(query || categoryFilter || activeFilters.size > 0) && (
             <button
@@ -1507,7 +1516,8 @@ export default function Home() {
               {t.aboutDialog.eyebrow}
             </span>
             <DialogTitle>
-              {t.aboutDialog.titleStart} <span>{t.aboutDialog.titleAccent}</span>
+              {t.aboutDialog.titleStart}{' '}
+              <span>{t.aboutDialog.titleAccent}</span>
             </DialogTitle>
             <DialogDescription>{t.aboutDialog.description}</DialogDescription>
           </DialogHeader>

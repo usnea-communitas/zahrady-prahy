@@ -14,8 +14,7 @@ import {
 
 /** Every leaf of the English dictionary, as dotted paths. */
 function leaves(value, prefix = '') {
-  if (typeof value === 'string' || typeof value === 'function')
-    return [prefix];
+  if (typeof value === 'string' || typeof value === 'function') return [prefix];
   return Object.entries(value).flatMap(([key, child]) =>
     leaves(child, prefix ? `${prefix}.${key}` : key),
   );
@@ -61,10 +60,7 @@ await test('counted phrases agree with their number in both languages', () => {
   assert.equal(dictionaries.cs.header.placesCount(13), '13 míst');
   assert.equal(plural(0, { one: 'a', few: 'b', many: 'c' }), 'c');
   assert.equal(plural(5, { one: 'a', few: 'b', many: 'c' }), 'c');
-  assert.equal(
-    dictionaries.cs.footer.discovered(2),
-    '2 objevená místa',
-  );
+  assert.equal(dictionaries.cs.footer.discovered(2), '2 objevená místa');
   assert.equal(dictionaries.en.footer.discovered(2), '2 places discovered');
 });
 await test('the verification date is formatted per language without touching the stored value', () => {

@@ -18,7 +18,9 @@ export const LOCALE_STORAGE_KEY = 'zahrady.lang';
 export type Localized<T = string> = Readonly<Record<Locale, T>>;
 
 export function isLocale(value: unknown): value is Locale {
-  return typeof value === 'string' && (locales as readonly string[]).includes(value);
+  return (
+    typeof value === 'string' && (locales as readonly string[]).includes(value)
+  );
 }
 
 /** Resolve a bilingual field for a locale. */
@@ -388,7 +390,9 @@ const cs: Dictionary = {
 export const dictionaries: Record<Locale, Dictionary> = { en, cs };
 
 /** Read the stored preference; `null` when nothing valid is stored. */
-export function readStoredLocale(storage: Pick<Storage, 'getItem'>): Locale | null {
+export function readStoredLocale(
+  storage: Pick<Storage, 'getItem'>,
+): Locale | null {
   try {
     const value = storage.getItem(LOCALE_STORAGE_KEY);
     return isLocale(value) ? value : null;
