@@ -16,6 +16,12 @@ every fact carries its source and the date it was checked, and a link to the
 real location on a geographic map. The interface is in English by default and
 fully available in Czech.
 
+![The illustrated map of Prague with the thirteen garden markers, search, the EN | CS switcher, filters and the character-of-the-place legend](docs/screenshots/atlas-desktop.webp)
+
+<p align="center">
+  <img src="docs/screenshots/garden-detail-phone.webp" alt="A garden detail on a phone: illustration labelled as an artistic rendering, description, tags and sourced visiting information" width="32%">
+</p>
+
 ## What it does
 
 - **An illustrated atlas, not a navigation map.** Prague is drawn as a
