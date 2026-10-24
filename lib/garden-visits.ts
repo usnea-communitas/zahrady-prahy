@@ -478,7 +478,7 @@ export const gardenVisits = {
     access: fact(
       {
         cs: 'Magická zahrada je podle aktuálního článku otevřena široké veřejnosti.',
-        en: 'According to the current article, the Magical Garden is open to the general public.',
+        en: 'According to the current article, the "Magická zahrada" (Magical Garden) is open to the general public.',
       },
       'published',
       [naPolskePublic],
