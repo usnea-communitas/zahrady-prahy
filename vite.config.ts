@@ -51,8 +51,31 @@ export default defineConfig(async () => {
     const { nitro } = await import('nitro/vite');
     const { default: tailwindcssVite } = await import('@tailwindcss/vite');
 
+    // Nitro writes these rules into .vercel/output/config.json, which is
+    // what Vercel routes by. Hashed build assets under /_next/static are
+    // already immutable; the media keep their names between releases, so
+    // browsers may reuse them for a day and then revalidate in the
+    // background instead of asking again on every visit.
+    const media = {
+      headers: {
+        'cache-control': 'public, max-age=86400, stale-while-revalidate=604800',
+      },
+    };
+
     return {
-      plugins: [vinext(), tailwindcssVite(), nitro()],
+      plugins: [
+        vinext(),
+        tailwindcssVite(),
+        nitro({
+          routeRules: {
+            '/map/**': media,
+            '/gardens/**': media,
+            '/audio/**': media,
+            '/zahrady-prahy-postcard.webp': media,
+            '/zahrady-prahy-og.jpg': media,
+          },
+        }),
+      ],
     };
   }
 
