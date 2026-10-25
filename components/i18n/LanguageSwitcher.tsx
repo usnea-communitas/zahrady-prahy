@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { locales, type Locale } from '@/lib/i18n';
+import { dictionaries, locales, type Locale } from '@/lib/i18n';
 import { useLocale } from '@/components/i18n/LocaleProvider';
 
 const shortNames: Record<Locale, string> = { en: 'EN', cs: 'CS' };
@@ -21,11 +21,7 @@ export function LanguageSwitcher() {
     if (next === locale) return;
     setLocale(next);
     // The announcement must be in the language that was just chosen.
-    setAnnouncement(
-      next === 'cs'
-        ? 'Jazyk přepnut na češtinu.'
-        : 'Language changed to English.',
-    );
+    setAnnouncement(dictionaries[next].langSwitch.announce);
   }
 
   return (
