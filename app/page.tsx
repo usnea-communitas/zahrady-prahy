@@ -73,7 +73,7 @@ import {
   type FilterId,
 } from '@/lib/gardens';
 import type { GardenVisit } from '@/lib/garden-visits';
-import { formatDate } from '@/lib/i18n';
+import { formatDate, withLocale } from '@/lib/i18n';
 
 const gardenCategoryIcons = {
   community: Sprout,
@@ -325,9 +325,10 @@ export default function Home() {
 
   async function shareGarden() {
     if (!selectedGarden) return;
-    const url = gardenShareUrl(
-      new URL(window.location.href),
-      selectedGarden.id,
+    // The link opens in the language it was shared from.
+    const url = withLocale(
+      gardenShareUrl(new URL(window.location.href), selectedGarden.id),
+      locale,
     );
     try {
       await navigator.clipboard.writeText(url.href);

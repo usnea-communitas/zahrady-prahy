@@ -14,6 +14,8 @@ import {
   defaultLocale,
   dictionaries,
   readStoredLocale,
+  readUrlLocale,
+  withLocale,
   type Dictionary,
   type Locale,
 } from '@/lib/i18n';
@@ -30,18 +32,26 @@ const LocaleContext = createContext<LocaleContextValue>({
   t: dictionaries[defaultLocale],
 });
 
-/* A tiny external store: the server always renders English, the browser
- * resolves the stored preference once and then follows the switcher. */
+/* A tiny external store: the server renders the language of the link
+ * (English unless it says `?lang=cs`), the browser resolves the link or the
+ * stored preference once and then follows the switcher. */
 let currentLocale: Locale | null = null;
 const listeners = new Set<() => void>();
 
 function readLocale(): Locale {
-  currentLocale ??= readStoredLocale(localStorage) ?? defaultLocale;
+  currentLocale ??=
+    readUrlLocale(new URL(window.location.href)) ??
+    readStoredLocale(localStorage) ??
+    defaultLocale;
   return currentLocale;
 }
 
-function serverLocale(): Locale {
-  return defaultLocale;
+function storeLocale(locale: Locale) {
+  try {
+    localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  } catch {
+    /* Storage can be unavailable, for example in private browsing. */
+  }
 }
 
 function subscribe(listener: () => void) {
@@ -61,24 +71,45 @@ function subscribe(listener: () => void) {
 
 function setLocale(next: Locale) {
   currentLocale = next;
-  try {
-    localStorage.setItem(LOCALE_STORAGE_KEY, next);
-  } catch {
-    /* Storage can be unavailable, for example in private browsing. */
-  }
+  storeLocale(next);
   for (const listener of listeners) listener();
 }
 
 /**
- * Holds the current language. English is the default; a stored Czech
- * preference (`zahrady.lang`) is applied right after hydration and the
- * document language follows it.
+ * Holds the current language. English is the default; a link with
+ * `?lang=cs` is rendered in Czech, and a stored Czech preference
+ * (`zahrady.lang`) is applied right after hydration. The document language,
+ * the title and the address bar follow it.
  */
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const locale = useSyncExternalStore(subscribe, readLocale, serverLocale);
+export function LocaleProvider({
+  children,
+  initialLocale = defaultLocale,
+}: {
+  children: ReactNode;
+  /** The language the server rendered, from the link. */
+  initialLocale?: Locale;
+}) {
+  const locale = useSyncExternalStore(
+    subscribe,
+    readLocale,
+    () => initialLocale,
+  );
 
   useEffect(() => {
     document.documentElement.lang = locale;
+    document.title = dictionaries[locale].meta.title;
+    // A language in the link is remembered like a choice in the switcher,
+    // and the address bar carries the language, so a copied link opens in it.
+    const syncAddress = () => {
+      const url = new URL(window.location.href);
+      if (readUrlLocale(url) === locale) storeLocale(locale);
+      const next = withLocale(url, locale);
+      if (next.href !== url.href)
+        window.history.replaceState(window.history.state, '', next);
+    };
+    syncAddress();
+    window.addEventListener('popstate', syncAddress);
+    return () => window.removeEventListener('popstate', syncAddress);
   }, [locale]);
 
   const value = useMemo<LocaleContextValue>(

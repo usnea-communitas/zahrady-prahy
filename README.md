@@ -15,7 +15,8 @@ Prague with thirteen community gardens drawn on it. Click a garden and you get
 its illustration, a short description, practical visiting information where
 every fact carries its source and the date it was checked, and a link to the
 real location on a geographic map. The interface is in English by default and
-fully available in Czech.
+fully available in Czech, also as a link:
+[zahrady-prahy.vercel.app/?lang=cs](https://zahrady-prahy.vercel.app/?lang=cs).
 
 ![The illustrated map of Prague with the thirteen garden markers, search, the EN | CS switcher, filters and the character-of-the-place legend](docs/screenshots/atlas-desktop.webp)
 
@@ -104,7 +105,7 @@ uses the Vercel build.
 
 ```
 app/
-  layout.tsx            Metadata (English by default) and the locale provider
+  layout.tsx            Metadata per language (?lang=cs) and the locale provider
   page.tsx              The whole atlas: map, header, filters, details, dialogs
   globals.css           Base styles and atlas chrome
   atlas.css, gallery.css, mobile.css
@@ -122,6 +123,7 @@ lib/
   map/                  Viewport maths, projection and river geometry
 public/
   map/, gardens/, audio/  Illustrations, sprites and the soundscape (see LICENSE-ASSETS.md)
+middleware.ts           Hands ?lang= to the layout, so Czech links render in Czech
 tests/                  Unit tests: catalogue, i18n, navigation, viewport
 tests/e2e/              Browser tests (Playwright): smoke, layout, accessibility
 docs/                   Rebuild notes and media provenance (prompts and tools)
@@ -172,11 +174,14 @@ The interface has a small, dependency-free localisation layer:
   enforce this). Strings that depend on a number are functions, so Czech can
   use its three plural forms.
 - [`components/i18n/LocaleProvider.tsx`](components/i18n/LocaleProvider.tsx)
-  keeps the current language. The server always renders English; in the
-  browser a stored preference (`localStorage` key `zahrady.lang`) is applied
-  after hydration and `<html lang>` follows it. `useT()` returns the
-  dictionary for the current language, `useLocale()` also returns the locale
-  and the setter.
+  keeps the current language. The server renders English, or Czech for a
+  link with `?lang=cs` ([`middleware.ts`](middleware.ts) hands the parameter
+  to the layout, which also sets the title, the canonical link and the
+  hreflang alternates). In the browser a stored preference (`localStorage`
+  key `zahrady.lang`) is applied after hydration; `<html lang>`, the title
+  and the address bar follow the language, so a copied link opens in it.
+  `useT()` returns the dictionary for the current language, `useLocale()`
+  also returns the locale and the setter.
 - The CS/EN switcher in the header is a group of `aria-pressed` buttons and
   announces the change politely in the language just chosen.
 - Content is bilingual at the data level (`Localized` fields in

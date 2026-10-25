@@ -55,6 +55,54 @@ test('Czech is one switch away and is remembered', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('lang', 'cs');
 });
 
+test('a Czech link is served in Czech from the first byte', async ({
+  page,
+}) => {
+  const html = await (await page.request.get('/?lang=cs')).text();
+  expect(html).toContain('<html lang="cs"');
+  expect(html).toContain(
+    '<title>Zahrady Prahy — živá mapa komunitních zahrad</title>',
+  );
+  // each language names itself canonical and points to the other
+  expect(html).toContain(
+    '<link rel="canonical" href="https://zahrady-prahy.vercel.app/?lang=cs"',
+  );
+  expect(html).toContain('hreflang="en"');
+  await openAtlas(page, '/?lang=cs');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'cs');
+  await expect(
+    page.getByRole('textbox', { name: 'Hledat zahradu nebo čtvrť' }),
+  ).toBeVisible();
+});
+
+test('the title and the address bar follow the language', async ({ page }) => {
+  await openAtlas(page);
+  await page.getByRole('button', { name: /Čeština/ }).click();
+  await expect(page).toHaveTitle(
+    'Zahrady Prahy — živá mapa komunitních zahrad',
+  );
+  await expect(page).toHaveURL(/\?lang=cs$/);
+  await page.getByRole('button', { name: /English/ }).click();
+  await expect(page).toHaveTitle(/a living map of community gardens/);
+  await expect(page).toHaveURL(/\/$/);
+});
+
+test('a copied garden link opens in the language it was copied in', async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await openAtlas(page, '/?zahrada=kotlaska&lang=cs');
+  await page
+    .getByRole('button', { name: 'Zkopírovat odkaz na zahradu' })
+    .click();
+  await expect(page.locator('.share-feedback')).not.toBeEmpty();
+  const link = new URL(
+    await page.evaluate(() => navigator.clipboard.readText()),
+  );
+  expect(link.search).toBe('?zahrada=kotlaska&lang=cs');
+});
+
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 
