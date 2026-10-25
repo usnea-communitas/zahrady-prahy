@@ -124,6 +124,15 @@ await test('search understands Czech and English words alike', () => {
   assert.ok(ids('urban farm').includes('metrofarm'));
   assert.ok(ids('mestska farma').includes('metrofarm'));
 });
+await test('search also finds what the descriptions mention, in both languages', () => {
+  const ids = (query) =>
+    gardens.filter((garden) => matchesSearch(garden, query)).map((g) => g.id);
+  assert.deepEqual(ids('pizza'), ['mecislavka']);
+  assert.deepEqual(ids('beehives'), ['velky-haj']);
+  assert.deepEqual(ids('včelí'), ['velky-haj']);
+  assert.deepEqual(ids('yurt'), ['na-polske']);
+  assert.deepEqual(ids('typí'), ['troja']);
+});
 await test('compost includes MetroFarm and courtyard does not include Vidimova', () => {
   const metrofarm = gardens.find((garden) => garden.id === 'metrofarm');
   assert.ok(

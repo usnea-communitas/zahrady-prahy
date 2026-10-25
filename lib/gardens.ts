@@ -382,7 +382,8 @@ export function normalizeSearch(value: string) {
     .trim();
 }
 
-/** Words of both languages are searchable regardless of the interface language. */
+/** Words of both languages are searchable regardless of the interface language,
+ * including what the description says (a pizza oven, beehives, a yurt). */
 function searchHaystack(garden: Garden) {
   const locales: Locale[] = ['cs', 'en'];
   return normalizeSearch(
@@ -391,6 +392,7 @@ function searchHaystack(garden: Garden) {
       garden.gloss ?? '',
       garden.district,
       ...locales.map((locale) => garden.area[locale]),
+      ...locales.map((locale) => garden.description[locale]),
       ...locales.map((locale) => categoryLabels[garden.category][locale]),
       ...garden.tags.flatMap((tag) =>
         locales.map((locale) => tagLabels[tag][locale]),
