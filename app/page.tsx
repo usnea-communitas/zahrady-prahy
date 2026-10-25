@@ -117,6 +117,9 @@ const INTRO_DEFAULT_WIDTH = 396;
 const INTRO_DEFAULT_HEIGHT = 346;
 /** v4: earlier versions also stored automatic folding, which then stuck. */
 const INTRO_STORAGE_KEY = 'prague-atlas-panel-v4';
+/** A desktop window too low for the full postcard above the map. */
+const LOW_WINDOW =
+  '(max-height: 800px) and (min-height: 501px) and (min-width: 721px)';
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), Math.max(min, max));
@@ -215,8 +218,9 @@ export default function Home() {
     };
     restoreLink();
     window.addEventListener('popstate', restoreLink);
-    // Only the visitor folds or unfolds the postcard, and only that is kept.
-    let minimized = false;
+    // A visitor's own choice is remembered; otherwise the postcard starts
+    // folded in a low window, where the map needs the height.
+    let minimized = window.matchMedia(LOW_WINDOW).matches;
     try {
       const saved = JSON.parse(
         localStorage.getItem(INTRO_STORAGE_KEY) ?? 'null',
@@ -745,9 +749,9 @@ export default function Home() {
         introGeometry && (selectedGarden || filtersOpen || listOpen)
           ? ' is-quiet'
           : ''
-      }${introGeometry ? ' is-positioned' : ''}${
-        introInteractionMode ? ` is-${introInteractionMode}` : ''
-      }`}
+      }${preferencesReady ? ' is-ready' : ''}${
+        introGeometry ? ' is-positioned' : ''
+      }${introInteractionMode ? ` is-${introInteractionMode}` : ''}`}
       ref={introCardRef}
       style={introStyle}
       aria-label={t.intro.label}

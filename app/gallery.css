@@ -24,7 +24,7 @@ body {
      can end up under it; the frame is the band plus the map stage. The
      stage takes the height left after the title row and the spacing. */
   --atlas-band: 76px;
-  --atlas-caption: 278px;
+  --atlas-caption: 276px;
   --atlas-pad: 20px;
   --atlas-gap: 16px;
   --directory-width: 320px;
@@ -369,7 +369,7 @@ body {
 }
 .visit-note-heading span {
   color: var(--color-graphite);
-  font: 400 10px/1.2 var(--font-helvetica-now);
+  font: 400 12px/1.2 var(--font-helvetica-now);
   white-space: nowrap;
 }
 .visit-facts {
@@ -379,13 +379,13 @@ body {
 }
 .visit-fact {
   display: grid;
-  grid-template-columns: 70px minmax(0, 1fr);
+  grid-template-columns: 92px minmax(0, 1fr);
   gap: 10px;
   margin: 0;
 }
 .visit-fact dt {
   color: var(--color-graphite);
-  font: 500 10px/1.35 var(--font-helvetica-now);
+  font: 500 12px/1.35 var(--font-helvetica-now);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -419,7 +419,7 @@ body {
   align-items: center;
   gap: 3px;
   color: var(--color-ink);
-  font: 500 10px/1.3 var(--font-helvetica-now);
+  font: 500 12px/1.3 var(--font-helvetica-now);
   text-decoration: underline;
   text-decoration-color: rgba(89, 88, 85, 0.36);
   text-underline-offset: 3px;
@@ -713,15 +713,15 @@ body {
 }
 @media (max-height: 800px) {
   .gallery-caption h1 {
-    font-size: 43px;
+    font-size: 36px;
   }
   .gallery-caption p {
-    margin-top: 8px;
-    font-size: 14px;
+    margin-top: 4px;
+    font-size: 13px;
   }
   .gallery-seal {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
   }
   .map-experience .map-legend {
     padding: 12px;
@@ -730,7 +730,7 @@ body {
     padding: 3px 0;
   }
   .map-experience .preview-illustration {
-    height: 150px;
+    height: 112px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -738,25 +738,13 @@ body {
     transition: none;
   }
 }
-/* A short desktop window also creates a narrow art frame. */
+/* A short desktop window: the list steps aside while a garden is open. */
 @media (max-height: 700px) {
-  .map-header {
-    grid-template-columns: 40px minmax(150px, 1fr) max-content;
-    gap: 8px;
-  }
-  .map-header .header-actions button > span:not(.sound-action) {
-    display: none;
-  }
-  .map-header .header-actions .glass-button,
-  .map-header .header-actions .add-button {
-    width: 44px;
-    padding: 0;
-  }
   .map-canvas.has-selection .garden-directory {
     display: none;
   }
-  .search-count {
-    display: none;
+  .map-experience .preview-illustration {
+    height: 96px;
   }
 }
 
@@ -937,7 +925,7 @@ body {
   padding: 3px 3px;
   gap: 6px;
   border: 0;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.15;
 }
 .intro-legend .legend-filter > span:nth-child(2) {
@@ -953,7 +941,7 @@ body {
   height: 13px;
 }
 .intro-legend .legend-filter small {
-  font-size: 11px;
+  font-size: 12px;
 }
 .intro-legend .atlas-note {
   margin: 7px 0 0;
@@ -1071,18 +1059,37 @@ body {
   }
 }
 
-@media (max-height: 800px) and (min-height: 701px) {
+/* Low desktop windows (laptops): a dense title row leaves the height to the
+   map. The postcard starts folded there; a visitor who unfolds it scrolls a
+   little to see the whole map, and folding it gives the height back. */
+@media (max-height: 800px) and (min-height: 501px) and (min-width: 721px) {
   .map-experience {
-    --atlas-caption: 274px;
+    --atlas-band: 68px;
+    --atlas-caption: 60px;
+    --atlas-pad: 16px;
+    --atlas-gap: 12px;
+  }
+  .map-header {
+    inset: 12px 16px auto;
   }
   .gallery-caption {
     gap: 16px;
   }
+  .gallery-postcard-slot {
+    min-height: 0 !important;
+  }
+  /* Until the remembered state is known the postcard waits, so nothing
+     jumps while the page starts. */
+  .gallery-postcard-slot > .intro-card:not(.is-ready) {
+    visibility: hidden;
+  }
+  .gallery-postcard-slot:not(:has(.intro-card.is-ready)) {
+    width: 104px;
+    height: 56px;
+    overflow: hidden;
+  }
 }
 @media (max-height: 700px) {
-  .map-experience {
-    --atlas-caption: 224px;
-  }
   .gallery-caption {
     gap: 10px;
   }
@@ -1116,10 +1123,7 @@ body {
     padding: 12px;
   }
   .visit-fact {
-    grid-template-columns: 60px minmax(0, 1fr);
+    grid-template-columns: 88px minmax(0, 1fr);
     gap: 7px;
-  }
-  .visit-fact dd {
-    font-size: 11px;
   }
 }

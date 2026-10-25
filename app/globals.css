@@ -31,7 +31,7 @@
     var(--font-interface-mono), 'JetBrains Mono', Consolas, monospace;
   --font-pplxserif:
     var(--font-gallery-serif), Georgia, 'Times New Roman', serif;
-  --text-caption: 11px;
+  --text-caption: 12px;
   --leading-caption: 1.2;
   --text-body-sm: 15px;
   --leading-body-sm: 1.5;
@@ -957,7 +957,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 8px;
   color: var(--color-moss-shadow);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.15;
 }
 .legend-symbol {

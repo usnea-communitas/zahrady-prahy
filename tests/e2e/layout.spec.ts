@@ -60,7 +60,11 @@ async function blockedMarkers(page: Page) {
 const sizes = [
   [1920, 1080],
   [1440, 900],
+  [1366, 768],
+  [1366, 657],
   [1280, 800],
+  [1280, 720],
+  [1024, 768],
   [768, 1024],
   // a phone held sideways gets the phone layout with side panels
   [844, 390],
@@ -85,3 +89,31 @@ for (const locale of ['en', 'cs'] as const) {
     }
   });
 }
+
+test('no visible text is smaller than 12 px, also in a low window', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 657 });
+  await openAtlas(page, '/?zahrada=kotlaska');
+  const tooSmall = await page.evaluate(() =>
+    [...document.querySelectorAll('body *')]
+      .filter((element) =>
+        [...element.childNodes].some(
+          (node) =>
+            node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+        ),
+      )
+      .filter((element) => {
+        if (element.closest('.sr-only, [hidden], [aria-hidden="true"]'))
+          return false;
+        const style = getComputedStyle(element);
+        return (
+          style.visibility !== 'hidden' &&
+          element.getBoundingClientRect().width > 0 &&
+          parseFloat(style.fontSize) < 12
+        );
+      })
+      .map((element) => element.textContent?.trim().slice(0, 40)),
+  );
+  expect(tooSmall).toEqual([]);
+});
