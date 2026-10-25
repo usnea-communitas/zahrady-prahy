@@ -10,6 +10,7 @@ import {
   filterOptions,
   navigationUrl,
   tagLabels,
+  thumbnailUrl,
 } from '../lib/gardens.ts';
 import { GARDEN_VISIT_CHECKED_AT } from '../lib/garden-visits.ts';
 import { locales } from '../lib/i18n.ts';
@@ -38,6 +39,16 @@ await test('all 13 gardens have unique IDs, real coordinates and existing illust
     assert.ok(garden.artPosition.y > 5 && garden.artPosition.y < 95);
   }
   assert.equal(Object.keys(artPositions).length, gardens.length);
+});
+await test('every garden has a small list thumbnail', () => {
+  for (const garden of gardens) {
+    const file = new URL('../public' + thumbnailUrl(garden), import.meta.url);
+    assert.ok(
+      existsSync(file),
+      `${garden.id}: run scripts/build-thumbnails.mjs`,
+    );
+    assert.ok(readFileSync(file).length < 20_000, garden.id);
+  }
 });
 await test('every reader-facing catalogue field exists in both languages', () => {
   for (const garden of gardens) {

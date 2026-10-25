@@ -404,6 +404,10 @@ export function matchesSearch(garden: Garden, query: string) {
     .split(/\s+/)
     .every((word) => haystack.includes(word));
 }
+/** Small square list thumbnail, made by `scripts/build-thumbnails.mjs`. */
+export function thumbnailUrl(garden: Pick<Garden, 'id'>) {
+  return `/gardens/thumbnails/${garden.id}.webp`;
+}
 export function navigationUrl(garden: Garden) {
   return (
     'https://www.google.com/maps/search/?api=1&query=' +

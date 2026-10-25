@@ -146,7 +146,8 @@ The catalogue is plain TypeScript, so a correction is a small pull request.
 4. **Record the check date.** `GARDEN_VISIT_CHECKED_AT` is the day all sources
    were last verified. Update it only after re-checking every source; for a
    single correction, mention the date you checked in the pull request.
-5. A new garden also needs an illustration in `public/gardens/`, an entry in
+5. A new garden also needs an illustration in `public/gardens/` (then run
+   `node scripts/build-thumbnails.mjs` for its list thumbnail), an entry in
    `artPositions` (its editorial place on the drawing; the tests check that
    west-bank gardens stay west of the river) and real `lat`/`lon` for the
    map link.

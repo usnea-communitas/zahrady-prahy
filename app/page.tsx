@@ -68,6 +68,7 @@ import {
   filterGardenCatalogue,
   navigationUrl,
   tagLabels,
+  thumbnailUrl,
   type GardenCategory,
   type FilterId,
 } from '@/lib/gardens';
@@ -1420,7 +1421,12 @@ export default function Home() {
                   onClick={() => selectGarden(garden.id)}
                 >
                   <span className="directory-image">
-                    <Image src={garden.illustration} alt="" fill sizes="72px" />
+                    <Image
+                      src={thumbnailUrl(garden)}
+                      alt=""
+                      fill
+                      sizes="56px"
+                    />
                   </span>
                   <span>
                     <strong lang="cs">{garden.name}</strong>
