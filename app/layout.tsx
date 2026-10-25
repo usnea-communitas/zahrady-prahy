@@ -41,6 +41,10 @@ export const metadata: Metadata = {
   description:
     'Zahrady Prahy: discover community gardens, neighbourhood places and green oases on an illustrated map of Prague. Available in English and Czech.',
   applicationName: 'Zahrady Prahy',
+  icons: {
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'Zahrady Prahy — Gardens of Prague',
     description: 'Prague grows together. A living map of community gardens.',
