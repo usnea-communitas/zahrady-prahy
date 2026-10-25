@@ -6,9 +6,8 @@
  * facts) is bilingual at the data level, see `lib/gardens.ts` and
  * `lib/garden-visits.ts`, and resolved with `pick()`.
  *
- * English is the default; Czech is selected with the switcher in the header,
- * by a link with `?lang=cs` or by a stored preference (`zahrady.lang`).
- * No dependency is needed.
+ * English is the default; Czech is selected with the switcher in the header
+ * or by a stored preference (`zahrady.lang`). No dependency is needed.
  */
 export const locales = ['en', 'cs'] as const;
 export type Locale = (typeof locales)[number];
@@ -401,23 +400,4 @@ export function readStoredLocale(
   } catch {
     return null;
   }
-}
-
-/** Query parameter that carries the interface language in a link. */
-export const LOCALE_PARAM = 'lang';
-/** Request header the middleware fills from `?lang=` for the layout. */
-export const LOCALE_HEADER = 'x-atlas-locale';
-
-/** The language a link asks for (`?lang=cs`); `null` when none or unknown. */
-export function readUrlLocale(url: URL): Locale | null {
-  const value = url.searchParams.get(LOCALE_PARAM);
-  return isLocale(value) ? value : null;
-}
-
-/** The same link in a language: `?lang=cs` for Czech, nothing for English. */
-export function withLocale(url: URL, locale: Locale): URL {
-  const next = new URL(url);
-  if (locale === defaultLocale) next.searchParams.delete(LOCALE_PARAM);
-  else next.searchParams.set(LOCALE_PARAM, locale);
-  return next;
 }

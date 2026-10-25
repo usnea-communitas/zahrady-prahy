@@ -10,8 +10,6 @@ import {
   locales,
   plural,
   readStoredLocale,
-  readUrlLocale,
-  withLocale,
 } from '../lib/i18n.ts';
 
 /** Every leaf of the English dictionary, as dotted paths. */
@@ -87,21 +85,7 @@ await test('only a valid stored language is honoured, and storage failures fall 
     null,
   );
 });
-await test('a link carries the language: ?lang=cs for Czech, nothing for English', () => {
-  assert.equal(readUrlLocale(new URL('https://example.test/?lang=cs')), 'cs');
-  assert.equal(readUrlLocale(new URL('https://example.test/?lang=de')), null);
-  assert.equal(readUrlLocale(new URL('https://example.test/')), null);
-  const czech = withLocale(
-    new URL('https://example.test/?zahrada=liboza'),
-    'cs',
-  );
-  assert.equal(czech.href, 'https://example.test/?zahrada=liboza&lang=cs');
-  assert.equal(
-    withLocale(czech, 'en').href,
-    'https://example.test/?zahrada=liboza',
-  );
-});
-await test('the document is served in the language of the link and the switcher is wired into the header', () => {
+await test('the document is served in English and the switcher is wired into the header', () => {
   const layout = readFileSync(
     new URL('../app/layout.tsx', import.meta.url),
     'utf8',
@@ -110,9 +94,9 @@ await test('the document is served in the language of the link and the switcher 
     new URL('../app/page.tsx', import.meta.url),
     'utf8',
   );
-  assert.ok(layout.includes('<html lang={locale}>'));
-  assert.ok(layout.includes("'en_US'"));
+  assert.ok(layout.includes('<html lang={defaultLocale}>'));
+  assert.ok(layout.includes("locale: 'en_US'"));
   assert.ok(layout.includes('og:locale:alternate'));
-  assert.ok(layout.includes('<LocaleProvider initialLocale={locale}>'));
+  assert.ok(layout.includes('<LocaleProvider>'));
   assert.ok(page.includes('<LanguageSwitcher />'));
 });
