@@ -107,9 +107,6 @@
     bottom: calc(8px + env(safe-area-inset-bottom)) !important;
     width: auto !important;
   }
-  .map-experience .map-footer .footer-meta {
-    display: none;
-  }
 
   /* Garden detail as a bottom sheet. */
   .map-experience .garden-preview {
@@ -257,6 +254,16 @@
   .map-canvas:has(.garden-directory:not([hidden])):not(.has-selection)
     .map-stage {
     bottom: 58svh;
+  }
+}
+/* Narrow phones: both footer chips stay on one line with the shorter
+ * OpenStreetMap credit. */
+@media (max-width: 400px) {
+  .osm-full {
+    display: none;
+  }
+  .osm-short {
+    display: inline;
   }
 }
 @media (max-width: 720px) and (prefers-reduced-motion: reduce),

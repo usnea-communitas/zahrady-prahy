@@ -1394,7 +1394,8 @@ export default function Home() {
               target="_blank"
               rel="noreferrer"
             >
-              {t.footer.osm}
+              <span className="osm-full">{t.footer.osm}</span>
+              <span className="osm-short">{t.footer.osmShort}</span>
             </a>
           </div>
         </footer>

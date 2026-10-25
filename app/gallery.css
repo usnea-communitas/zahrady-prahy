@@ -551,6 +551,10 @@ body {
   backdrop-filter: blur(12px) saturate(1.12);
   -webkit-backdrop-filter: blur(12px) saturate(1.12);
   pointer-events: auto;
+  white-space: nowrap;
+}
+.osm-short {
+  display: none;
 }
 .marker-label {
   background: var(--color-bone);

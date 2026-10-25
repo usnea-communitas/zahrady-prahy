@@ -1786,9 +1786,6 @@ textarea:focus-visible {
     left: 12px;
     padding-inline: 12px;
   }
-  .prototype-note {
-    display: none;
-  }
   .filter-tray {
     top: 68px;
     width: calc(100vw - 24px);

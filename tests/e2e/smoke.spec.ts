@@ -72,6 +72,18 @@ test.describe('on a phone', () => {
     expect(sheet?.width).toBe(390);
   });
 
+  test('the map credit and the motion pause stay on screen', async ({
+    page,
+  }) => {
+    await openAtlas(page);
+    await expect(
+      page.getByRole('link', { name: '© OpenStreetMap', exact: true }),
+    ).toBeInViewport();
+    await expect(
+      page.getByRole('button', { name: 'Pause motion' }),
+    ).toBeInViewport();
+  });
+
   test('two fingers zoom the map and one finger pans it', async ({ page }) => {
     await openAtlas(page);
     const plane = page.locator('.map-plane');

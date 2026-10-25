@@ -167,6 +167,8 @@ const en = {
     motionResume: 'Animate the map',
     motionPause: 'Pause motion',
     osm: '© OpenStreetMap contributors',
+    /** The shorter credit the OSMF also accepts, for narrow phones. */
+    osmShort: '© OpenStreetMap',
   },
   directory: {
     label: 'List of gardens',
@@ -328,6 +330,7 @@ const cs: Dictionary = {
     motionResume: 'Rozpohybovat mapu',
     motionPause: 'Pozastavit pohyb',
     osm: '© Přispěvatelé OpenStreetMap',
+    osmShort: '© OpenStreetMap',
   },
   directory: {
     label: 'Seznam zahrad',
