@@ -327,6 +327,27 @@ body {
   overscroll-behavior: contain;
   scrollbar-color: rgba(89, 88, 85, 0.32) transparent;
   scrollbar-gutter: stable;
+  /* keyboard focus never lands under the bar below */
+  scroll-padding-top: 68px;
+}
+/* Fades in behind the close button once the text scrolls up to it. */
+.preview-bar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 68px;
+  margin-bottom: -68px;
+  border-bottom: 1px solid var(--gallery-line);
+  background: var(--gallery-surface);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms var(--ease-out);
+}
+.garden-preview.is-scrolled .preview-bar {
+  opacity: 1;
+}
+.garden-preview .preview-close {
+  z-index: 4;
 }
 .preview-body p {
   display: block;
@@ -738,7 +759,8 @@ body {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .gallery-seal {
+  .gallery-seal,
+  .preview-bar {
     transition: none;
   }
 }
@@ -747,8 +769,9 @@ body {
   .map-canvas.has-selection .garden-directory {
     display: none;
   }
+  /* still tall enough that the caption clears the close button */
   .map-experience .preview-illustration {
-    height: 96px;
+    height: 104px;
   }
 }
 

@@ -124,9 +124,6 @@
     animation: sheet-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   .map-experience .garden-preview .preview-scroll {
-    max-height: 62svh !important;
-    overflow-y: auto;
-    overscroll-behavior: contain;
     padding-bottom: env(safe-area-inset-bottom);
   }
   .map-experience .garden-preview .preview-illustration {
@@ -234,9 +231,6 @@
     left: auto !important;
     right: max(10px, env(safe-area-inset-right)) !important;
     width: min(360px, 46vw) !important;
-  }
-  .map-experience .garden-preview .preview-scroll {
-    max-height: 100% !important;
   }
   .map-experience .garden-directory {
     left: max(10px, env(safe-area-inset-left)) !important;

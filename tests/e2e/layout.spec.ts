@@ -93,6 +93,59 @@ for (const locale of ['en', 'cs'] as const) {
   });
 }
 
+/** Whether the detail's close button covers its picture caption or any text. */
+async function closeButtonCover(page: Page) {
+  return page.evaluate(() => {
+    const rect = (selector: string) =>
+      document.querySelector(selector)?.getBoundingClientRect();
+    const close = rect('.preview-close');
+    const scroll = rect('.preview-scroll');
+    const bar = document.querySelector('.preview-bar');
+    if (!close || !scroll || !bar) return ['no detail'];
+    const under = (other?: DOMRect) =>
+      !!other &&
+      other.left < close.right &&
+      other.right > close.left &&
+      other.top < close.bottom &&
+      other.bottom > close.top;
+    const problems: string[] = [];
+    if (under(rect('.garden-preview .illustration-caption')))
+      problems.push('caption');
+    // Text under the button is fine only while the bar hides it.
+    if (Number(getComputedStyle(bar).opacity) < 1)
+      for (const element of document.querySelectorAll('.preview-body *')) {
+        const hasText = [...element.childNodes].some(
+          (node) =>
+            node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+        );
+        const box = element.getBoundingClientRect();
+        if (hasText && box.bottom > scroll.top && under(box))
+          problems.push(element.textContent?.trim().slice(0, 30) ?? '');
+      }
+    return problems;
+  });
+}
+
+for (const [width, height] of [
+  [1440, 900],
+  [1366, 657],
+  [844, 390],
+  [390, 844],
+] as const) {
+  test(`the close button never covers the garden text at ${width}×${height}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height });
+    await openAtlas(page, '/?zahrada=kotlaska');
+    expect(await closeButtonCover(page)).toEqual([]);
+    await page
+      .locator('.preview-scroll')
+      .evaluate((element) => element.scrollTo(0, element.scrollHeight));
+    await expect(page.locator('.preview-bar')).toHaveCSS('opacity', '1');
+    expect(await closeButtonCover(page)).toEqual([]);
+  });
+}
+
 test('no visible text is smaller than 12 px, also in a low window', async ({
   page,
 }) => {

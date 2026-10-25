@@ -168,6 +168,8 @@ export default function Home() {
     '',
   );
   const [revealRequest, setRevealRequest] = useState(0);
+  /** The garden whose detail text has been scrolled up to the close button. */
+  const [scrolledPreview, setScrolledPreview] = useState<string | null>(null);
   const [preferencesReady, setPreferencesReady] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -1209,7 +1211,9 @@ export default function Home() {
         {selectedGarden && (
           <aside
             key={selectedGarden.id}
-            className="garden-preview"
+            className={`garden-preview${
+              scrolledPreview === selectedGarden.id ? ' is-scrolled' : ''
+            }`}
             aria-live="polite"
             aria-label={selectedGarden.name}
           >
@@ -1221,7 +1225,21 @@ export default function Home() {
             >
               <X />
             </button>
-            <div className="preview-scroll">
+            <div
+              className="preview-scroll"
+              onScroll={(event) => {
+                // Once the text reaches the close button, a bar fades in
+                // behind the button so it never sits on top of the text.
+                const picture = event.currentTarget.querySelector<HTMLElement>(
+                  '.preview-illustration',
+                );
+                const reached =
+                  event.currentTarget.scrollTop >
+                  (picture?.offsetHeight ?? 0) - 68;
+                setScrolledPreview(reached ? selectedGarden.id : null);
+              }}
+            >
+              <div className="preview-bar" />
               <div className="preview-illustration">
                 <Image
                   src={selectedGarden.illustration}
