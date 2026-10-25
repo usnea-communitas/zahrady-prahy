@@ -115,6 +115,8 @@ const INTRO_MINIMIZED_WIDTH = 104;
 const INTRO_MINIMIZED_HEIGHT = 56;
 const INTRO_DEFAULT_WIDTH = 396;
 const INTRO_DEFAULT_HEIGHT = 346;
+/** v4: earlier versions also stored automatic folding, which then stuck. */
+const INTRO_STORAGE_KEY = 'prague-atlas-panel-v4';
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), Math.max(min, max));
@@ -141,6 +143,7 @@ export default function Home() {
   const lastFocusRef = useRef<HTMLElement | null>(null);
   const introInteractionRef = useRef<IntroInteraction | null>(null);
   const introLiveGeometryRef = useRef<IntroGeometry | null>(null);
+  const introTouchedRef = useRef(false);
   const [navigation, setNavigation] =
     useState<AtlasNavigation>(emptyNavigation);
   const navigationRef = useRef<AtlasNavigation>(emptyNavigation);
@@ -206,24 +209,19 @@ export default function Home() {
       setNavigation(next);
       setShareStatus('');
       if (next.query || next.filters.length || next.category) setListOpen(true);
-      if (next.selectedId) setIntroMinimized(true);
       const clean = writeAtlasUrl(url, next);
       if (clean.href !== url.href)
         window.history.replaceState(window.history.state, '', clean);
     };
     restoreLink();
     window.addEventListener('popstate', restoreLink);
+    // Only the visitor folds or unfolds the postcard, and only that is kept.
+    let minimized = false;
     try {
       const saved = JSON.parse(
-        localStorage.getItem('prague-atlas-panel-v3') ?? 'null',
+        localStorage.getItem(INTRO_STORAGE_KEY) ?? 'null',
       );
-      // oxlint-disable-next-line react/react-compiler -- Restore browser-only preferences after server hydration.
-      if (
-        saved &&
-        typeof saved.minimized === 'boolean' &&
-        !navigationRef.current.selectedId
-      )
-        setIntroMinimized(saved.minimized);
+      if (typeof saved?.minimized === 'boolean') minimized = saved.minimized;
       if (
         saved?.geometry &&
         ['left', 'top', 'width', 'height'].every((key) =>
@@ -250,16 +248,19 @@ export default function Home() {
     } catch {
       /* Preferences are optional, including in private browsing. */
     }
+    // oxlint-disable-next-line react/react-compiler -- Restore browser-only preferences after server hydration.
+    setIntroMinimized(minimized);
     setPreferencesReady(true);
     return () => window.removeEventListener('popstate', restoreLink);
   }, []);
   /* oxlint-enable react/react-compiler */
 
   useEffect(() => {
-    if (!preferencesReady) return;
+    // Only what the visitor did is stored, never an automatic change.
+    if (!preferencesReady || !introTouchedRef.current) return;
     try {
       localStorage.setItem(
-        'prague-atlas-panel-v3',
+        INTRO_STORAGE_KEY,
         JSON.stringify({ minimized: introMinimized, geometry: introGeometry }),
       );
     } catch {
@@ -298,7 +299,6 @@ export default function Home() {
           lastFocusRef.current = activeElement;
       }
       updateNavigation({ selectedId: id }, 'push');
-      setIntroMinimized(true);
       if (id)
         requestAnimationFrame(() =>
           document
@@ -646,6 +646,7 @@ export default function Home() {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
     if (introLiveGeometryRef.current) {
+      introTouchedRef.current = true;
       setIntroGeometry(introLiveGeometryRef.current);
     }
     introInteractionRef.current = null;
@@ -670,6 +671,7 @@ export default function Home() {
     if (!geometry) return;
 
     event.preventDefault();
+    introTouchedRef.current = true;
     const step = event.shiftKey ? 24 : 8;
     const [horizontal, vertical] = direction;
 
@@ -740,7 +742,9 @@ export default function Home() {
   const introCard = (
     <aside
       className={`intro-card${introMinimized ? ' is-minimized' : ''}${
-        selectedGarden || filtersOpen || listOpen ? ' is-quiet' : ''
+        introGeometry && (selectedGarden || filtersOpen || listOpen)
+          ? ' is-quiet'
+          : ''
       }${introGeometry ? ' is-positioned' : ''}${
         introInteractionMode ? ` is-${introInteractionMode}` : ''
       }`}
@@ -781,7 +785,10 @@ export default function Home() {
       <button
         className="intro-minimize"
         type="button"
-        onClick={() => setIntroMinimized((minimized) => !minimized)}
+        onClick={() => {
+          introTouchedRef.current = true;
+          setIntroMinimized((minimized) => !minimized);
+        }}
         aria-label={introMinimized ? t.intro.expand : t.intro.minimize}
         aria-expanded={!introMinimized}
         aria-controls="intro-postcard"
@@ -863,7 +870,6 @@ export default function Home() {
         href="#garden-list"
         onClick={() => {
           setListOpen(true);
-          setIntroMinimized(true);
           if (selectedGarden) setRevealRequest((request) => request + 1);
         }}
       >
@@ -1017,7 +1023,6 @@ export default function Home() {
               onChange={(event) => {
                 updateNavigation({ query: event.target.value.slice(0, 200) });
                 setListOpen(true);
-                setIntroMinimized(true);
                 if (selectedGarden) setRevealRequest((request) => request + 1);
               }}
               placeholder={t.header.searchPlaceholder}
@@ -1050,7 +1055,6 @@ export default function Home() {
               aria-label={listOpen ? t.header.listClose : t.header.listOpen}
               onClick={() => {
                 setListOpen((open) => !open);
-                setIntroMinimized(true);
                 if (selectedGarden) setRevealRequest((request) => request + 1);
               }}
             >
