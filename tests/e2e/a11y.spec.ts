@@ -1,6 +1,40 @@
-import { expect, test } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import { expect, test, type Page } from '@playwright/test';
 
 import { openAtlas } from './atlas';
+
+/** Serious and critical axe findings, one line per element. */
+async function seriousViolations(page: Page) {
+  const results = await new AxeBuilder({ page }).analyze();
+  return results.violations
+    .filter(({ impact }) => impact === 'serious' || impact === 'critical')
+    .flatMap(({ id, nodes }) =>
+      nodes.map((node) => `${id}: ${node.target.join(' ')}`),
+    );
+}
+
+const states = [
+  ['at the start', '/'],
+  ['with a garden open', '/?zahrada=kotlaska'],
+  ['with the list open', '/?filtry=compost'],
+] as const;
+
+for (const locale of ['en', 'cs'] as const)
+  for (const [width, height] of [
+    [1440, 900],
+    [390, 844],
+  ] as const)
+    for (const [state, path] of states)
+      test(`axe finds nothing serious ${state} (${locale}, ${width}×${height})`, async ({
+        page,
+      }) => {
+        await page.addInitScript((choice) => {
+          localStorage.setItem('zahrady.lang', choice);
+        }, locale);
+        await page.setViewportSize({ width, height });
+        await openAtlas(page, path);
+        expect(await seriousViolations(page)).toEqual([]);
+      });
 
 test('the keyboard moves through the page in the order it is seen', async ({
   page,

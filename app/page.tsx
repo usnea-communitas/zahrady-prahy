@@ -827,10 +827,8 @@ export default function Home() {
         </button>
       )}
       {!introMinimized && (
-        <div
-          className="map-legend intro-legend"
-          aria-label={t.intro.legendLabel}
-        >
+        <fieldset className="map-legend intro-legend">
+          <legend className="sr-only">{t.intro.legendLabel}</legend>
           <div className="legend-heading">
             <Flower2 aria-hidden="true" />
             <strong>{t.intro.legendTitle}</strong>
@@ -838,6 +836,9 @@ export default function Home() {
           <ul>
             {gardenCategoryOrder.map((categoryId) => {
               const CategoryIcon = gardenCategoryIcons[categoryId];
+              const count = gardens.filter(
+                (garden) => garden.category === categoryId,
+              ).length;
 
               return (
                 <li key={categoryId}>
@@ -845,6 +846,8 @@ export default function Home() {
                     type="button"
                     className="legend-filter"
                     aria-pressed={categoryFilter === categoryId}
+                    // read as "Community garden, 6 places", not "garden6"
+                    aria-label={`${categoryLabels[categoryId][locale]}, ${t.header.placesCount(count)}`}
                     onClick={() =>
                       updateNavigation({
                         category:
@@ -858,21 +861,15 @@ export default function Home() {
                     >
                       <CategoryIcon />
                     </span>
-                    <span>{categoryLabels[categoryId][locale]}</span>
-                    <small>
-                      {
-                        gardens.filter(
-                          (garden) => garden.category === categoryId,
-                        ).length
-                      }
-                    </small>
+                    <span>{categoryLabels[categoryId][locale]}</span>{' '}
+                    <small>{count}</small>
                   </button>
                 </li>
               );
             })}
           </ul>
           <p className="atlas-note">{t.intro.note}</p>
-        </div>
+        </fieldset>
       )}
     </aside>
   );
@@ -1040,7 +1037,7 @@ export default function Home() {
               aria-label={t.header.filtersLabel(activeFilters.size)}
             >
               <SlidersHorizontal />
-              <span>{t.header.filters}</span>
+              <span>{t.header.filters}</span>{' '}
               {activeFilters.size > 0 && (
                 <span className="active-filter-count">
                   {activeFilters.size}
@@ -1051,7 +1048,8 @@ export default function Home() {
               className="add-button"
               size="lg"
               onClick={() => setAddOpen(true)}
-              aria-label={t.header.addLabel}
+              aria-label={t.header.add}
+              title={t.header.addLabel}
             >
               <Plus />
               <span>{t.header.add}</span>
@@ -1246,7 +1244,8 @@ export default function Home() {
                   onClick={() => selectGarden(garden.id)}
                   aria-label={t.map.markerLabel(
                     garden.name,
-                    garden.area[locale],
+                    garden.district,
+                    categoryLabels[garden.category][locale],
                   )}
                   aria-pressed={isSelected}
                 >
@@ -1255,7 +1254,7 @@ export default function Home() {
                     <CategoryIcon />
                   </span>
                   <span className="marker-label">
-                    <strong>{garden.name}</strong>
+                    <strong>{garden.name}</strong>{' '}
                     <small>
                       {garden.district} ·{' '}
                       {categoryLabels[garden.category][locale]}
@@ -1364,11 +1363,11 @@ export default function Home() {
                   <MapPin /> {t.preview.showOnMap}
                 </button>
                 <p>{selectedGarden.description[locale]}</p>
-                <div className="tag-list" aria-label={t.preview.tagsLabel}>
+                <ul className="tag-list" aria-label={t.preview.tagsLabel}>
                   {selectedGarden.tags.map((tag) => (
-                    <span key={tag}>{tagLabels[tag][locale]}</span>
+                    <li key={tag}>{tagLabels[tag][locale]}</li>
                   ))}
-                </div>
+                </ul>
                 {selectedVisit && (
                   <div className="visit-note">
                     <div className="visit-note-heading">

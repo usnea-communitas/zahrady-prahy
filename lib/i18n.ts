@@ -85,8 +85,8 @@ const en = {
       'A wide storybook-style illustrated view of Prague with enlarged landmarks and the Vltava river',
     loading: 'Loading the map…',
     markersLegend: 'Gardens on the map',
-    markerLabel: (name: string, area: string) =>
-      `${name}, ${area}, open details`,
+    markerLabel: (name: string, district: string, category: string) =>
+      `${name}, ${district}, ${category}, open details`,
     planeRole: 'interactive map',
     planeLabel:
       'Map: arrow keys pan, plus and minus zoom, the 0 key shows the whole map',
@@ -114,7 +114,7 @@ const en = {
     listClose: 'Close the list of gardens',
     filters: 'Filters',
     filtersLabel: (active: number) =>
-      `Garden filters${active ? `, ${active} active` : ''}`,
+      `Filters${active ? `, ${active} active` : ''}`,
     add: 'Add a place · soon',
     addLabel: 'Adding gardens is being prepared',
   },
@@ -243,8 +243,8 @@ const cs: Dictionary = {
       'Široký pohádkově ilustrovaný pohled na Prahu se zvětšenými památkami a Vltavou',
     loading: 'Načítám mapu…',
     markersLegend: 'Zahrady na mapě',
-    markerLabel: (name: string, area: string) =>
-      `${name}, ${area}, otevřít detail`,
+    markerLabel: (name: string, district: string, category: string) =>
+      `${name}, ${district}, ${category}, otevřít detail`,
     planeRole: 'interaktivní mapa',
     planeLabel:
       'Mapa: šipkami posun, plus a minus přiblížení, klávesou 0 celá mapa',
@@ -273,7 +273,9 @@ const cs: Dictionary = {
     listClose: 'Zavřít seznam zahrad',
     filters: 'Filtry',
     filtersLabel: (active: number) =>
-      `Filtry zahrad${active ? `, ${active} aktivní` : ''}`,
+      active
+        ? `Filtry, ${active} ${plural(active, { one: 'aktivní', few: 'aktivní', many: 'aktivních' })}`
+        : 'Filtry',
     add: 'Přidat místo · brzy',
     addLabel: 'Přidávání zahrad připravujeme',
   },

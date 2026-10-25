@@ -1127,7 +1127,7 @@ textarea:focus-visible {
   gap: 8px;
   margin-top: 20px;
 }
-.tag-list span {
+.tag-list li {
   border: 1px solid var(--color-fog);
   border-radius: var(--radius-badges);
   background: var(--color-parchment);
@@ -1138,15 +1138,15 @@ textarea:focus-visible {
   font-weight: 400;
   letter-spacing: 0;
 }
-.tag-list span:nth-child(3n + 1) {
+.tag-list li:nth-child(3n + 1) {
   border-color: rgba(117, 166, 92, 0.3);
   background: rgba(183, 212, 119, 0.18);
 }
-.tag-list span:nth-child(3n + 2) {
+.tag-list li:nth-child(3n + 2) {
   border-color: rgba(198, 91, 116, 0.25);
   background: rgba(198, 91, 116, 0.1);
 }
-.tag-list span:nth-child(3n) {
+.tag-list li:nth-child(3n) {
   border-color: rgba(142, 131, 184, 0.28);
   background: rgba(142, 131, 184, 0.1);
 }

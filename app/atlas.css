@@ -43,7 +43,7 @@
 .map-navigation {
   margin: 0;
 }
-.tag-list span {
+.tag-list li {
   font-size: 12px;
 }
 .preview-body .visit-note p {

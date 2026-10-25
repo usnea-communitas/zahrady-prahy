@@ -453,7 +453,7 @@ body {
   width: 12px;
   height: 12px;
 }
-.preview-body .tag-list span {
+.preview-body .tag-list li {
   background: transparent;
   border-color: var(--gallery-line);
   color: var(--color-graphite);
@@ -935,6 +935,7 @@ body {
   display: block;
   width: auto !important;
   max-width: none;
+  min-inline-size: 0;
   margin: 0;
   padding: 10px 14px 11px;
   border: 0;

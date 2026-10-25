@@ -37,11 +37,12 @@ export function LanguageSwitcher() {
           type="button"
           lang={option}
           aria-pressed={locale === option}
-          aria-label={longNames[option]}
           title={longNames[option]}
           onClick={() => choose(option)}
         >
+          {/* The name starts with the visible code, then the full name. */}
           {shortNames[option]}
+          <span className="sr-only"> {longNames[option]}</span>
         </button>
       ))}
       <output className="sr-only" aria-live="polite">
