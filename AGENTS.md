@@ -28,7 +28,9 @@ VERCEL=1 npm run build:vercel   # the build the live site uses
 npm run test:e2e                # Playwright and axe against that build
 ```
 
-CI runs the same steps. Without `VERCEL=1`, `build:vercel` builds the
+CI runs the same steps; on GitHub Actions it also sets `NITRO_PRESET=vercel`,
+because Nitro's provider detection otherwise prefers GitHub Actions and emits
+a Node server in `.output/`. Without `VERCEL=1`, `build:vercel` builds the
 Sites/Cloudflare variant instead. The browser tests reuse a server already
 running on port 4173, so stop one you started by hand before testing a new
 build. They need Chromium once: `npx playwright install chromium`.
