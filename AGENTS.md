@@ -9,7 +9,7 @@ Maintainer workspace: if an untracked `STAV.md` exists in the repo root, read it
 
 Zahrady Prahy (Gardens of Prague) is an illustrated, bilingual atlas of 13
 Prague community gardens: <https://zahrady-prahy.vercel.app>. English is the
-default; Czech is complete and has its own link (`?lang=cs`). It is a project
+default; Czech is complete and chosen with the CS/EN switcher. It is a project
 of Usnea communitas, z. s. Code is MIT, the illustrations, maps and music are
 CC BY-NC-SA 4.0 ([`LICENSE`](LICENSE), [`LICENSE-ASSETS.md`](LICENSE-ASSETS.md)).
 
@@ -44,8 +44,10 @@ build. They need Chromium once: `npx playwright install chromium`.
   it).
 - `components/map/MapViewport.tsx` and `lib/map/viewport.ts`: pan, zoom,
   pinch and the camera maths.
-- `middleware.ts` and `app/layout.tsx`: `?lang=cs` is rendered in Czech on
-  the server, with canonical and hreflang links.
+- Do not add a `middleware.ts`: on Vercel it failed in production
+  (`MIDDLEWARE_INVOCATION_FAILED`) although the local build passed, so a
+  server-rendered `?lang=cs` needs another approach and a check on a Vercel
+  preview deployment first.
 - `scripts/`: asset scripts (thumbnails, icons, sprites). `tests/`: unit
   tests; `tests/e2e/`: smoke, layout and accessibility tests.
 - Design work: the Impeccable skill (`.agents/skills/impeccable`,
