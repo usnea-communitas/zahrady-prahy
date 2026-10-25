@@ -29,7 +29,8 @@
   --font-pplxsans: var(--font-interface-sans), Inter, -apple-system, sans-serif;
   --font-pplxsansmono:
     var(--font-interface-mono), 'JetBrains Mono', Consolas, monospace;
-  --font-pplxserif: var(--font-gallery-serif), Georgia, 'Times New Roman', serif;
+  --font-pplxserif:
+    var(--font-gallery-serif), Georgia, 'Times New Roman', serif;
   --text-caption: 11px;
   --leading-caption: 1.2;
   --text-body-sm: 15px;

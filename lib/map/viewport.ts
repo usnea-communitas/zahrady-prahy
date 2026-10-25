@@ -12,7 +12,11 @@ const MAP_ASPECT = 1672 / 941;
 export function coverZoom(viewportWidth: number, viewportHeight: number) {
   const width = Math.min(viewportWidth, viewportHeight * MAP_ASPECT);
   if (!(width > 0)) return 1;
-  return Math.max(1, viewportWidth / width, (viewportHeight * MAP_ASPECT) / width);
+  return Math.max(
+    1,
+    viewportWidth / width,
+    (viewportHeight * MAP_ASPECT) / width,
+  );
 }
 
 /** Highest zoom: 2.4× on wide screens, more on phones where the map starts covered. */

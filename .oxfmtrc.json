@@ -9,6 +9,7 @@
     "yarn.lock",
     "bun.lock",
     "bun.lockb",
+    "LICENSE-ASSETS.md",
     ".claude/skills/**",
     ".agents/skills/**"
   ]

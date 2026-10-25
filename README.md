@@ -40,7 +40,7 @@ fully available in Czech.
 - **Sourced visiting information.** Access, opening hours, where to find the
   entrance and how to take part are separate facts, each with a source link
   and a check date. When a source does not publish a regular schedule, the
-  atlas says so instead of guessing: *not found* means "no regular schedule
+  atlas says so instead of guessing: _not found_ means "no regular schedule
   found", never "closed".
 - **An optional soundscape**, "Zahrady nad Vltavou", that plays only when you
   press the note button. Nothing autoplays.
