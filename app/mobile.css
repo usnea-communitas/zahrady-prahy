@@ -3,6 +3,8 @@
  * Loaded after the other stylesheets, so it only has to override. */
 @media (max-width: 720px) {
   .map-experience {
+    /* The two header rows get their own band; the map stage starts below. */
+    --atlas-band: calc(max(10px, env(safe-area-inset-top)) + 104px);
     min-height: 100svh;
     padding: 0 !important;
     gap: 0 !important;
@@ -91,8 +93,10 @@
     display: none;
   }
   .map-experience .map-navigation {
+    top: auto !important;
     left: 50% !important;
     right: auto !important;
+    flex-direction: row;
     bottom: calc(52px + env(safe-area-inset-bottom)) !important;
     transform: translateX(-50%) !important;
   }

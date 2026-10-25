@@ -886,6 +886,29 @@ export default function Home() {
           revealRequest={revealRequest}
           isFullscreen={mapFullscreen}
           onToggleFullscreen={toggleMapFullscreen}
+          controls={
+            <button
+              className="motion-toggle"
+              type="button"
+              onClick={() => setMotionPaused((paused) => !paused)}
+              disabled={prefersReducedMotion}
+              aria-pressed={prefersReducedMotion ? undefined : isMotionPaused}
+              aria-label={
+                prefersReducedMotion
+                  ? t.footer.motionSystem
+                  : t.footer.motionPause
+              }
+              title={
+                prefersReducedMotion
+                  ? t.footer.motionSystemTitle
+                  : isMotionPaused
+                    ? t.footer.motionResume
+                    : t.footer.motionPause
+              }
+            >
+              {isMotionPaused ? <Play /> : <Pause />}
+            </button>
+          }
         >
           {!mapLoaded && (
             // eslint-disable-next-line @next/next/no-img-element -- 1.5 kB inline placeholder
@@ -1348,25 +1371,6 @@ export default function Home() {
             {t.footer.discovered(filteredGardens.length)}
           </output>
           <div className="footer-meta">
-            <button
-              className="motion-toggle"
-              type="button"
-              onClick={() => setMotionPaused((paused) => !paused)}
-              disabled={prefersReducedMotion}
-              aria-pressed={isMotionPaused}
-              title={
-                prefersReducedMotion ? t.footer.motionSystemTitle : undefined
-              }
-            >
-              {isMotionPaused ? <Play /> : <Pause />}
-              <span>
-                {prefersReducedMotion
-                  ? t.footer.motionSystem
-                  : isMotionPaused
-                    ? t.footer.motionResume
-                    : t.footer.motionPause}
-              </span>
-            </button>
             <a
               className="prototype-note"
               href="https://www.openstreetmap.org/copyright"

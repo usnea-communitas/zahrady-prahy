@@ -1244,28 +1244,6 @@ textarea:focus-visible {
   align-items: center;
   gap: 20px;
 }
-.motion-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 0;
-  background: transparent;
-  padding: 4px 0;
-  color: inherit;
-  font: inherit;
-  opacity: 0.78;
-}
-.motion-toggle:hover {
-  opacity: 1;
-}
-.motion-toggle:disabled {
-  cursor: default;
-  opacity: 0.48;
-}
-.motion-toggle svg {
-  width: 11px;
-  height: 11px;
-}
 .prototype-note {
   color: inherit;
   opacity: 0.64;
@@ -1750,9 +1728,6 @@ textarea:focus-visible {
   .intro-card {
     width: 360px;
     height: 240px;
-  }
-  .motion-toggle {
-    display: none;
   }
 }
 @media (max-height: 820px) {

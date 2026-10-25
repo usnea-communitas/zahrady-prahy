@@ -83,13 +83,15 @@
 .garden-marker {
   transform: translate(-50%, -50%) scale(calc(1 / var(--scene-zoom, 1)));
 }
+/* Zoom, full screen, overview and motion form a column at the left edge of
+   the map, where no marker sits, instead of a bar across the lower middle. */
 .map-navigation {
   position: absolute;
   z-index: 25;
-  bottom: 72px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: calc(var(--atlas-band, 0px) + 12px);
+  left: 16px;
   display: flex;
+  flex-direction: column;
   gap: 4px;
   padding: 5px;
   border: 1px solid #ffffffa3;
@@ -119,6 +121,16 @@
 .map-navigation svg {
   width: 17px;
   height: 17px;
+}
+/* An open list covers the left edge, so the controls move beside it. */
+.map-canvas:has(.garden-directory:not([hidden])) .map-navigation {
+  left: calc(20px + var(--directory-width, 320px) + 12px);
+}
+@media (max-width: 1050px), (max-height: 700px) {
+  /* Here the list steps aside while a garden is open. */
+  .map-canvas.has-selection:has(.garden-directory) .map-navigation {
+    left: 16px;
+  }
 }
 .map-legend {
   width: 284px;
@@ -407,8 +419,7 @@
   font-size: 12px;
 }
 .result-count,
-.prototype-note,
-.motion-toggle {
+.prototype-note {
   font-size: 12px;
 }
 @media (max-height: 740px) {

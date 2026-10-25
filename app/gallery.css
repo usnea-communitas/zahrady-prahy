@@ -20,28 +20,48 @@ body {
   letter-spacing: -0.015em;
 }
 .map-experience {
+  /* The header sits in its own band above the illustration, so no marker
+     can end up under it; the frame is the band plus the map stage. The
+     stage takes the height left after the title row and the spacing. */
+  --atlas-band: 76px;
+  --atlas-caption: 278px;
+  --atlas-pad: 20px;
+  --atlas-gap: 16px;
+  --directory-width: 320px;
   --atlas-frame-width: min(
-    calc(100vw - 48px),
-    calc((100svh - 330px) * 1.776833)
+    calc(100vw - 2 * var(--atlas-pad)),
+    calc(
+      (100svh - 2 * var(--atlas-pad) - var(--atlas-gap) - var(--atlas-caption) -
+          var(--atlas-band)) *
+        1.776833
+    )
   );
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
-  padding: 24px;
+  gap: var(--atlas-gap);
+  padding: var(--atlas-pad);
   background: var(--color-paper);
 }
 .map-experience .map-canvas {
   width: var(--atlas-frame-width);
+  height: calc(var(--atlas-frame-width) / 1.776833 + var(--atlas-band));
   min-height: 0;
-  aspect-ratio: 1672 / 941;
   flex: none;
   border-radius: var(--radius-cards);
   background: var(--color-putty);
 }
+.map-stage {
+  position: absolute;
+  inset: var(--atlas-band, 0px) 0 0;
+  z-index: 0;
+  overflow: hidden;
+  container-type: size;
+}
+/* The illustration fits the stage both ways, as the camera maths assume. */
 .map-plane {
-  width: 100%;
+  width: min(100cqw, 100cqh * 1.776833);
 }
 .map-wash {
   background: none;
@@ -230,10 +250,10 @@ body {
   backdrop-filter: none;
 }
 .garden-directory {
-  top: 80px;
+  top: calc(var(--atlas-band) + 4px);
   bottom: 62px;
   left: 20px;
-  width: 320px;
+  width: var(--directory-width);
   max-height: none;
   padding: var(--card-padding);
   scrollbar-color: var(--color-putty) transparent;
@@ -290,11 +310,11 @@ body {
   padding: var(--card-padding);
 }
 .garden-preview {
-  top: 80px;
+  top: calc(var(--atlas-band) + 4px);
   bottom: 62px;
   right: 20px;
   width: 370px;
-  max-height: calc(100% - 142px);
+  max-height: calc(100% - var(--atlas-band) - 66px);
   height: fit-content;
   display: flex;
   flex-direction: column;
@@ -505,18 +525,32 @@ body {
 .legend-heading svg {
   color: var(--color-graphite);
 }
+/* Two small chips in the lower corners instead of a bar across the whole
+   edge, so the markers near the bottom of the map stay clear. */
 .map-footer {
-  left: 20px;
-  right: 20px;
+  left: 16px;
+  right: 16px;
   bottom: 12px;
-  min-height: 36px;
-  padding: 0 12px;
-  background: #ebebeb52;
-  border-top: 1px solid var(--gallery-line);
+  min-height: 0;
+  align-items: flex-end;
+  padding: 0;
+  background: transparent;
+  border: 0;
   border-radius: 0;
   box-shadow: none;
-  backdrop-filter: blur(6px);
+  backdrop-filter: none;
   color: var(--color-ink);
+  pointer-events: none;
+}
+.map-footer > * {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: var(--radius-buttons);
+  background: rgba(231, 229, 228, 0.78);
+  backdrop-filter: blur(12px) saturate(1.12);
+  -webkit-backdrop-filter: blur(12px) saturate(1.12);
+  pointer-events: auto;
 }
 .marker-label {
   background: var(--color-bone);
@@ -627,7 +661,6 @@ body {
   font-size: 12px;
 }
 .map-navigation {
-  bottom: 64px;
   border-radius: var(--radius-buttons);
 }
 .filter-tray {
@@ -647,26 +680,38 @@ body {
 .search-shell {
   height: var(--gallery-control-size);
 }
+/* The header lives inside the frame, so its room follows the frame rather
+   than the window: the place count gives way first, then button labels. */
+.map-header {
+  container-type: inline-size;
+}
+@container (max-width: 920px) {
+  .search-count {
+    display: none;
+  }
+}
+@container (max-width: 820px) {
+  .header-actions > button > span:not(.sound-action):not(.active-filter-count) {
+    display: none;
+  }
+  .header-actions .glass-button,
+  .header-actions .add-button {
+    width: var(--gallery-control-size);
+    padding: 0 !important;
+  }
+}
 @media (max-width: 1200px) {
   .map-header {
     grid-template-columns: 40px minmax(200px, 360px) max-content;
   }
-  .map-experience .garden-directory {
-    width: 290px;
+  .map-experience {
+    --directory-width: 290px;
   }
   .map-experience .garden-preview {
     width: 330px;
   }
 }
 @media (max-height: 800px) {
-  .map-experience {
-    --atlas-frame-width: min(
-      calc(100vw - 40px),
-      calc((100svh - 140px) * 1.776833)
-    );
-    padding: 20px;
-    gap: 16px;
-  }
   .gallery-caption h1 {
     font-size: 43px;
   }
@@ -960,10 +1005,6 @@ body {
 .map-canvas:fullscreen .map-footer {
   bottom: 16px;
 }
-.map-canvas.is-map-fullscreen .map-navigation,
-.map-canvas:fullscreen .map-navigation {
-  bottom: 72px;
-}
 .map-canvas.is-map-fullscreen .map-header,
 .map-canvas:fullscreen .map-header {
   inset: 16px 20px auto;
@@ -1032,12 +1073,7 @@ body {
 
 @media (max-height: 800px) and (min-height: 701px) {
   .map-experience {
-    --atlas-frame-width: min(
-      calc(100vw - 40px),
-      calc((100svh - 330px) * 1.776833)
-    );
-    padding: 20px;
-    gap: 16px;
+    --atlas-caption: 274px;
   }
   .gallery-caption {
     gap: 16px;
@@ -1045,10 +1081,7 @@ body {
 }
 @media (max-height: 700px) {
   .map-experience {
-    --atlas-frame-width: min(
-      calc(100vw - 40px),
-      calc((100svh - 280px) * 1.776833)
-    );
+    --atlas-caption: 224px;
   }
   .gallery-caption {
     gap: 10px;
