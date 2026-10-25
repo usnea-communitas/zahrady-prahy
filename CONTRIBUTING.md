@@ -62,7 +62,7 @@ VERCEL=1 npm run build:vercel # the production build used on Vercel
 npm run test:e2e              # browser tests against that build
 ```
 
-All checks must pass. The browser tests use
+All checks must pass; CI runs the same ones. The browser tests use
 Playwright with Chromium (`npx playwright install chromium` once). For
 interface changes, also describe in the pull request what you tried by
 hand (desktop and, if relevant, a phone-sized window).
