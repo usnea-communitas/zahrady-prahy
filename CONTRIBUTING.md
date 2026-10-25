@@ -54,16 +54,18 @@ npm run dev
 Before you push:
 
 ```sh
-npm test             # unit tests (node --test)
-npm run lint         # oxlint
-npm run typecheck    # tsc --noEmit
-npm run build:vercel # the production build used on Vercel
-npm run format       # oxfmt, if you touched formatting
+npm test                      # unit tests (node --test)
+npm run lint                  # oxlint, including type errors
+npm run typecheck             # tsc --noEmit
+npx oxfmt --check             # formatting (npm run format fixes it)
+VERCEL=1 npm run build:vercel # the production build used on Vercel
+npm run test:e2e              # browser tests against that build
 ```
 
-All four checks must pass. There is no browser test suite; for interface
-changes, describe in the pull request what you tried by hand (desktop and,
-if relevant, a narrow window for the phone layout).
+All checks must pass. The browser tests use
+Playwright with Chromium (`npx playwright install chromium` once). For
+interface changes, also describe in the pull request what you tried by
+hand (desktop and, if relevant, a phone-sized window).
 
 ## Editing garden data
 

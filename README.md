@@ -72,9 +72,10 @@ focused on education, community and permaculture.
 - [Base UI](https://base-ui.com) primitives through
   [shadcn](https://ui.shadcn.com) (button, input, dialog)
 - [lucide-react](https://lucide.dev) icons
-- Tests with the built-in `node:test` runner, linting with
+- Unit tests with the built-in `node:test` runner, browser tests with
+  [Playwright](https://playwright.dev) and axe, linting with
   [oxlint](https://oxc.rs), formatting with oxfmt
-- Deployed on [Vercel](https://vercel.com) (`npm run build:vercel`)
+- Deployed on [Vercel](https://vercel.com) (`VERCEL=1 npm run build:vercel`)
 
 No database, no backend, no third-party scripts at runtime. Fonts are
 downloaded at build time and self-hosted.
@@ -84,13 +85,16 @@ downloaded at build time and self-hosted.
 Requires Node.js 22.13 or newer.
 
 ```sh
-npm ci               # install exactly the locked dependencies
-npm run dev          # start the development server
-npm test             # run the unit tests (node --test)
-npm run lint         # oxlint
-npm run typecheck    # tsc --noEmit
-npm run build:vercel # production build as deployed on Vercel
+npm ci                        # install exactly the locked dependencies
+npm run dev                   # start the development server
+npm test                      # run the unit tests (node --test)
+npm run lint                  # oxlint, including type errors
+npm run typecheck             # tsc --noEmit
+VERCEL=1 npm run build:vercel # production build as deployed on Vercel
+npm run test:e2e              # browser tests against that build
 ```
+
+The browser tests need Chromium once: `npx playwright install chromium`.
 
 `npm run build` and `npm start` produce and serve the Cloudflare Workers
 variant of the build (the project scaffold's original target); the live site
@@ -119,6 +123,7 @@ lib/
 public/
   map/, gardens/, audio/  Illustrations, sprites and the soundscape (see LICENSE-ASSETS.md)
 tests/                  Unit tests: catalogue, i18n, navigation, viewport
+tests/e2e/              Browser tests (Playwright): smoke, layout, accessibility
 docs/                   Rebuild notes and media provenance (prompts and tools)
 design/                 Design tokens and theme reference
 scripts/                One-off asset build scripts (sprites, map reference)
@@ -217,7 +222,7 @@ nothing collects data, accessibility is preserved), and the
 [`SECURITY.md`](SECURITY.md).
 
 Before opening a pull request, run `npm test`, `npm run lint`,
-`npm run typecheck` and `npm run build:vercel`.
+`npm run typecheck`, `VERCEL=1 npm run build:vercel` and `npm run test:e2e`.
 
 ## License
 
