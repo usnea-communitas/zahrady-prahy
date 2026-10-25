@@ -251,6 +251,14 @@
     display: flex !important;
   }
 }
+/* A portrait phone: with the list open, the map moves into the space above
+ * the sheet instead of staying behind it. */
+@media (max-width: 720px) {
+  .map-canvas:has(.garden-directory:not([hidden])):not(.has-selection)
+    .map-stage {
+    bottom: 58svh;
+  }
+}
 @media (max-width: 720px) and (prefers-reduced-motion: reduce),
   (max-height: 500px) and (prefers-reduced-motion: reduce) {
   .map-experience .garden-preview,

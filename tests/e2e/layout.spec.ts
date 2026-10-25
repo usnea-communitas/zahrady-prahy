@@ -66,6 +66,9 @@ const sizes = [
   [1280, 720],
   [1024, 768],
   [768, 1024],
+  // phones: the whole atlas fits between the header and the controls
+  [390, 844],
+  [360, 740],
   // a phone held sideways gets the phone layout with side panels
   [844, 390],
 ] as const;

@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
 import { Maximize2, Minimize2, Minus, Plus, RotateCcw } from 'lucide-react';
@@ -14,26 +15,17 @@ import { useT } from '@/components/i18n/LocaleProvider';
 import {
   boundMapView,
   coverZoom,
+  fitMapZoom,
   maxMapZoom,
   revealMapPoint,
+  zoomMapAround,
   type MapView as View,
   type MapRect,
 } from '@/lib/map/viewport';
 const initialView: View = { zoom: 1, x: 0, y: 0 };
-/** Default overview: whole map on wide screens, map filling the screen on portrait phones. */
-function homeView(): View {
-  const frame = mapFrame();
-  return {
-    // portrait phones: closer than the thin full-width strip, but not so close
-    // that most gardens start off-screen (drag pans, the list lists all)
-    zoom:
-      frame.height > frame.width
-        ? Math.min(coverZoom(frame.width, frame.height), 1.6)
-        : 1,
-    x: 0,
-    y: 0,
-  };
-}
+/** Room kept around the outermost markers when fitting them on screen. */
+const MARKER_MARGIN = 30;
+
 /**
  * The stage is the part of the frame below the header band; the illustration
  * is centred in it and every camera calculation uses its rectangle.
@@ -98,10 +90,39 @@ function usableMapArea(frame = mapFrame()): MapRect {
   if (bounds.bottom - bounds.top < 90) bounds.bottom = frame.height - 60;
   return bounds;
 }
+/**
+ * Default overview: the whole map on wide screens. On portrait phones the map
+ * is brought as close as it can be while every garden stays in view.
+ */
+function homeView(gardenBounds?: MapRect): View {
+  const frame = mapFrame();
+  if (frame.height <= frame.width || !gardenBounds) return initialView;
+  const fit = fitMapZoom(
+    frame.width,
+    frame.height,
+    gardenBounds,
+    usableMapArea(frame),
+    MARKER_MARGIN,
+  );
+  return {
+    zoom: Math.max(1, Math.min(coverZoom(frame.width, frame.height), fit)),
+    x: 0,
+    y: 0,
+  };
+}
+/** Pointer position relative to the centre of the stage. */
+function fromStageCentre(clientX: number, clientY: number) {
+  const frame = mapFrame();
+  return {
+    x: clientX - frame.left - frame.width / 2,
+    y: clientY - frame.top - frame.height / 2,
+  };
+}
 
 export function MapViewport({
   children,
   controls,
+  gardenBounds,
   focusTarget,
   revealRequest = 0,
   isFullscreen = false,
@@ -110,6 +131,8 @@ export function MapViewport({
   children: ReactNode;
   /** Extra buttons appended to the map controls (for example motion). */
   controls?: ReactNode;
+  /** Extent of all garden markers, in percent of the illustration. */
+  gardenBounds?: MapRect;
   focusTarget?: { id: string; x: number; y: number };
   revealRequest?: number;
   isFullscreen?: boolean;
@@ -117,14 +140,25 @@ export function MapViewport({
 }) {
   const t = useT();
   const [view, setView] = useState(initialView);
+  const viewRef = useRef(view);
   const [maxZoom, setMaxZoom] = useState(2.4);
   const placed = useRef(false);
   const drag = useRef<{ id: number; x: number; y: number; view: View } | null>(
     null,
   );
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinch = useRef<{
+    distance: number;
+    centre: { x: number; y: number };
+    view: View;
+  } | null>(null);
+  const suppressClick = useRef(false);
   const targetId = focusTarget?.id;
   const targetX = focusTarget?.x;
   const targetY = focusTarget?.y;
+  useEffect(() => {
+    viewRef.current = view;
+  }, [view]);
   function bounded(view: View): View {
     const frame = mapFrame();
     return boundMapView(
@@ -158,7 +192,7 @@ export function MapViewport({
       if (!placed.current) {
         placed.current = true;
         if (targetX === undefined || targetY === undefined) {
-          setView(homeView());
+          setView(homeView(gardenBounds));
           return;
         }
       }
@@ -178,9 +212,26 @@ export function MapViewport({
     const observer = new ResizeObserver(resize);
     if (stage) observer.observe(stage);
     return () => observer.disconnect();
-  }, [targetX, targetY]);
+  }, [targetX, targetY, gardenBounds]);
+  /** Zooms around the centre of what is visible. */
   function zoomBy(delta: number) {
-    setView((current) => bounded({ ...current, zoom: current.zoom + delta }));
+    setView((current) =>
+      bounded(zoomMapAround(current, current.zoom + delta, { x: 0, y: 0 })),
+    );
+  }
+  function endPointer(event: ReactPointerEvent<HTMLDivElement>) {
+    pointers.current.delete(event.pointerId);
+    if (pinch.current && pointers.current.size < 2) {
+      pinch.current = null;
+      suppressClick.current = true;
+      // A finger that stays on the glass keeps panning from where it is.
+      const [rest] = [...pointers.current.entries()];
+      drag.current = rest
+        ? { id: rest[0], ...rest[1], view: viewRef.current }
+        : null;
+      return;
+    }
+    if (drag.current?.id === event.pointerId) drag.current = null;
   }
   return (
     <>
@@ -219,10 +270,29 @@ export function MapViewport({
               zoomBy(event.key === '-' ? -0.2 : 0.2);
             } else if (event.key === '0') {
               event.preventDefault();
-              setView(homeView());
+              setView(homeView(gardenBounds));
             }
           }}
           onPointerDown={(event) => {
+            if (event.pointerType === 'touch') {
+              if (pointers.current.size === 0) suppressClick.current = false;
+              pointers.current.set(event.pointerId, {
+                x: event.clientX,
+                y: event.clientY,
+              });
+            }
+            if (pointers.current.size === 2) {
+              // Two fingers: pinch to zoom around the point between them.
+              const [a, b] = [...pointers.current.values()];
+              pinch.current = {
+                distance: Math.hypot(a.x - b.x, a.y - b.y) || 1,
+                centre: fromStageCentre((a.x + b.x) / 2, (a.y + b.y) / 2),
+                view: viewRef.current,
+              };
+              drag.current = null;
+              event.currentTarget.setPointerCapture(event.pointerId);
+              return;
+            }
             if (
               event.button !== 0 ||
               (event.target as Element).closest('button') ||
@@ -239,6 +309,34 @@ export function MapViewport({
             event.currentTarget.setPointerCapture(event.pointerId);
           }}
           onPointerMove={(event) => {
+            if (pointers.current.has(event.pointerId))
+              pointers.current.set(event.pointerId, {
+                x: event.clientX,
+                y: event.clientY,
+              });
+            const gesture = pinch.current;
+            if (gesture && pointers.current.size >= 2) {
+              const [a, b] = [...pointers.current.values()];
+              const frame = mapFrame();
+              const zoom = Math.max(
+                1,
+                Math.min(
+                  maxMapZoom(frame.width, frame.height),
+                  (gesture.view.zoom * Math.hypot(a.x - b.x, a.y - b.y)) /
+                    gesture.distance,
+                ),
+              );
+              const centre = fromStageCentre((a.x + b.x) / 2, (a.y + b.y) / 2);
+              const zoomed = zoomMapAround(gesture.view, zoom, gesture.centre);
+              setView(
+                bounded({
+                  zoom,
+                  x: zoomed.x + centre.x - gesture.centre.x,
+                  y: zoomed.y + centre.y - gesture.centre.y,
+                }),
+              );
+              return;
+            }
             const start = drag.current;
             if (!start || event.pointerId !== start.id) return;
             setView(
@@ -249,14 +347,15 @@ export function MapViewport({
               }),
             );
           }}
-          onPointerUp={() => {
-            drag.current = null;
-          }}
-          onPointerCancel={() => {
-            drag.current = null;
-          }}
-          onLostPointerCapture={() => {
-            drag.current = null;
+          onPointerUp={endPointer}
+          onPointerCancel={endPointer}
+          onLostPointerCapture={endPointer}
+          onClickCapture={(event) => {
+            // The lifted finger of a pinch must not open the marker under it.
+            if (!suppressClick.current) return;
+            suppressClick.current = false;
+            event.preventDefault();
+            event.stopPropagation();
           }}
         >
           {children}
@@ -294,7 +393,7 @@ export function MapViewport({
         </button>
         <button
           type="button"
-          onClick={() => setView(homeView())}
+          onClick={() => setView(homeView(gardenBounds))}
           aria-label={t.map.resetView}
           title={t.map.resetViewTitle}
         >

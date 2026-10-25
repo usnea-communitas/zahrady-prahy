@@ -71,4 +71,48 @@ test.describe('on a phone', () => {
     const sheet = await page.locator('.garden-preview').boundingBox();
     expect(sheet?.width).toBe(390);
   });
+
+  test('two fingers zoom the map and one finger pans it', async ({ page }) => {
+    await openAtlas(page);
+    const plane = page.locator('.map-plane');
+    const zoom = async () =>
+      Number(
+        await plane.evaluate((element) =>
+          getComputedStyle(element).getPropertyValue('--scene-zoom'),
+        ),
+      );
+    const stage = await page.locator('.map-stage').boundingBox();
+    if (!stage) throw new Error('no map stage');
+    const x = stage.x + stage.width / 2;
+    const y = stage.y + stage.height / 2;
+    const cdp = await page.context().newCDPSession(page);
+    const touch = (
+      type: 'touchStart' | 'touchMove' | 'touchEnd',
+      points: [number, number][],
+    ) =>
+      cdp.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: points.map(([px, py], id) => ({ x: px, y: py, id })),
+      });
+
+    const before = await zoom();
+    await touch('touchStart', [
+      [x - 30, y],
+      [x + 30, y],
+    ]);
+    for (let step = 1; step <= 6; step++)
+      await touch('touchMove', [
+        [x - 30 - step * 15, y],
+        [x + 30 + step * 15, y],
+      ]);
+    await touch('touchEnd', []);
+    expect(await zoom()).toBeGreaterThan(before * 1.5);
+
+    const zoomed = await plane.getAttribute('style');
+    await touch('touchStart', [[x, y]]);
+    for (let step = 1; step <= 4; step++)
+      await touch('touchMove', [[x - step * 20, y]]);
+    await touch('touchEnd', []);
+    expect(await plane.getAttribute('style')).not.toBe(zoomed);
+  });
 });

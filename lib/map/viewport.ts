@@ -19,6 +19,50 @@ export function coverZoom(viewportWidth: number, viewportHeight: number) {
   );
 }
 
+/**
+ * Highest zoom at which every point of `bounds` (percent of the illustration)
+ * stays inside `area` (pixels of the viewport) with the map centred, keeping
+ * `margin` pixels clear so whole markers fit, not just their centres.
+ */
+export function fitMapZoom(
+  viewportWidth: number,
+  viewportHeight: number,
+  bounds: MapRect,
+  area: MapRect,
+  margin = 0,
+) {
+  const artWidth = Math.min(viewportWidth, viewportHeight * MAP_ASPECT);
+  const artHeight = artWidth / MAP_ASPECT;
+  const centreX = viewportWidth / 2;
+  const centreY = viewportHeight / 2;
+  const limits: number[] = [];
+  const fit = (room: number, extent: number) => {
+    if (extent > 0) limits.push(room / extent);
+  };
+  fit(area.right - margin - centreX, (bounds.right / 100 - 0.5) * artWidth);
+  fit(centreX - area.left - margin, (0.5 - bounds.left / 100) * artWidth);
+  fit(area.bottom - margin - centreY, (bounds.bottom / 100 - 0.5) * artHeight);
+  fit(centreY - area.top - margin, (0.5 - bounds.top / 100) * artHeight);
+  return limits.length ? Math.min(...limits) : Infinity;
+}
+
+/**
+ * Changes the zoom while the point under `anchor` (pixels from the viewport
+ * centre, e.g. between two fingers) stays where it is.
+ */
+export function zoomMapAround(
+  view: MapView,
+  zoom: number,
+  anchor: { x: number; y: number },
+): MapView {
+  const factor = zoom / view.zoom;
+  return {
+    zoom,
+    x: anchor.x - (anchor.x - view.x) * factor,
+    y: anchor.y - (anchor.y - view.y) * factor,
+  };
+}
+
 /** Highest zoom: 2.4× on wide screens, more on phones where the map starts covered. */
 export function maxMapZoom(viewportWidth: number, viewportHeight: number) {
   return Math.max(2.4, coverZoom(viewportWidth, viewportHeight) * 1.6);

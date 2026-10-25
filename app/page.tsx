@@ -91,6 +91,14 @@ const gardenCategoryOrder: GardenCategory[] = [
   'nature',
 ];
 
+/** Where the markers lie on the illustration (percent), for the phone overview. */
+const gardenBounds = {
+  left: Math.min(...gardens.map((garden) => garden.artPosition.x)),
+  right: Math.max(...gardens.map((garden) => garden.artPosition.x)),
+  top: Math.min(...gardens.map((garden) => garden.artPosition.y)),
+  bottom: Math.max(...gardens.map((garden) => garden.artPosition.y)),
+};
+
 type SoundState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 type IntroInteractionMode = 'move' | 'resize';
 type IntroGeometry = {
@@ -893,6 +901,7 @@ export default function Home() {
               ? { id: selectedGarden.id, ...selectedGarden.artPosition }
               : undefined
           }
+          gardenBounds={gardenBounds}
           revealRequest={revealRequest}
           isFullscreen={mapFullscreen}
           onToggleFullscreen={toggleMapFullscreen}
