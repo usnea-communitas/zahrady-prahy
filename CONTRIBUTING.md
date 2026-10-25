@@ -102,5 +102,5 @@ in components.
 
 ## Questions
 
-Open a discussion or an issue, or write to <martin@usnea.ngo>. Please follow
-the [Code of Conduct](CODE_OF_CONDUCT.md).
+Open an issue or write to <martin@usnea.ngo>. Please follow the
+[Code of Conduct](CODE_OF_CONDUCT.md).
