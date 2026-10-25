@@ -787,7 +787,6 @@ body {
 
 /* Top identity row and map chrome share one quiet glass language. */
 .gallery-caption {
-  order: -1;
   position: relative;
   z-index: 40;
   flex: none;

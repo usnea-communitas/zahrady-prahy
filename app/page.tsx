@@ -890,6 +890,29 @@ export default function Home() {
         {t.skipLink}
       </a>
 
+      <div className="gallery-caption" id="top">
+        <div>
+          <h1>{t.caption.title}</h1>
+          <p>{t.caption.subtitle}</p>
+        </div>
+        <div
+          className="gallery-postcard-slot"
+          style={
+            postcardSlotHeight ? { minHeight: postcardSlotHeight } : undefined
+          }
+        >
+          {introCard}
+        </div>
+        <button
+          className="gallery-seal"
+          type="button"
+          onClick={() => setAboutOpen(true)}
+          aria-label={t.caption.about}
+        >
+          <Leaf aria-hidden="true" />
+        </button>
+      </div>
+
       <section
         ref={mapCanvasRef}
         className={`map-canvas${selectedGarden ? ' has-selection' : ''}${
@@ -897,129 +920,6 @@ export default function Home() {
         }${mapFullscreen ? ' is-map-fullscreen' : ''}`}
         aria-label={t.map.canvasLabel}
       >
-        <MapViewport
-          focusTarget={
-            selectedGarden
-              ? { id: selectedGarden.id, ...selectedGarden.artPosition }
-              : undefined
-          }
-          gardenBounds={gardenBounds}
-          revealRequest={revealRequest}
-          isFullscreen={mapFullscreen}
-          onToggleFullscreen={toggleMapFullscreen}
-          controls={
-            <button
-              className="motion-toggle"
-              type="button"
-              onClick={() => setMotionPaused((paused) => !paused)}
-              disabled={prefersReducedMotion}
-              aria-pressed={prefersReducedMotion ? undefined : isMotionPaused}
-              aria-label={
-                prefersReducedMotion
-                  ? t.footer.motionSystem
-                  : t.footer.motionPause
-              }
-              title={
-                prefersReducedMotion
-                  ? t.footer.motionSystemTitle
-                  : isMotionPaused
-                    ? t.footer.motionResume
-                    : t.footer.motionPause
-              }
-            >
-              {isMotionPaused ? <Play /> : <Pause />}
-            </button>
-          }
-        >
-          {!mapLoaded && (
-            // eslint-disable-next-line @next/next/no-img-element -- 1.5 kB inline placeholder
-            <img
-              className="map-art-placeholder"
-              src="/map/prague-storybook-vltava-v6-placeholder.webp"
-              alt=""
-              aria-hidden="true"
-            />
-          )}
-          <Image
-            ref={mapArtRef}
-            className="map-art"
-            src="/map/prague-storybook-vltava-v6-wide.webp"
-            alt={t.map.artAlt}
-            fill
-            priority
-            sizes="100vw"
-            onLoad={() => setMapLoaded(true)}
-            onError={() => setMapLoaded(true)}
-          />
-          <div className="map-wash" aria-hidden="true" />
-          <div className="paper-grain" aria-hidden="true" />
-          <MapMotionLayer
-            paused={isMotionPaused}
-            quiet={Boolean(selectedGarden) || filtersOpen}
-            ready={mapLoaded}
-          />
-
-          <fieldset className="garden-markers">
-            <legend className="sr-only">{t.map.markersLegend}</legend>
-            {filteredGardens.map((garden) => {
-              const isSelected = selectedId === garden.id;
-              const position = garden.artPosition;
-              const CategoryIcon = gardenCategoryIcons[garden.category];
-
-              return (
-                <button
-                  key={garden.id}
-                  ref={(node) => {
-                    markerRefs.current[garden.id] = node;
-                  }}
-                  type="button"
-                  className={`garden-marker marker-${garden.category}${
-                    isSelected ? ' is-selected' : ''
-                  }`}
-                  style={
-                    {
-                      left: `${position.x}%`,
-                      top: `${position.y}%`,
-                    } as CSSProperties
-                  }
-                  onClick={() => selectGarden(garden.id)}
-                  aria-label={t.map.markerLabel(
-                    garden.name,
-                    garden.area[locale],
-                  )}
-                  aria-pressed={isSelected}
-                >
-                  <span className="marker-aura" aria-hidden="true" />
-                  <span className="marker-core" aria-hidden="true">
-                    <CategoryIcon />
-                  </span>
-                  <span className="marker-label">
-                    <strong>{garden.name}</strong>
-                    <small>
-                      {garden.district} ·{' '}
-                      {categoryLabels[garden.category][locale]}
-                    </small>
-                  </span>
-                </button>
-              );
-            })}
-          </fieldset>
-        </MapViewport>
-
-        {!mapLoaded && (
-          <output className="map-loading">
-            <LoaderCircle aria-hidden="true" /> {t.map.loading}
-          </output>
-        )}
-
-        <output className="sr-only" aria-live="polite">
-          {fullscreenStatus === 'on'
-            ? t.map.fullscreenOn
-            : fullscreenStatus === 'failed'
-              ? t.map.fullscreenFailed
-              : ''}
-        </output>
-
         <header className="map-header">
           <a className="brand" href="#top" aria-label={t.header.home}>
             <span className="brand-mark" aria-hidden="true">
@@ -1192,6 +1092,194 @@ export default function Home() {
             </button>
           )}
         </div>
+
+        <section
+          className="garden-directory"
+          id="garden-list"
+          aria-label={t.directory.label}
+          hidden={!listOpen}
+        >
+          <div className="directory-heading">
+            <div>
+              <span className="directory-eyebrow">{t.directory.eyebrow}</span>
+              <h2>{t.directory.title}</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setListOpen(false)}
+              aria-label={t.directory.close}
+            >
+              <X />
+            </button>
+          </div>
+          <p className="directory-summary" aria-live="polite">
+            {t.directory.summary(filteredGardens.length, gardens.length)}
+            {categoryFilter
+              ? ` · ${categoryLabels[categoryFilter][locale]}`
+              : ''}
+          </p>
+          {(query || categoryFilter || activeFilters.size > 0) && (
+            <button
+              className="text-action"
+              type="button"
+              onClick={resetFilters}
+            >
+              {t.empty.reset}
+            </button>
+          )}
+          <ul>
+            {filteredGardens.map((garden) => (
+              <li key={garden.id}>
+                <button
+                  type="button"
+                  aria-pressed={selectedId === garden.id}
+                  onClick={() => selectGarden(garden.id)}
+                >
+                  <span className="directory-image">
+                    <Image
+                      src={thumbnailUrl(garden)}
+                      alt=""
+                      fill
+                      sizes="56px"
+                    />
+                  </span>
+                  <span>
+                    <strong lang="cs">{garden.name}</strong>
+                    <small>
+                      {garden.district} · {garden.area[locale]}
+                    </small>
+                  </span>
+                  <ArrowRight />
+                </button>
+              </li>
+            ))}
+          </ul>
+          {filteredGardens.length === 0 && <p>{t.directory.noMatch}</p>}
+          <p className="directory-footnote">{t.directory.footnote}</p>
+        </section>
+
+        <MapViewport
+          focusTarget={
+            selectedGarden
+              ? { id: selectedGarden.id, ...selectedGarden.artPosition }
+              : undefined
+          }
+          gardenBounds={gardenBounds}
+          revealRequest={revealRequest}
+          isFullscreen={mapFullscreen}
+          onToggleFullscreen={toggleMapFullscreen}
+          controls={
+            <button
+              className="motion-toggle"
+              type="button"
+              onClick={() => setMotionPaused((paused) => !paused)}
+              disabled={prefersReducedMotion}
+              aria-pressed={prefersReducedMotion ? undefined : isMotionPaused}
+              aria-label={
+                prefersReducedMotion
+                  ? t.footer.motionSystem
+                  : t.footer.motionPause
+              }
+              title={
+                prefersReducedMotion
+                  ? t.footer.motionSystemTitle
+                  : isMotionPaused
+                    ? t.footer.motionResume
+                    : t.footer.motionPause
+              }
+            >
+              {isMotionPaused ? <Play /> : <Pause />}
+            </button>
+          }
+        >
+          {!mapLoaded && (
+            // eslint-disable-next-line @next/next/no-img-element -- 1.5 kB inline placeholder
+            <img
+              className="map-art-placeholder"
+              src="/map/prague-storybook-vltava-v6-placeholder.webp"
+              alt=""
+              aria-hidden="true"
+            />
+          )}
+          <Image
+            ref={mapArtRef}
+            className="map-art"
+            src="/map/prague-storybook-vltava-v6-wide.webp"
+            alt={t.map.artAlt}
+            fill
+            priority
+            sizes="100vw"
+            onLoad={() => setMapLoaded(true)}
+            onError={() => setMapLoaded(true)}
+          />
+          <div className="map-wash" aria-hidden="true" />
+          <div className="paper-grain" aria-hidden="true" />
+          <MapMotionLayer
+            paused={isMotionPaused}
+            quiet={Boolean(selectedGarden) || filtersOpen}
+            ready={mapLoaded}
+          />
+
+          <fieldset className="garden-markers">
+            <legend className="sr-only">{t.map.markersLegend}</legend>
+            {filteredGardens.map((garden) => {
+              const isSelected = selectedId === garden.id;
+              const position = garden.artPosition;
+              const CategoryIcon = gardenCategoryIcons[garden.category];
+
+              return (
+                <button
+                  key={garden.id}
+                  ref={(node) => {
+                    markerRefs.current[garden.id] = node;
+                  }}
+                  type="button"
+                  className={`garden-marker marker-${garden.category}${
+                    isSelected ? ' is-selected' : ''
+                  }`}
+                  style={
+                    {
+                      left: `${position.x}%`,
+                      top: `${position.y}%`,
+                    } as CSSProperties
+                  }
+                  onClick={() => selectGarden(garden.id)}
+                  aria-label={t.map.markerLabel(
+                    garden.name,
+                    garden.area[locale],
+                  )}
+                  aria-pressed={isSelected}
+                >
+                  <span className="marker-aura" aria-hidden="true" />
+                  <span className="marker-core" aria-hidden="true">
+                    <CategoryIcon />
+                  </span>
+                  <span className="marker-label">
+                    <strong>{garden.name}</strong>
+                    <small>
+                      {garden.district} ·{' '}
+                      {categoryLabels[garden.category][locale]}
+                    </small>
+                  </span>
+                </button>
+              );
+            })}
+          </fieldset>
+        </MapViewport>
+
+        {!mapLoaded && (
+          <output className="map-loading">
+            <LoaderCircle aria-hidden="true" /> {t.map.loading}
+          </output>
+        )}
+
+        <output className="sr-only" aria-live="polite">
+          {fullscreenStatus === 'on'
+            ? t.map.fullscreenOn
+            : fullscreenStatus === 'failed'
+              ? t.map.fullscreenFailed
+              : ''}
+        </output>
 
         {filteredGardens.length === 0 && (
           <output className="empty-state" aria-live="polite">
@@ -1417,95 +1505,7 @@ export default function Home() {
             </a>
           </div>
         </footer>
-
-        <section
-          className="garden-directory"
-          id="garden-list"
-          aria-label={t.directory.label}
-          hidden={!listOpen}
-        >
-          <div className="directory-heading">
-            <div>
-              <span className="directory-eyebrow">{t.directory.eyebrow}</span>
-              <h2>{t.directory.title}</h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => setListOpen(false)}
-              aria-label={t.directory.close}
-            >
-              <X />
-            </button>
-          </div>
-          <p className="directory-summary" aria-live="polite">
-            {t.directory.summary(filteredGardens.length, gardens.length)}
-            {categoryFilter
-              ? ` · ${categoryLabels[categoryFilter][locale]}`
-              : ''}
-          </p>
-          {(query || categoryFilter || activeFilters.size > 0) && (
-            <button
-              className="text-action"
-              type="button"
-              onClick={resetFilters}
-            >
-              {t.empty.reset}
-            </button>
-          )}
-          <ul>
-            {filteredGardens.map((garden) => (
-              <li key={garden.id}>
-                <button
-                  type="button"
-                  aria-pressed={selectedId === garden.id}
-                  onClick={() => selectGarden(garden.id)}
-                >
-                  <span className="directory-image">
-                    <Image
-                      src={thumbnailUrl(garden)}
-                      alt=""
-                      fill
-                      sizes="56px"
-                    />
-                  </span>
-                  <span>
-                    <strong lang="cs">{garden.name}</strong>
-                    <small>
-                      {garden.district} · {garden.area[locale]}
-                    </small>
-                  </span>
-                  <ArrowRight />
-                </button>
-              </li>
-            ))}
-          </ul>
-          {filteredGardens.length === 0 && <p>{t.directory.noMatch}</p>}
-          <p className="directory-footnote">{t.directory.footnote}</p>
-        </section>
       </section>
-
-      <div className="gallery-caption" id="top">
-        <div>
-          <h1>{t.caption.title}</h1>
-          <p>{t.caption.subtitle}</p>
-        </div>
-        <div
-          className="gallery-postcard-slot"
-          style={
-            postcardSlotHeight ? { minHeight: postcardSlotHeight } : undefined
-          }
-        >
-          {introCard}
-        </div>
-        <button
-          className="gallery-seal"
-          type="button"
-          onClick={() => setAboutOpen(true)}
-          aria-label={t.caption.about}
-        >
-          <Leaf aria-hidden="true" />
-        </button>
-      </div>
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent
