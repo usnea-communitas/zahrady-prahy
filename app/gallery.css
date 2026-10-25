@@ -715,6 +715,16 @@ body {
     display: none;
   }
 }
+/* Tighter buttons, so the search hint is not cut off (Czech labels are longer). */
+@container (max-width: 900px) {
+  .header-actions {
+    gap: 6px;
+  }
+  .header-actions .glass-button,
+  .header-actions .add-button {
+    padding-inline: 12px;
+  }
+}
 @container (max-width: 820px) {
   .header-actions > button > span:not(.sound-action):not(.active-filter-count) {
     display: none;
