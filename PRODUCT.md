@@ -25,7 +25,7 @@ A storybook-style illustrated map of Prague in which every practical piece of vi
 - Primarily desktop; a phone layout exists (`app/mobile.css`, fixes of 2026-09-23).
 - Map, diacritics-insensitive search in both languages, category filters, shareable `?zahrada=` links (`?garden=` accepted as an alias).
 - The soundscape starts only from the note button, never automatically.
-- Language: English by default, Czech via the CS/EN switcher in the header; the choice is remembered in the browser (`zahrady.lang`), nothing is sent anywhere.
+- Language: English by default, Czech via the CS/EN switcher in the header or a link with `?lang=cs`; the choice is remembered in the browser (`zahrady.lang`), nothing is sent anywhere.
 
 ## Capabilities and Constraints
 
