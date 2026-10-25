@@ -57,11 +57,13 @@ async function blockedMarkers(page: Page) {
   });
 }
 
-const desktopSizes = [
+const sizes = [
   [1920, 1080],
   [1440, 900],
   [1280, 800],
   [768, 1024],
+  // a phone held sideways gets the phone layout with side panels
+  [844, 390],
 ] as const;
 
 for (const locale of ['en', 'cs'] as const) {
@@ -72,7 +74,7 @@ for (const locale of ['en', 'cs'] as const) {
       }, locale);
     });
 
-    for (const [width, height] of desktopSizes) {
+    for (const [width, height] of sizes) {
       test(`no garden marker sits under a control at ${width}×${height}`, async ({
         page,
       }) => {

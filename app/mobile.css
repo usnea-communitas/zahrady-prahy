@@ -1,7 +1,8 @@
-/* Phone layout (≤ 720 px): the map fills the screen, the title card and postcard
- * step aside, and the garden detail and the list open as bottom sheets.
+/* Phone layout (≤ 720 px wide, or ≤ 500 px tall such as a phone held
+ * sideways): the map fills the screen, the title card and postcard step aside,
+ * and the garden detail and the list open as bottom sheets.
  * Loaded after the other stylesheets, so it only has to override. */
-@media (max-width: 720px) {
+@media (max-width: 720px), (max-height: 500px) {
   .map-experience {
     /* The two header rows get their own band; the map stage starts below. */
     --atlas-band: calc(max(10px, env(safe-area-inset-top)) + 104px);
@@ -203,7 +204,55 @@
     }
   }
 }
-@media (max-width: 720px) and (prefers-reduced-motion: reduce) {
+/* A phone held sideways: there is room for one header row, the controls as
+ * a column at the left edge and the detail and list beside the map. */
+@media (max-height: 500px) and (min-width: 721px) {
+  .map-experience {
+    --atlas-band: calc(max(10px, env(safe-area-inset-top)) + 54px);
+  }
+  .map-experience .map-header {
+    flex-wrap: nowrap;
+  }
+  .map-experience .map-header .header-actions {
+    flex: none;
+  }
+  .map-experience .map-navigation {
+    top: calc(var(--atlas-band) + 8px) !important;
+    bottom: auto !important;
+    left: max(10px, env(safe-area-inset-left)) !important;
+    transform: none !important;
+    flex-direction: column;
+  }
+  .map-experience .garden-preview,
+  .map-experience .garden-directory {
+    top: calc(var(--atlas-band) + 4px) !important;
+    bottom: 8px !important;
+    height: auto !important;
+    max-height: none !important;
+    border-radius: var(--radius-cards) !important;
+    padding-bottom: 0 !important;
+    animation: preview-in 260ms var(--ease-out) both;
+  }
+  .map-experience .garden-preview {
+    left: auto !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+    width: min(360px, 46vw) !important;
+  }
+  .map-experience .garden-preview .preview-scroll {
+    max-height: 100% !important;
+  }
+  .map-experience .garden-directory {
+    left: max(10px, env(safe-area-inset-left)) !important;
+    right: auto !important;
+    width: min(320px, 42vw) !important;
+  }
+  /* With the panels at the sides the controls stay in reach. */
+  .map-canvas.has-selection .map-navigation {
+    display: flex !important;
+  }
+}
+@media (max-width: 720px) and (prefers-reduced-motion: reduce),
+  (max-height: 500px) and (prefers-reduced-motion: reduce) {
   .map-experience .garden-preview,
   .map-experience .garden-directory {
     animation: none;
