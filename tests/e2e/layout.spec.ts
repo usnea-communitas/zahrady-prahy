@@ -173,3 +173,53 @@ test('no visible text is smaller than 12 px, also in a low window', async ({
   );
   expect(tooSmall).toEqual([]);
 });
+
+test.describe('on short phones', () => {
+  for (const [width, height] of [
+    [320, 568],
+    [360, 640],
+    [390, 844],
+  ] as const)
+    test(`a selected garden and both lines of its label stay above the sheet at ${width} × ${height}`, async ({
+      browser,
+    }) => {
+      const page = await browser.newPage({
+        viewport: { width, height },
+        isMobile: true,
+        hasTouch: true,
+      });
+      for (const id of ['prales', 'liboza', 'na-polske']) {
+        await openAtlas(page, `/?zahrada=${id}`);
+        await expect(page.locator('.garden-preview')).toBeVisible();
+        // The sheet slides up and the map pans to the garden: judge where they settle.
+        await expect
+          .poll(
+            () =>
+              page.evaluate(() => {
+                const rect = (selector: string) =>
+                  document.querySelector(selector)?.getBoundingClientRect() ??
+                  null;
+                const header = rect('.map-header')?.bottom ?? 0;
+                const marker = rect('.garden-marker.is-selected .marker-core');
+                const label = rect(
+                  '.garden-marker.is-selected .marker-label small',
+                );
+                const sheet = rect('.garden-preview')?.top ?? 0;
+                const title = rect('.garden-preview .preview-body h2')?.bottom;
+                const actions = rect('.garden-preview .preview-actions')?.top;
+                const problems = [];
+                if (!marker || marker.top < header)
+                  problems.push('marker under the header');
+                if (!label || label.bottom > sheet)
+                  problems.push('label under the sheet');
+                if (!title || !actions || title > actions)
+                  problems.push('title under the actions');
+                return problems.join(', ');
+              }),
+            { message: id },
+          )
+          .toBe('');
+      }
+      await page.close();
+    });
+});

@@ -7,6 +7,10 @@ export type MapRect = {
 };
 
 const MAP_ASPECT = 1672 / 941;
+/** Pixels a selected marker and its two-line name label reach below the
+ * garden's point (the marker, the gap and the label, measured at 126 px on
+ * phones), with a little air. */
+export const SELECTED_LABEL_BELOW = 130;
 
 /** Zoom at which the illustration fills the whole frame (1 on landscape screens). */
 export function coverZoom(viewportWidth: number, viewportHeight: number) {
@@ -121,13 +125,21 @@ export function revealMapPoint(
     view.y +
     (((point.y / 100 - 0.5) * width) / (1672 / 941)) * view.zoom;
   const horizontalSpace = Math.min(120, (usable.right - usable.left) / 2);
-  const bottomSpace = Math.min(144, (usable.bottom - usable.top) / 2);
+  // The selected garden's two-line name label hangs below its marker: keep
+  // marker and label clear of a bottom sheet whenever the space allows it.
+  // The marker starts just above the point, so little room is needed there.
+  const height = usable.bottom - usable.top;
+  const bottomSpace = Math.min(
+    Math.max(SELECTED_LABEL_BELOW, Math.min(144, height / 2)),
+    Math.max(0, height - 12),
+  );
+  const topSpace = Math.min(40, Math.max(12, height - bottomSpace));
   const targetX = Math.max(
     usable.left + horizontalSpace,
     Math.min(usable.right - horizontalSpace, px),
   );
   const targetY = Math.max(
-    usable.top + 40,
+    usable.top + topSpace,
     Math.min(usable.bottom - bottomSpace, py),
   );
   return boundMapView(

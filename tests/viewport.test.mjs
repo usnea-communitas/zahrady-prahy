@@ -4,6 +4,7 @@ import {
   boundMapView,
   fitMapZoom,
   revealMapPoint,
+  SELECTED_LABEL_BELOW,
   zoomMapAround,
 } from '../lib/map/viewport.ts';
 import { gardens } from '../lib/gardens.ts';
@@ -59,6 +60,30 @@ await test('every garden can be revealed beside desktop panels, at fit and maxim
         );
       }
   }
+});
+await test('on a phone the selected marker and its label stay above the sheet', () => {
+  // usable area between the header and the sheet on a 360 × 740 phone
+  const safe = { left: 16, right: 344, top: 120, bottom: 269 };
+  for (const zoom of [1, 2, 3])
+    for (const garden of gardens) {
+      const view = revealMapPoint(
+        { zoom, x: 0, y: 400 },
+        garden.artPosition,
+        360,
+        740,
+        safe,
+      );
+      const artWidth = Math.min(360, (740 * 1672) / 941);
+      const y =
+        740 / 2 +
+        view.y +
+        (((garden.artPosition.y / 100 - 0.5) * artWidth) / (1672 / 941)) *
+          view.zoom;
+      assert.ok(
+        y >= safe.top + 11 && y + SELECTED_LABEL_BELOW <= safe.bottom + 1,
+        `${garden.id}: y=${y} at zoom ${zoom}`,
+      );
+    }
 });
 await test('reveal is stable when the marker already fits', () => {
   const view = { zoom: 1.8, x: 0, y: 0 };

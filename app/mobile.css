@@ -244,6 +244,33 @@
 }
 /* A portrait phone: with the list open, the map moves into the space above
  * the sheet instead of staying behind it. */
+/* Keep room above the sheet for the selected garden and its two-line name
+   label: header, marker and label take about 285 px. On short phones the
+   label's second line used to sit under the sheet. */
+@media (max-width: 720px) and (orientation: portrait) {
+  .map-experience .garden-preview {
+    max-height: min(
+      62svh,
+      calc(100svh - 285px - env(safe-area-inset-top, 0px))
+    ) !important;
+  }
+}
+/* That sheet is shorter on small phones: a lower illustration (still clear
+   of the close button) keeps the garden's name above the sheet's action bar,
+   and on the smallest ones a slightly smaller title does too. */
+@media (max-width: 720px) and (orientation: portrait) and (max-height: 700px) {
+  .map-experience .garden-preview .preview-illustration {
+    height: 104px !important;
+  }
+}
+@media (max-width: 720px) and (orientation: portrait) and (max-height: 600px) {
+  .map-experience .garden-preview .preview-body {
+    padding-top: 12px !important;
+  }
+  .map-experience .garden-preview .preview-body h2 {
+    font-size: 22px !important;
+  }
+}
 @media (max-width: 720px) {
   .map-canvas:has(.garden-directory:not([hidden])):not(.has-selection)
     .map-stage {
