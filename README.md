@@ -173,10 +173,13 @@ The interface has a small, dependency-free localisation layer:
   use its three plural forms.
 - [`components/i18n/LocaleProvider.tsx`](components/i18n/LocaleProvider.tsx)
   keeps the current language. The server always renders English; in the
-  browser a stored preference (`localStorage` key `zahrady.lang`) is applied
-  after hydration and `<html lang>` follows it. `useT()` returns the
-  dictionary for the current language, `useLocale()` also returns the locale
-  and the setter.
+  browser a `?lang=cs` link or a stored preference (`localStorage` key
+  `zahrady.lang`) is applied after hydration, and `<html lang>` and the
+  address follow it: Czech pages carry `?lang=cs`, so a copied link or a
+  shared garden opens in Czech. All of it happens in the browser, without
+  middleware (see [`AGENTS.md`](AGENTS.md)). `useT()` returns the dictionary
+  for the current language, `useLocale()` also returns the locale and the
+  setter.
 - The CS/EN switcher in the header is a group of `aria-pressed` buttons and
   announces the change politely in the language just chosen.
 - Content is bilingual at the data level (`Localized` fields in

@@ -6,13 +6,16 @@
  * facts) is bilingual at the data level, see `lib/gardens.ts` and
  * `lib/garden-visits.ts`, and resolved with `pick()`.
  *
- * English is the default; Czech is selected with the switcher in the header
- * or by a stored preference (`zahrady.lang`). No dependency is needed.
+ * English is the default; Czech is selected with the switcher in the header,
+ * by a `?lang=cs` link or by a stored preference (`zahrady.lang`), all in the
+ * browser (no middleware: see AGENTS.md). No dependency is needed.
  */
 export const locales = ['en', 'cs'] as const;
 export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = 'en';
 export const LOCALE_STORAGE_KEY = 'zahrady.lang';
+/** `?lang=cs` opens the atlas in Czech; the switcher keeps it in the address. */
+export const LOCALE_PARAM = 'lang';
 
 /** A value written in both languages. */
 export type Localized<T = string> = Readonly<Record<Locale, T>>;

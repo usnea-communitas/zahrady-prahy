@@ -55,6 +55,34 @@ test('Czech is one switch away and is remembered', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('lang', 'cs');
 });
 
+test('a ?lang=cs link opens in Czech and the address follows the switcher', async ({
+  page,
+}) => {
+  await page.goto('/?lang=cs&zahrada=prales');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'cs');
+  await expect(
+    page.getByRole('textbox', { name: 'Hledat zahradu nebo čtvrť' }),
+  ).toBeVisible();
+  // The garden link and the language survive together.
+  await expect(page.locator('.garden-preview')).toBeVisible();
+  expect(new URL(page.url()).searchParams.get('zahrada')).toBe('prales');
+  expect(new URL(page.url()).searchParams.get('lang')).toBe('cs');
+
+  await page.getByRole('button', { name: /English/ }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect
+    .poll(() => new URL(page.url()).searchParams.has('lang'))
+    .toBe(false);
+  await page.getByRole('button', { name: /Čeština/ }).click();
+  await expect
+    .poll(() => new URL(page.url()).searchParams.get('lang'))
+    .toBe('cs');
+
+  // Opening the plain address later keeps the language chosen last.
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'cs');
+});
+
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 

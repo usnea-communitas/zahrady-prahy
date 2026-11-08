@@ -1,4 +1,5 @@
 import type { GardenCategory, FilterId } from './gardens';
+import { LOCALE_PARAM, defaultLocale, isLocale } from './i18n.ts';
 
 export type AtlasNavigation = {
   query: string;
@@ -68,9 +69,13 @@ export function writeAtlasUrl(current: URL, state: AtlasNavigation): URL {
   return url;
 }
 
-/** A garden share is independent of the sender's search and filters. */
+/** A garden share is independent of the sender's search and filters, but
+ * opens in the language it was sent from (`?lang=cs`). */
 export function gardenShareUrl(current: URL, id: string): URL {
   const url = new URL(current.origin + current.pathname);
   url.searchParams.set(GARDEN_PARAM, id);
+  const locale = current.searchParams.get(LOCALE_PARAM);
+  if (isLocale(locale) && locale !== defaultLocale)
+    url.searchParams.set(LOCALE_PARAM, locale);
   return url;
 }

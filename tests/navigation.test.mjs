@@ -47,6 +47,24 @@ await test('garden shares never carry incompatible filters or search', () => {
   );
   assert.equal(url.href, 'https://example.test/?zahrada=liboza');
 });
+await test('a garden share opens in the language it was sent from', () => {
+  assert.equal(
+    gardenShareUrl(
+      new URL('https://example.test/?lang=cs&q=liboza&zahrada=prales'),
+      'liboza',
+    ).href,
+    'https://example.test/?zahrada=liboza&lang=cs',
+  );
+  // English is the default and needs no parameter; unknown values are dropped.
+  assert.equal(
+    gardenShareUrl(new URL('https://example.test/?lang=en'), 'liboza').href,
+    'https://example.test/?zahrada=liboza',
+  );
+  assert.equal(
+    gardenShareUrl(new URL('https://example.test/?lang=xx'), 'liboza').href,
+    'https://example.test/?zahrada=liboza',
+  );
+});
 await test('?garden= is accepted as an alias of ?zahrada= and normalised away', () => {
   const state = readAtlasUrl(new URL('https://example.test/?garden=liboza'), [
     'liboza',

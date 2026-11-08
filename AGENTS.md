@@ -47,7 +47,8 @@ build. They need Chromium once: `npx playwright install chromium`.
 - Do not add a `middleware.ts`: on Vercel it failed in production
   (`MIDDLEWARE_INVOCATION_FAILED`) although the local build passed, so a
   server-rendered `?lang=cs` needs another approach and a check on a Vercel
-  preview deployment first.
+  preview deployment first. Today `?lang=cs` is read in the browser
+  (`components/i18n/LocaleProvider.tsx`), which also keeps it in the address.
 - `scripts/`: asset scripts (thumbnails, icons, sprites). `tests/`: unit
   tests; `tests/e2e/`: smoke, layout and accessibility tests.
 - Design work: the Impeccable skill (`.agents/skills/impeccable`,
