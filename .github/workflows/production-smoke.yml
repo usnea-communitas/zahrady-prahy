@@ -1,0 +1,41 @@
+name: Production smoke test
+
+# Vercel reports every deployment to GitHub. After a successful production
+# deployment this checks the live atlas on the deployed commit: it answers,
+# all 13 gardens are on the map and one opens, and a ?lang=cs link opens a
+# garden in Czech on a phone, without console errors or failed requests. It
+# runs after the deploy and never blocks it; a failure shows on the commit
+# and in Actions.
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+# one queue per environment, so the Preview deployment of the same push cannot
+# cancel the production check
+concurrency:
+  group: production-smoke-${{ github.event.deployment.environment }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Live atlas answers and works in both languages
+    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Check https://zahrady-prahy.vercel.app/ (one retry)
+        env:
+          PROD_URL: https://zahrady-prahy.vercel.app/
+        run: npm run test:production || { echo "::warning::First attempt failed; retrying once in 20 s."; sleep 20; npm run test:production; }

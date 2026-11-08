@@ -35,6 +35,11 @@ Sites/Cloudflare variant instead. The browser tests reuse a server already
 running on port 4173, so stop one you started by hand before testing a new
 build. They need Chromium once: `npx playwright install chromium`.
 
+After each production deployment, `.github/workflows/production-smoke.yml`
+runs `npm run test:production` (`tests/production/`) on the deployed commit
+against the live site; it never blocks a deploy. Run it by hand against a
+local build with `PROD_URL=http://127.0.0.1:4173/`.
+
 ## Where things are
 
 - `app/page.tsx`: the whole atlas. Styles are layered `globals.css`,

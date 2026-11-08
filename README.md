@@ -96,6 +96,13 @@ npm run test:e2e              # browser tests against that build
 
 The browser tests need Chromium once: `npx playwright install chromium`.
 
+After every production deployment, `.github/workflows/production-smoke.yml`
+runs `npm run test:production` on the deployed commit against the live site:
+it must answer, show all 13 gardens and open one, and a `?lang=cs` link must
+open a garden in Czech on a phone, without console errors or failed requests.
+It never blocks a deploy. `PROD_URL` points it elsewhere, for example at a
+local build on `http://127.0.0.1:4173/`.
+
 `npm run build` and `npm start` produce and serve the Cloudflare Workers
 variant of the build (the project scaffold's original target); the live site
 uses the Vercel build.
@@ -124,6 +131,7 @@ public/
   map/, gardens/, audio/  Illustrations, sprites and the soundscape (see LICENSE-ASSETS.md)
 tests/                  Unit tests: catalogue, i18n, navigation, viewport
 tests/e2e/              Browser tests (Playwright): smoke, layout, accessibility
+tests/production/       Live-site check run after each production deployment
 docs/                   Rebuild notes and media provenance (prompts and tools)
 design/                 Design tokens and theme reference
 scripts/                One-off asset build scripts (sprites, map reference)
