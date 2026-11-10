@@ -1604,6 +1604,11 @@ export default function Home() {
               </span>
             </li>
           </ol>
+          <p className="about-project">
+            <a href="https://usnea.ngo/" target="_blank" rel="noopener">
+              {t.aboutDialog.project}
+            </a>
+          </p>
         </DialogContent>
       </Dialog>
     </main>

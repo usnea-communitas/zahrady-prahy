@@ -221,6 +221,7 @@ const en = {
     step2Text: 'See the illustration, the source and the real location.',
     step3Title: 'New places, gradually',
     step3Text: 'Accepting and reviewing your tips is being prepared.',
+    project: 'A project of Usnea communitas, z. s.',
   },
   dialog: {
     close: 'Close',
@@ -385,6 +386,7 @@ const cs: Dictionary = {
     step2Text: 'Prohlédněte si ilustraci, zdroj a skutečnou polohu.',
     step3Title: 'Nová místa postupně',
     step3Text: 'Přijímání a schvalování vašich tipů připravujeme.',
+    project: 'Projekt spolku Usnea communitas, z. s.',
   },
   dialog: {
     close: 'Zavřít',
