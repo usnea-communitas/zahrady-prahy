@@ -40,6 +40,26 @@ await test(`${site.host} answers with the atlas`, async () => {
   assert.match(await response.text(), /Zahrady Prahy/);
 });
 
+await test('security headers, icons, sitemap and the share preview', async () => {
+  const response = await fetch(site, {
+    headers: { 'cache-control': 'no-cache' },
+  });
+  const header = (name) => response.headers.get(name) ?? '';
+  assert.equal(header('x-content-type-options'), 'nosniff');
+  assert.equal(header('referrer-policy'), 'strict-origin-when-cross-origin');
+  assert.equal(header('x-frame-options'), 'SAMEORIGIN');
+  assert.match(header('permissions-policy'), /camera=\(\)/);
+  assert.match(header('content-security-policy'), /frame-ancestors 'self'/);
+  const html = await response.text();
+  const preview =
+    html.match(/property="og:image" content="([^"]+)"/)?.[1] ?? '';
+  assert.match(preview, /^https:\/\//, 'og:image is an absolute address');
+  assert.equal((await fetch(preview)).status, 200, `GET ${preview}`);
+  for (const path of ['/favicon.ico', '/robots.txt', '/sitemap.xml']) {
+    assert.equal((await fetch(new URL(path, site))).status, 200, `GET ${path}`);
+  }
+});
+
 await test('all 13 gardens are on the map and one opens, with no errors', async () => {
   const { page, problems } = await open('/', { width: 1440, height: 900 });
   assert.equal(await page.locator('.garden-marker').count(), 13);

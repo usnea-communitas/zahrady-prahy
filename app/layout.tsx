@@ -42,7 +42,10 @@ export const metadata: Metadata = {
     'Zahrady Prahy: discover community gardens, neighbourhood places and green oases on an illustrated map of Prague. Available in English and Czech.',
   applicationName: 'Zahrady Prahy',
   icons: {
-    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    icon: [
+      { url: '/favicon.ico', sizes: '16x16 32x32 48x48' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
