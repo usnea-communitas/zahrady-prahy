@@ -82,3 +82,8 @@ The ones most easily broken by accident:
 - Small, focused commits with English messages in the style of `git log`.
 - Check interface changes in a browser at desktop and phone sizes, in both
   languages, and attach screenshots to pull requests.
+- Changes reach `main` through pull requests: work on a branch
+  (`claude/<id>-…` or `codex/…`), open a pull request and merge it once CI is
+  green; for interface changes also check the Vercel preview deployment.
+  Every merge deploys to production. Do not push to `main` directly or
+  rewrite its history.
