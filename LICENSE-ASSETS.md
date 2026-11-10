@@ -19,10 +19,13 @@ It also covers the production prompts and provenance notes in
 [`docs/visual-generation-prompts.md`](docs/visual-generation-prompts.md),
 which are part of the same creative work.
 
-It does **not** cover `public/favicon.svg`, a generic placeholder icon from
-the project scaffold, nor any third-party fonts the build downloads and
-self-hosts (Playfair Display, Inter and JetBrains Mono are distributed under
-the SIL Open Font License by their respective authors).
+It does **not** cover the leaf inside the atlas seal (`public/favicon.svg`,
+also drawn in `public/apple-touch-icon.png`): the leaf is the "leaf" icon
+from [Lucide](https://lucide.dev), ISC License, Copyright (c) 2026 Lucide
+Icons and Contributors; the round frame around it belongs to this project.
+Nor does it cover any third-party fonts the build downloads and self-hosts
+(Playfair Display, Inter and JetBrains Mono are distributed under the SIL
+Open Font License by their respective authors).
 
 ## Licence
 
@@ -53,11 +56,10 @@ In brief:
 
 | Asset | How it was made |
 | --- | --- |
-| Illustrated map of Prague (`map/prague-storybook-vltava-v5.webp`, `-v6-wide.webp`) | Image generation and image editing built into the Codex/ChatGPT environment (OpenAI image generation), guided by the real course of the Vltava from OpenStreetMap data, then outpainted to a wider frame. |
+| Illustrated map of Prague (`map/prague-storybook-vltava-v6-wide.webp`; the earlier `-v5.webp` it was outpainted from was removed on 10 November 2026 and stays in the git history) | Image generation and image editing built into the Codex/ChatGPT environment (OpenAI image generation), guided by the real course of the Vltava from OpenStreetMap data, then outpainted to a wider frame. |
 | Blurred map placeholder (`-v6-placeholder.webp`) | Mechanically derived from the wide map. |
 | Animated tree cluster sprite (`map/motion/tree-cluster-v1.png`) | OpenAI image generation (transparent sprite), mechanically resized. |
 | Boat and bird sprites (`map/motion/*.webp`) | Cut from a sprite atlas created with Picsart and converted by `scripts/build-motion-sprites.mjs`. |
-| Garden map crops (`gardens/<id>.webp`, eight files) | Mechanical crops of the wide map centred on each garden's position, kept as a fallback; the interface uses the illustrated versions. |
 | Garden illustrations (`gardens/*-illustrated.webp`, thirteen files), postcard and social preview | AI-generated illustrations in the same storybook style, added on 4 September 2026; the individual prompts and tool were not recorded in the provenance notes. They are artistic renderings of real places, not documentary pictures. |
 | Soundscape "Zahrady nad Vltavou" (`audio/*`) | Generated with ElevenLabs Music v2 through Picsart, instrumental, then looped and mastered. |
 

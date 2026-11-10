@@ -15,7 +15,7 @@ are deliberately not committed; only converted production assets live in
 - Mode: built-in image generation, image edit.
 - Input guide: `work/prague-storybook-river-guide.png`, created from the previous storybook artwork and the exact OpenStreetMap Vltava path in `lib/map/geometry.generated.ts`.
 - Original generated file: kept outside the repository (the generation tool's local output folder); only the converted production asset is committed.
-- Workspace production asset: `public/map/prague-storybook-vltava-v5.webp`.
+- Workspace production asset: `public/map/prague-storybook-vltava-v5.webp` (removed on 10 November 2026 as unused; it remains in the git history).
 
 Exact production prompt:
 
@@ -93,7 +93,7 @@ Constraints: no text, buildings, people, border, watermark, cropped canopy, cast
 - Mode: built-in image generation, new illustration atlas.
 - Result: two attempts reached neither billing nor an output file; the style-reference edit endpoint and the no-reference generation endpoint both returned a network error.
 - Production fallback: eight 900 × 320 WebP crops mechanically derived from `public/map/prague-storybook-vltava-v6-wide.webp`, centered on each garden's projected map position and animated with a slow camera drift in CSS.
-- Workspace production assets: `public/gardens/metrofarm.webp`, `prales.webp`, `kotlaska.webp`, `troja.webp`, `mecislavka.webp`, `vidimova.webp`, `prokopka.webp`, and `velky-haj.webp`.
+- Workspace production assets (removed on 10 November 2026 as unused; they remain in the git history): `public/gardens/metrofarm.webp`, `prales.webp`, `kotlaska.webp`, `troja.webp`, `mecislavka.webp`, `vidimova.webp`, `prokopka.webp`, and `velky-haj.webp`.
 
 Exact canonical atlas prompt (the no-reference retry omitted only the sentence beginning `Input images:`):
 
