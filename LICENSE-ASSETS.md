@@ -20,7 +20,7 @@ It also covers the production prompts and provenance notes in
 which are part of the same creative work.
 
 It does **not** cover the leaf inside the atlas seal (`public/favicon.svg`,
-also drawn in `public/apple-touch-icon.png`): the leaf is the "leaf" icon
+also drawn in `public/apple-touch-icon.png` and `public/favicon.ico`): the leaf is the "leaf" icon
 from [Lucide](https://lucide.dev), ISC License, Copyright (c) 2026 Lucide
 Icons and Contributors; the round frame around it belongs to this project.
 Nor does it cover any third-party fonts the build downloads and self-hosts
