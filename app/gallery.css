@@ -641,16 +641,6 @@ body {
 .about-dialog .how-list li .how-step-number {
   color: var(--color-graphite);
 }
-.about-dialog .about-project {
-  margin: 4px 0 0;
-  font-size: 14px;
-  text-align: center;
-}
-.about-dialog .about-project a {
-  color: var(--color-ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
 .about-dialog [data-slot='dialog-close'],
 .add-garden-dialog [data-slot='dialog-close'] {
   background: var(--color-bone);
