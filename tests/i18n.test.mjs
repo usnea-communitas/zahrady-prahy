@@ -85,18 +85,18 @@ await test('only a valid stored language is honoured, and storage failures fall 
     null,
   );
 });
-await test('the document is served in English and the switcher is wired into the header', () => {
-  const layout = readFileSync(
-    new URL('../app/layout.tsx', import.meta.url),
-    'utf8',
-  );
-  const page = readFileSync(
-    new URL('../app/page.tsx', import.meta.url),
-    'utf8',
-  );
-  assert.ok(layout.includes('<html lang={defaultLocale}>'));
-  assert.ok(layout.includes("locale: 'en_US'"));
-  assert.ok(layout.includes('og:locale:alternate'));
-  assert.ok(layout.includes('<LocaleProvider>'));
+await test('each page is served in its language and the switcher is wired into the header', () => {
+  const read = (file) =>
+    readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
+  const template = read('index.html');
+  const server = read('src/entry-server.tsx');
+  const client = read('src/main.tsx');
+  const page = read('app/page.tsx');
+  // English by default; the build writes each page's own language.
+  assert.ok(template.includes('<html lang="en">'));
+  assert.ok(server.includes("'en_US'"));
+  assert.ok(server.includes('og:locale:alternate'));
+  assert.ok(server.includes('<LocaleProvider initialLocale={route.locale}>'));
+  assert.ok(client.includes('<LocaleProvider initialLocale={route.locale}>'));
   assert.ok(page.includes('<LanguageSwitcher />'));
 });

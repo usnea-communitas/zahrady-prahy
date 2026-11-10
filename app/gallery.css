@@ -31,8 +31,10 @@ body {
   --atlas-frame-width: min(
     calc(100vw - 2 * var(--atlas-pad)),
     calc(
-      (100svh - 2 * var(--atlas-pad) - var(--atlas-gap) - var(--atlas-caption) -
-          var(--atlas-band)) *
+      (
+          100svh - 2 * var(--atlas-pad) - var(--atlas-gap) -
+            var(--atlas-caption) - var(--atlas-band)
+        ) *
         1.776833
     )
   );
@@ -177,6 +179,10 @@ body {
 }
 .header-actions .header-sound {
   padding: 0;
+}
+/* "About the map" in the header only where the postcard and seal are hidden (mobile.css). */
+.header-actions .header-about {
+  display: none;
 }
 .header-actions button:hover,
 .header-actions .glass-button:hover,

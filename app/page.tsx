@@ -10,7 +10,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
-import Image from 'next/image';
+import Image from '@/components/ui/image';
 import {
   ArrowRight,
   List,
@@ -54,6 +54,8 @@ import { MapViewport } from '@/components/map/MapViewport';
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
 import { useLocale } from '@/components/i18n/LocaleProvider';
 import { registerGardenSearch } from '@/lib/webmcp';
+import { pageTitle } from '@/lib/page-meta';
+import { parseRoutePath } from '@/lib/routes';
 import {
   emptyNavigation,
   readAtlasUrl,
@@ -143,9 +145,17 @@ function uniqueVisitSources(visit: GardenVisit) {
     );
 }
 
-export default function Home() {
+/** The atlas. `initialGardenId` is the garden of the page being built or
+ * hydrated (`/zahrada/<id>/`), so its detail is already in the static HTML. */
+export default function Home({
+  initialGardenId = '',
+}: { initialGardenId?: string } = {}) {
   useEffect(registerGardenSearch, []);
   const { locale, t } = useLocale();
+  const localeRef = useRef(locale);
+  useEffect(() => {
+    localeRef.current = locale;
+  }, [locale]);
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioFadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const markerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -155,9 +165,11 @@ export default function Home() {
   const introInteractionRef = useRef<IntroInteraction | null>(null);
   const introLiveGeometryRef = useRef<IntroGeometry | null>(null);
   const introTouchedRef = useRef(false);
-  const [navigation, setNavigation] =
-    useState<AtlasNavigation>(emptyNavigation);
-  const navigationRef = useRef<AtlasNavigation>(emptyNavigation);
+  const [navigation, setNavigation] = useState<AtlasNavigation>(() => ({
+    ...emptyNavigation,
+    selectedId: initialGardenId,
+  }));
+  const navigationRef = useRef<AtlasNavigation>(navigation);
   const { query, selectedId, category: categoryFilter } = navigation;
   const activeFilters = useMemo(
     () => new Set(navigation.filters),
@@ -199,6 +211,11 @@ export default function Home() {
 
   const selectedGarden =
     filteredGardens.find((garden) => garden.id === selectedId) ?? null;
+
+  // The static page carries the title of its garden; keep it in step.
+  useEffect(() => {
+    document.title = pageTitle(locale, selectedGarden);
+  }, [locale, selectedGarden]);
   const selectedVisit = selectedGarden?.visit ?? null;
   const isSoundPlaying = soundState === 'playing';
   const isMotionPaused = motionPaused || prefersReducedMotion;
@@ -222,7 +239,12 @@ export default function Home() {
       setNavigation(next);
       setShareStatus('');
       if (next.query || next.filters.length || next.category) setListOpen(true);
-      const clean = writeAtlasUrl(url, next);
+      // The address's own language: back and forward may cross a switch.
+      const routeLocale = parseRoutePath(
+        url.pathname,
+        gardens.map((garden) => garden.id),
+      ).locale;
+      const clean = writeAtlasUrl(url, next, routeLocale);
       if (clean.href !== url.href)
         window.history.replaceState(window.history.state, '', clean);
     };
@@ -295,7 +317,11 @@ export default function Home() {
       navigationRef.current = next;
       setNavigation(next);
       setShareStatus('');
-      const url = writeAtlasUrl(new URL(window.location.href), next);
+      const url = writeAtlasUrl(
+        new URL(window.location.href),
+        next,
+        localeRef.current,
+      );
       if (url.href !== window.location.href) {
         if (mode === 'push')
           window.history.pushState(window.history.state, '', url);
@@ -328,6 +354,7 @@ export default function Home() {
     const url = gardenShareUrl(
       new URL(window.location.href),
       selectedGarden.id,
+      locale,
     );
     try {
       await navigator.clipboard.writeText(url.href);
@@ -993,6 +1020,16 @@ export default function Home() {
                 )}
               </span>
             </button>
+            {/* Phones hide the postcard and the seal, so "About the map" lives here there. */}
+            <button
+              className="header-about"
+              type="button"
+              onClick={() => setAboutOpen(true)}
+              aria-label={t.caption.about}
+              title={t.caption.about}
+            >
+              <Leaf aria-hidden="true" />
+            </button>
             {/* The instrumental soundscape contains no spoken word, so there is nothing to caption. */}
             {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
             <audio
@@ -1191,7 +1228,7 @@ export default function Home() {
           }
         >
           {!mapLoaded && (
-            // eslint-disable-next-line @next/next/no-img-element -- 1.5 kB inline placeholder
+            // a 1.5 kB placeholder while the map loads
             <img
               className="map-art-placeholder"
               src="/map/prague-storybook-vltava-v6-placeholder.webp"

@@ -62,9 +62,9 @@ their own, at their own pace. It is built and maintained by
 
 ## Tech stack
 
-- [React 19](https://react.dev) with the App Router conventions of Next.js,
-  run by [vinext](https://github.com/cloudflare/vinext) on
-  [Vite](https://vite.dev)
+- [React 19](https://react.dev) on [Vite](https://vite.dev), prerendered to
+  static HTML at build time: 28 pages (the atlas and each garden, in English
+  and Czech), no server code at runtime
 - [TypeScript](https://www.typescriptlang.org), strict
 - [Tailwind CSS 4](https://tailwindcss.com) for utilities, plus hand-written
   CSS for the atlas
@@ -74,10 +74,11 @@ their own, at their own pace. It is built and maintained by
 - Unit tests with the built-in `node:test` runner, browser tests with
   [Playwright](https://playwright.dev) and axe, linting with
   [oxlint](https://oxc.rs), formatting with oxfmt
-- Deployed on [Vercel](https://vercel.com) (`VERCEL=1 npm run build:vercel`)
+- Served as static files by [Vercel](https://vercel.com) (`vercel.json`)
 
-No database, no backend, no third-party scripts at runtime. Fonts are
-downloaded at build time and self-hosted.
+No database, no backend, no third-party scripts at runtime. The fonts (Inter,
+Playfair Display, JetBrains Mono; SIL Open Font License) are stored in
+`public/fonts/`.
 
 ## Getting started
 
@@ -89,7 +90,7 @@ npm run dev                   # start the development server
 npm test                      # run the unit tests (node --test)
 npm run lint                  # oxlint, including type errors
 npm run typecheck             # tsc --noEmit
-VERCEL=1 npm run build:vercel # production build as deployed on Vercel
+npm run build                 # the static pages in dist/, as deployed on Vercel
 npm run test:e2e              # browser tests against that build
 ```
 
@@ -97,14 +98,29 @@ The browser tests need Chromium once: `npx playwright install chromium`.
 
 After every production deployment, `.github/workflows/production-smoke.yml`
 runs `npm run test:production` on the deployed commit against the live site:
-it must answer, show all 13 gardens and open one, and a `?lang=cs` link must
-open a garden in Czech on a phone, without console errors or failed requests.
+it must answer, show all 13 gardens and open one, the Czech and garden pages
+must exist with their share pictures, and an older `?lang=cs` link must open a
+garden in Czech on a phone, without console errors or failed requests.
 It never blocks a deploy. `PROD_URL` points it elsewhere, for example at a
 local build on `http://127.0.0.1:4173/`.
 
-`npm run build` and `npm start` produce and serve the Cloudflare Workers
-variant of the build (the project scaffold's original target); the live site
-uses the Vercel build.
+`npm run preview` serves `dist/` the way Vercel does (headers from
+`vercel.json`, trailing slashes, the 404 page).
+
+### Addresses
+
+| Page      | English          | Czech               |
+| --------- | ---------------- | ------------------- |
+| The atlas | `/`              | `/cs/`              |
+| A garden  | `/zahrada/<id>/` | `/cs/zahrada/<id>/` |
+
+Each page has its own title, description, canonical address, `hreflang`
+alternates, share picture (`/og/<id>.jpg`, made at build time from the
+garden's illustration) and, for a garden, schema.org `Place` data; all pages
+are in `sitemap.xml`. Search and filters stay query parameters. Older links
+(`?zahrada=`, `?garden=`, `?lang=cs`) still work: a small script in the head of
+`/` sends them to the matching page before anything renders, and also sends a
+visitor who chose Czech before from `/` to `/cs/`.
 
 ## Project structure
 
@@ -179,14 +195,12 @@ The interface has a small, dependency-free localisation layer:
   enforce this). Strings that depend on a number are functions, so Czech can
   use its three plural forms.
 - [`components/i18n/LocaleProvider.tsx`](components/i18n/LocaleProvider.tsx)
-  keeps the current language. The server always renders English; in the
-  browser a `?lang=cs` link or a stored preference (`localStorage` key
-  `zahrady.lang`) is applied after hydration, and `<html lang>` and the
-  address follow it: Czech pages carry `?lang=cs`, so a copied link or a
-  shared garden opens in Czech. All of it happens in the browser, without
-  middleware (see [`AGENTS.md`](AGENTS.md)). `useT()` returns the dictionary
-  for the current language, `useLocale()` also returns the locale and the
-  setter.
+  keeps the current language. Every page is built in its own language
+  (`/…` English, `/cs/…` Czech); the switcher changes the language in place,
+  replaces the address with the other language's page and remembers the
+  choice (`localStorage` key `zahrady.lang`), so `/` sends a returning Czech
+  visitor to `/cs/`. `useT()` returns the dictionary for the current
+  language, `useLocale()` also returns the locale and the setter.
 - The CS/EN switcher in the header is a group of `aria-pressed` buttons and
   announces the change politely in the language just chosen.
 - Content is bilingual at the data level (`Localized` fields in
@@ -235,7 +249,7 @@ nothing collects data, accessibility is preserved), and the
 [`SECURITY.md`](SECURITY.md).
 
 Before opening a pull request, run `npm test`, `npm run lint`,
-`npm run typecheck`, `VERCEL=1 npm run build:vercel` and `npm run test:e2e`.
+`npm run typecheck`, `npm run build` and `npm run test:e2e`.
 
 ## License
 

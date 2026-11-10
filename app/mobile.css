@@ -32,6 +32,10 @@
   .gallery-seal {
     display: none !important;
   }
+  .map-experience .header-actions .header-about {
+    display: grid;
+    place-items: center;
+  }
 
   /* Header: brand + search on the first row, actions under it on the right. */
   .map-experience .map-header {

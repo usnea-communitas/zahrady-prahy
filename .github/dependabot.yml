@@ -3,13 +3,10 @@
 # update gets its own pull request so it can be read and tested alone.
 # Updates are proposed only after a version has been public for a week.
 #
-# The static rebuild of the atlas (package Z-01) removes vinext, Nitro,
-# Cloudflare, wrangler and the OpenAI Sites plugin, so Dependabot leaves
-# them alone until then (their November group broke the build). The
-# atlas runs on Node 22, so @types/node stays on 22, and TypeScript's next
-# major is chosen in Z-01. oxlint 1.90 dropped a rule the lint config uses
-# and adds one that flags app/page.tsx, and a newer oxfmt reformats files
-# nobody changed; Z-01 reworks that code. Remove these ignores with Z-01.
+# The atlas runs on Node 22, so @types/node stays on 22. oxlint 1.90
+# dropped a rule the lint config uses and adds one that flags
+# app/page.tsx, and TypeScript's next major needs its own look; both wait
+# for a pull request of their own.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -24,14 +21,8 @@ updates:
         patterns: ['*']
         update-types: [minor, patch]
     ignore:
-      - dependency-name: vinext
-      - dependency-name: nitro
-      - dependency-name: '@cloudflare/*'
-      - dependency-name: wrangler
-      - dependency-name: '@openai/sites-vite-plugin'
       - dependency-name: oxlint
       - dependency-name: oxlint-tsgolint
-      - dependency-name: oxfmt
       - dependency-name: '@types/node'
         update-types: [version-update:semver-major]
       - dependency-name: typescript
