@@ -4,8 +4,10 @@
 # Updates are proposed only after a version has been public for a week.
 #
 # The static rebuild of the atlas (package Z-01) removes vinext, Nitro,
-# Cloudflare, wrangler and the OpenAI Sites plugin; until then, major
-# updates of those can be closed with a note instead of merged.
+# Cloudflare, wrangler and the OpenAI Sites plugin, so Dependabot leaves
+# them alone until then (their November group broke the build). The
+# atlas runs on Node 22, so @types/node stays on 22, and TypeScript's next
+# major is chosen in Z-01. Remove these ignores with Z-01.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -19,6 +21,16 @@ updates:
       npm-minor-and-patch:
         patterns: ['*']
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: vinext
+      - dependency-name: nitro
+      - dependency-name: '@cloudflare/*'
+      - dependency-name: wrangler
+      - dependency-name: '@openai/sites-vite-plugin'
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule:
