@@ -129,3 +129,22 @@ Materials/textures: visible watercolor blooms, gouache foliage, fine hand-inked 
 
 Constraints: exactly eight cells, exactly 2 columns and 4 rows, exact ordering, exact uniform cream gutters; no captions, no labels, no letters, no numbers, no logos, no signs with text, no UI, no icons, no badges, no map pins, no people in the foreground, no famous Prague landmarks, no river, no castle, no cathedral, no television tower, no watermark. Do not merge cells. Do not allow objects or paint to cross the cream gutters. Avoid photorealism, generic flat vector art, modern 3D rendering, harsh shadows, neon colors, and duplicate garden layouts.
 ```
+
+## Garden illustrations (thirteen files, 4 September 2026)
+
+The thirteen `public/gardens/<id>-illustrated.webp` images (1000 × 563 WebP)
+are the pictures in each garden's detail panel and postcard. Their prompts
+were **not recorded** and could not be recovered:
+
+- They were added by Codex in commit `df88da2` ("Expand garden map with
+  illustrated places", 4 September 2026), whose message has no body and no
+  prompt.
+- No document in the repository history describes them; the files carry no
+  generator metadata (checked on 10 November 2026).
+- [`LICENSE-ASSETS.md`](../LICENSE-ASSETS.md) therefore describes them only as
+  AI-generated illustrations in the same storybook style as the map.
+
+What is known: they are artistic renderings of the real places, not
+documentary pictures, and they follow the style of the illustrated map above.
+If a garden's illustration is ever regenerated, record its tool, date and
+exact prompt in this section, as for the other assets.
