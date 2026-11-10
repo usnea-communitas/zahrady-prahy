@@ -8,8 +8,8 @@
 # them alone until then (their November group broke the build). The
 # atlas runs on Node 22, so @types/node stays on 22, and TypeScript's next
 # major is chosen in Z-01. oxlint 1.90 dropped a rule the lint config uses
-# and adds one that flags app/page.tsx, which Z-01 reworks. Remove these
-# ignores with Z-01.
+# and adds one that flags app/page.tsx, and a newer oxfmt reformats files
+# nobody changed; Z-01 reworks that code. Remove these ignores with Z-01.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -31,6 +31,7 @@ updates:
       - dependency-name: '@openai/sites-vite-plugin'
       - dependency-name: oxlint
       - dependency-name: oxlint-tsgolint
+      - dependency-name: oxfmt
       - dependency-name: '@types/node'
         update-types: [version-update:semver-major]
       - dependency-name: typescript
