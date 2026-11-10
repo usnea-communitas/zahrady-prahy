@@ -223,6 +223,9 @@ Deliberate gaps and what comes next:
 There are no usage statistics, testimonials or visitor numbers to report, and
 none are invented.
 
+What changed in each version is in [CHANGELOG.md](CHANGELOG.md) and on the
+[releases page](https://github.com/usnea-communitas/zahrady-prahy/releases).
+
 ## Contributing
 
 Bug reports, data corrections and pull requests are welcome. Please read
