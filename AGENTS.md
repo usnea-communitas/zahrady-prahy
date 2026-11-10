@@ -9,9 +9,9 @@ Maintainer workspace: if an untracked `STAV.md` exists in the repo root, read it
 
 Zahrady Prahy (Gardens of Prague) is an illustrated, bilingual atlas of 13
 Prague community gardens: <https://zahrady-prahy.vercel.app>. English is the
-default; Czech is complete and chosen with the CS/EN switcher. It is a project
-of Usnea communitas, z. s. Code is MIT, the illustrations, maps and music are
-CC BY-NC-SA 4.0 ([`LICENSE`](LICENSE), [`LICENSE-ASSETS.md`](LICENSE-ASSETS.md)).
+default; Czech is complete and chosen with the CS/EN switcher. Code is MIT,
+the illustrations, maps and music are CC BY-NC-SA 4.0
+([`LICENSE`](LICENSE), [`LICENSE-ASSETS.md`](LICENSE-ASSETS.md)).
 
 Stack: vinext (the Next.js App Router API on Vite), React 19, strict
 TypeScript, Tailwind 4 with hand-written CSS, Playwright and axe for browser

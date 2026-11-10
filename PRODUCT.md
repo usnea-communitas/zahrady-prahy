@@ -14,7 +14,7 @@ People who want to discover Prague's community gardens and urban nature on their
 
 ## Product Purpose
 
-An illustrated interactive atlas of 13 Prague community gardens. A project of Usnea communitas, z. s., a Czech nonprofit association.
+An illustrated interactive atlas of 13 Prague community gardens.
 
 ## Positioning
 

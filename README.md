@@ -57,9 +57,8 @@ fully available in Czech.
 ## Who it is for
 
 People who want to explore Prague's community gardens and urban nature on
-their own, at their own pace. It is a project of
-[Usnea communitas, z. s.](https://usnea.ngo), a Czech nonprofit association
-focused on education, community and permaculture.
+their own, at their own pace. It is built and maintained by
+[Martin Pazderník](https://github.com/martinpazdernik-source).
 
 ## Tech stack
 
@@ -248,10 +247,8 @@ Before opening a pull request, run `npm test`, `npm run lint`,
 - River geometry derived from OpenStreetMap data, © OpenStreetMap
   contributors, [ODbL](https://www.openstreetmap.org/copyright).
 
-## About Usnea communitas
+## Contact
 
-[Usnea communitas, z. s.](https://usnea.ngo) is a Czech nonprofit association
-(registered in Prague in 2026) devoted to education, communities, nature and
-permaculture. Zahrady Prahy is one of its open projects; the source lives in
-the [usnea-communitas](https://github.com/usnea-communitas) organisation on
-GitHub. Contact: <martin@usnea.ngo>.
+The source lives on
+[GitHub](https://github.com/usnea-communitas/zahrady-prahy). Contact:
+<martin@usnea.ngo>.

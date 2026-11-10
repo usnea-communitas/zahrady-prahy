@@ -38,8 +38,8 @@ licence (CC BY-NC-SA 4.0):
 
 In short, you may share and adapt them, provided that you
 
-- **give attribution** — credit "Zahrady Prahy / Martin Pazderník, Usnea
-  communitas, z. s." and link to <https://zahrady-prahy.vercel.app>,
+- **give attribution** — credit "Zahrady Prahy / Martin Pazderník" and link
+  to <https://zahrady-prahy.vercel.app>,
 - use them **non-commercially**, and
 - **share alike** — distribute any adaptation under the same licence.
 
