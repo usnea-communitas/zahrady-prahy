@@ -397,12 +397,12 @@ export const gardenVisits = {
     ),
     hours: fact(
       {
-        cs: 'Bar/kavárna: út–pá a ne 17:00–21:00; po a so zavřeno. Tento rozvrh není otevírací dobou samotné zahrady.',
-        en: 'Bar/café: Tue–Fri and Sun 17:00–21:00; closed on Mon and Sat. These are not the opening hours of the garden itself.',
+        cs: 'Bar/kavárna v sezoně 2026 (duben–říjen): út–pá a ne 17:00–21:00; po a so zavřeno, na začátku sezony podle počasí. Rozvrh mimo sezonu jsme nenašli. Tento rozvrh není otevírací dobou samotné zahrady.',
+        en: 'Bar/café in the 2026 season (April–October): Tue–Fri and Sun 17:00–21:00; closed on Mon and Sat, at the start of the season depending on the weather. We did not find a schedule outside the season. These are not the opening hours of the garden itself.',
       },
       'published',
-      [prazeleninaRules],
-      { cs: 'bar a kavárna', en: 'bar and café' },
+      [prazeleninaRules, prazeleninaHome],
+      { cs: 'bar a kavárna, sezona 2026', en: 'bar and café, 2026 season' },
     ),
     participation: fact(
       {
