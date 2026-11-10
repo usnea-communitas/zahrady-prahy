@@ -5,6 +5,7 @@ import {
   writeAtlasUrl,
   gardenShareUrl,
 } from '../lib/atlas-navigation.ts';
+import { allRoutes, parseRoutePath, routePath } from '../lib/routes.ts';
 
 await test('search, filters, category and selected garden round-trip together', () => {
   const state = {
@@ -16,13 +17,15 @@ await test('search, filters, category and selected garden round-trip together', 
   const url = writeAtlasUrl(
     new URL('https://example.test/?campaign=atlas'),
     state,
+    'en',
   );
+  assert.equal(url.pathname, '/zahrada/metrofarm/');
   assert.deepEqual(readAtlasUrl(url, ['metrofarm']), state);
   assert.equal(url.searchParams.get('campaign'), 'atlas');
 });
 await test('malformed links cannot introduce invalid IDs or duplicate filters', () => {
   const url = new URL(
-    'https://example.test/?zahrada=missing&typ=invalid&filtry=events,invalid,events,compost&q=' +
+    'https://example.test/zahrada/missing/?typ=invalid&filtry=events,invalid,events,compost&q=' +
       'x'.repeat(400),
   );
   const state = readAtlasUrl(url, ['metrofarm']);
@@ -34,38 +37,38 @@ await test('malformed links cannot introduce invalid IDs or duplicate filters', 
 await test('clearing selection and filters removes stale URL parameters', () => {
   const url = writeAtlasUrl(
     new URL(
-      'https://example.test/?zahrada=liboza&typ=community&q=liboza&filtry=compost',
+      'https://example.test/cs/zahrada/liboza/?typ=community&q=liboza&filtry=compost',
     ),
     { query: '', selectedId: '', category: null, filters: [] },
+    'cs',
   );
+  assert.equal(url.pathname, '/cs/');
   assert.equal(url.search, '');
 });
 await test('garden shares never carry incompatible filters or search', () => {
   const url = gardenShareUrl(
     new URL('https://example.test/?q=elsewhere&typ=nature#garden-list'),
     'liboza',
+    'en',
   );
-  assert.equal(url.href, 'https://example.test/?zahrada=liboza');
+  assert.equal(url.href, 'https://example.test/zahrada/liboza/');
 });
 await test('a garden share opens in the language it was sent from', () => {
   assert.equal(
     gardenShareUrl(
-      new URL('https://example.test/?lang=cs&q=liboza&zahrada=prales'),
+      new URL('https://example.test/cs/zahrada/prales/?q=liboza'),
       'liboza',
+      'cs',
     ).href,
-    'https://example.test/?zahrada=liboza&lang=cs',
+    'https://example.test/cs/zahrada/liboza/',
   );
-  // English is the default and needs no parameter; unknown values are dropped.
+  // English is the default and has no prefix.
   assert.equal(
-    gardenShareUrl(new URL('https://example.test/?lang=en'), 'liboza').href,
-    'https://example.test/?zahrada=liboza',
-  );
-  assert.equal(
-    gardenShareUrl(new URL('https://example.test/?lang=xx'), 'liboza').href,
-    'https://example.test/?zahrada=liboza',
+    gardenShareUrl(new URL('https://example.test/'), 'liboza', 'en').href,
+    'https://example.test/zahrada/liboza/',
   );
 });
-await test('?garden= is accepted as an alias of ?zahrada= and normalised away', () => {
+await test('older ?zahrada=, ?garden= and ?lang= links are read and written away', () => {
   const state = readAtlasUrl(new URL('https://example.test/?garden=liboza'), [
     'liboza',
   ]);
@@ -79,13 +82,37 @@ await test('?garden= is accepted as an alias of ?zahrada= and normalised away', 
     'prales',
   );
   const clean = writeAtlasUrl(
-    new URL('https://example.test/?garden=liboza'),
+    new URL('https://example.test/?garden=liboza&lang=cs'),
     state,
+    'cs',
   );
-  assert.equal(clean.href, 'https://example.test/?zahrada=liboza');
+  assert.equal(clean.href, 'https://example.test/cs/zahrada/liboza/');
   assert.equal(
     readAtlasUrl(new URL('https://example.test/?garden=missing'), ['liboza'])
       .selectedId,
     '',
   );
+});
+await test('page addresses: language prefix, garden segment, trailing slash', () => {
+  const ids = ['prales', 'liboza'];
+  assert.equal(routePath({ locale: 'en', gardenId: '' }), '/');
+  assert.equal(routePath({ locale: 'cs', gardenId: '' }), '/cs/');
+  assert.equal(
+    routePath({ locale: 'en', gardenId: 'prales' }),
+    '/zahrada/prales/',
+  );
+  assert.equal(
+    routePath({ locale: 'cs', gardenId: 'prales' }),
+    '/cs/zahrada/prales/',
+  );
+  assert.deepEqual(parseRoutePath('/cs/zahrada/liboza/', ids), {
+    locale: 'cs',
+    gardenId: 'liboza',
+  });
+  assert.deepEqual(parseRoutePath('/zahrada/unknown/', ids), {
+    locale: 'en',
+    gardenId: '',
+  });
+  assert.deepEqual(parseRoutePath('/en/', ids), { locale: 'en', gardenId: '' });
+  assert.equal(allRoutes(ids).length, 6);
 });

@@ -80,6 +80,14 @@ const en = {
   meta: {
     title: 'Gardens of Prague — a living map of community gardens',
     tagline: 'Prague grows together.',
+    siteName: 'Gardens of Prague',
+    description:
+      'Zahrady Prahy: discover community gardens, neighbourhood places and green oases on an illustrated map of Prague. Available in English and Czech.',
+    shareTitle: 'Zahrady Prahy — Gardens of Prague',
+    shareDescription:
+      'Prague grows together. A living map of community gardens.',
+    shareImageAlt: 'Illustrated Prague with a community garden lit up',
+    gardenImageAlt: 'Illustration of {name}',
   },
   skipLink: 'Skip the map and show the list of gardens',
   map: {
@@ -238,6 +246,13 @@ const cs: Dictionary = {
   meta: {
     title: 'Zahrady Prahy — živá mapa komunitních zahrad',
     tagline: 'Praha roste společně.',
+    siteName: 'Zahrady Prahy',
+    description:
+      'Zahrady Prahy: objevte komunitní zahrady, sousedská místa a zelené oázy na ilustrované mapě Prahy. Česky i anglicky.',
+    shareTitle: 'Zahrady Prahy — Gardens of Prague',
+    shareDescription: 'Praha roste společně. Živá mapa komunitních zahrad.',
+    shareImageAlt: 'Ilustrovaná Praha s rozsvícenou komunitní zahradou',
+    gardenImageAlt: 'Ilustrace: {name}',
   },
   skipLink: 'Přeskočit mapu a zobrazit seznam zahrad',
   map: {

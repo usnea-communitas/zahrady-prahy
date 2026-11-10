@@ -20,13 +20,8 @@ jobs:
       - run: npm run typecheck
       - run: npx oxfmt --check
       - run: npm test
-      # The Vercel build output, the same as the live site. Nitro's provider
-      # detection prefers GitHub Actions over VERCEL=1 and would emit a Node
-      # server in .output/, so the preset is named explicitly.
-      - run: npm run build:vercel
-        env:
-          VERCEL: '1'
-          NITRO_PRESET: vercel
+      # The static pages in dist/, the same files Vercel serves.
+      - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v7

@@ -63,28 +63,78 @@ test('a ?lang=cs link opens in Czech and the address follows the switcher', asyn
   await expect(
     page.getByRole('textbox', { name: 'Hledat zahradu nebo čtvrť' }),
   ).toBeVisible();
-  // The garden link and the language survive together.
+  // The garden link and the language survive together, now as the address.
   await expect(page.locator('.garden-preview')).toBeVisible();
-  expect(new URL(page.url()).searchParams.get('zahrada')).toBe('prales');
-  expect(new URL(page.url()).searchParams.get('lang')).toBe('cs');
+  expect(new URL(page.url()).pathname).toBe('/cs/zahrada/prales/');
 
   await page.getByRole('button', { name: /English/ }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect
-    .poll(() => new URL(page.url()).searchParams.has('lang'))
-    .toBe(false);
+    .poll(() => new URL(page.url()).pathname)
+    .toBe('/zahrada/prales/');
   await page.getByRole('button', { name: /Čeština/ }).click();
   await expect
-    .poll(() => new URL(page.url()).searchParams.get('lang'))
-    .toBe('cs');
+    .poll(() => new URL(page.url()).pathname)
+    .toBe('/cs/zahrada/prales/');
 
   // Opening the plain address later keeps the language chosen last.
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'cs');
 });
 
+test('every garden has its own page in both languages', async ({ page }) => {
+  const errors = collectErrors(page);
+  await openAtlas(page, '/cs/zahrada/kotlaska/');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'cs');
+  await expect(page).toHaveTitle(
+    'Komunitní centrum a zahrada Kotlaska — Zahrady Prahy',
+  );
+  const head = page.locator('head');
+  await expect(head.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://zahrady-prahy.vercel.app/cs/zahrada/kotlaska/',
+  );
+  await expect(
+    head.locator('link[rel="alternate"][hreflang="en"]'),
+  ).toHaveAttribute(
+    'href',
+    'https://zahrady-prahy.vercel.app/zahrada/kotlaska/',
+  );
+  await expect(head.locator('meta[property="og:image"]')).toHaveAttribute(
+    'content',
+    'https://zahrady-prahy.vercel.app/og/kotlaska.jpg',
+  );
+  const place = JSON.parse(
+    (await head.locator('script[type="application/ld+json"]').textContent()) ??
+      '{}',
+  );
+  expect(place.name).toBe('Komunitní centrum a zahrada Kotlaska');
+  // The detail is in the page before any script runs.
+  const html = await (await page.request.get('/cs/zahrada/kotlaska/')).text();
+  expect(html).toContain('garden-preview');
+
+  // Another garden is another address, without loading a page.
+  await page.locator('.preview-close').click();
+  await page.locator('.garden-marker').first().click();
+  await expect
+    .poll(() => new URL(page.url()).pathname)
+    .toMatch(/^\/cs\/zahrada\/[a-z-]+\/$/);
+  await expect(page).toHaveTitle(/ — Zahrady Prahy$/);
+  await page.goBack();
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/cs/');
+  expect(errors).toEqual([]);
+});
+
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+  test('"About the map" opens from the header', async ({ page }) => {
+    await openAtlas(page);
+    await page
+      .getByRole('button', { name: 'About the map Zahrady Prahy' })
+      .click();
+    await expect(page.getByRole('dialog')).toContainText('How the map works');
+  });
 
   test('the page does not scroll sideways and a garden opens as a sheet', async ({
     page,

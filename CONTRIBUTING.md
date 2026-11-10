@@ -58,7 +58,7 @@ npm test                      # unit tests (node --test)
 npm run lint                  # oxlint, including type errors
 npm run typecheck             # tsc --noEmit
 npx oxfmt --check             # formatting (npm run format fixes it)
-VERCEL=1 npm run build:vercel # the production build used on Vercel
+npm run build                 # the static pages in dist/, as deployed on Vercel
 npm run test:e2e              # browser tests against that build
 ```
 

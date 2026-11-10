@@ -60,6 +60,28 @@ await test('security headers, icons, sitemap and the share preview', async () =>
   }
 });
 
+await test('the Czech atlas and each garden page exist with their share pictures', async () => {
+  for (const [path, picture] of [
+    ['/cs/', '/zahrady-prahy-og.jpg'],
+    ['/zahrada/prales/', '/og/prales.jpg'],
+    ['/cs/zahrada/prales/', '/og/prales.jpg'],
+  ]) {
+    const response = await fetch(new URL(path, site), {
+      headers: { 'cache-control': 'no-cache' },
+    });
+    assert.equal(response.status, 200, `GET ${path}`);
+    assert.match(
+      response.headers.get('content-security-policy') ?? '',
+      /script-src 'self'/,
+    );
+    const html = await response.text();
+    const image =
+      html.match(/property="og:image" content="([^"]+)"/)?.[1] ?? '';
+    assert.ok(image.endsWith(picture), `${path}: og:image ${image}`);
+    assert.equal((await fetch(new URL(picture, site))).status, 200, picture);
+  }
+});
+
 await test('all 13 gardens are on the map and one opens, with no errors', async () => {
   const { page, problems } = await open('/', { width: 1440, height: 900 });
   assert.equal(await page.locator('.garden-marker').count(), 13);

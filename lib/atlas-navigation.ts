@@ -1,5 +1,6 @@
 import type { GardenCategory, FilterId } from './gardens';
-import { LOCALE_PARAM, defaultLocale, isLocale } from './i18n.ts';
+import type { Locale } from './i18n.ts';
+import { parseRoutePath, routePath } from './routes.ts';
 
 export type AtlasNavigation = {
   query: string;
@@ -23,25 +24,30 @@ const categoryIds = [
 ];
 const filterIds = ['children', 'accessible', 'compost', 'events'];
 
-/** The canonical share parameter. Links generated before the English
- * interface existed use it, so it stays. */
+/** Older links named the garden in the query (`?zahrada=`, the English alias
+ * `?garden=`) and the language in `?lang=`. A small script in the head of `/`
+ * turns them into page addresses before anything renders; they are still read
+ * here and always written away. */
 export const GARDEN_PARAM = 'zahrada';
-/** English alias accepted on input; it is normalised to `zahrada`. */
 export const GARDEN_PARAM_ALIAS = 'garden';
+const LEGACY_PARAMS = [GARDEN_PARAM, GARDEN_PARAM_ALIAS, 'lang'];
 
 /** URL input is untrusted. Unknown IDs never become UI state. */
 export function readAtlasUrl(
   url: URL,
   gardenIds: readonly string[],
 ): AtlasNavigation {
-  const selected =
+  const legacy =
     url.searchParams.get(GARDEN_PARAM) ??
     url.searchParams.get(GARDEN_PARAM_ALIAS) ??
     '';
+  const selected =
+    parseRoutePath(url.pathname, gardenIds).gardenId ||
+    (gardenIds.includes(legacy) ? legacy : '');
   const category = url.searchParams.get('typ');
   return {
     query: (url.searchParams.get('q') ?? '').slice(0, 200),
-    selectedId: gardenIds.includes(selected) ? selected : '',
+    selectedId: selected,
     category: categoryIds.includes(category ?? '')
       ? (category as GardenCategory)
       : null,
@@ -51,12 +57,17 @@ export function readAtlasUrl(
   };
 }
 
-/** Preserve unrelated query parameters, but own the atlas parameters. */
-export function writeAtlasUrl(current: URL, state: AtlasNavigation): URL {
+/** The garden and the language are the page address; search and filters
+ * stay query parameters, and unrelated parameters are preserved. */
+export function writeAtlasUrl(
+  current: URL,
+  state: AtlasNavigation,
+  locale: Locale,
+): URL {
   const url = new URL(current);
+  url.pathname = routePath({ locale, gardenId: state.selectedId });
   const values: Record<string, string> = {
     q: state.query,
-    [GARDEN_PARAM]: state.selectedId,
     typ: state.category ?? '',
     filtry: [...new Set(state.filters)].sort().join(','),
   };
@@ -64,18 +75,13 @@ export function writeAtlasUrl(current: URL, state: AtlasNavigation): URL {
     if (value) url.searchParams.set(key, value);
     else url.searchParams.delete(key);
   }
-  // The alias is only ever read; the canonical parameter carries the state.
-  url.searchParams.delete(GARDEN_PARAM_ALIAS);
+  for (const key of LEGACY_PARAMS) url.searchParams.delete(key);
   return url;
 }
 
 /** A garden share is independent of the sender's search and filters, but
- * opens in the language it was sent from (`?lang=cs`). */
-export function gardenShareUrl(current: URL, id: string): URL {
-  const url = new URL(current.origin + current.pathname);
-  url.searchParams.set(GARDEN_PARAM, id);
-  const locale = current.searchParams.get(LOCALE_PARAM);
-  if (isLocale(locale) && locale !== defaultLocale)
-    url.searchParams.set(LOCALE_PARAM, locale);
-  return url;
+ * opens in the language it was sent from: `/zahrada/<id>/` or
+ * `/cs/zahrada/<id>/`. */
+export function gardenShareUrl(current: URL, id: string, locale: Locale): URL {
+  return new URL(routePath({ locale, gardenId: id }), current.origin);
 }

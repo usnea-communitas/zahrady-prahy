@@ -13,9 +13,10 @@ default; Czech is complete and chosen with the CS/EN switcher. Code is MIT,
 the illustrations, maps and music are CC BY-NC-SA 4.0
 ([`LICENSE`](LICENSE), [`LICENSE-ASSETS.md`](LICENSE-ASSETS.md)).
 
-Stack: vinext (the Next.js App Router API on Vite), React 19, strict
-TypeScript, Tailwind 4 with hand-written CSS, Playwright and axe for browser
-tests. The live site is the Vercel build.
+Stack: React 19 on Vite, prerendered to static HTML at build time (no server
+code at runtime), strict TypeScript, Tailwind 4 with hand-written CSS,
+Playwright and axe for browser tests. Vercel serves `dist/` as static files
+(`vercel.json`).
 
 ## Before you commit
 
@@ -24,16 +25,19 @@ npm run lint                    # oxlint, type-aware
 npm run typecheck               # tsc --noEmit
 npx oxfmt --check               # formatting; npm run format fixes it
 npm test                        # unit tests (node --test)
-VERCEL=1 npm run build:vercel   # the build the live site uses
+npm run build                   # the 28 static pages in dist/, what Vercel serves
 npm run test:e2e                # Playwright and axe against that build
 ```
 
-CI runs the same steps; on GitHub Actions it also sets `NITRO_PRESET=vercel`,
-because Nitro's provider detection otherwise prefers GitHub Actions and emits
-a Node server in `.output/`. Without `VERCEL=1`, `build:vercel` builds the
-Sites/Cloudflare variant instead. The browser tests reuse a server already
-running on port 4173, so stop one you started by hand before testing a new
-build. They need Chromium once: `npx playwright install chromium`.
+CI runs the same steps. `npm run build` (`scripts/build-static.mjs`) builds the
+bundle, renders every page with `src/entry-server.tsx` and makes the share
+pictures; it stops when the Content-Security-Policy in `vercel.json` lacks the
+hash of the one inline script (in the head of `/`), which changes with the
+garden list: copy the hash it prints. The browser tests serve `dist/` with
+`scripts/serve-static.mjs`, which applies the headers from `vercel.json`, and
+reuse a server already running on port 4173, so stop one you started by hand
+before testing a new build. They need Chromium once:
+`npx playwright install chromium`.
 
 After each production deployment, `.github/workflows/production-smoke.yml`
 runs `npm run test:production` (`tests/production/`) on the deployed commit
@@ -49,11 +53,13 @@ local build with `PROD_URL=http://127.0.0.1:4173/`.
   it).
 - `components/map/MapViewport.tsx` and `lib/map/viewport.ts`: pan, zoom,
   pinch and the camera maths.
-- Do not add a `middleware.ts`: on Vercel it failed in production
-  (`MIDDLEWARE_INVOCATION_FAILED`) although the local build passed, so a
-  server-rendered `?lang=cs` needs another approach and a check on a Vercel
-  preview deployment first. Today `?lang=cs` is read in the browser
-  (`components/i18n/LocaleProvider.tsx`), which also keeps it in the address.
+- Addresses (`lib/routes.ts`): `/` and `/cs/` for the atlas, `/zahrada/<id>/`
+  and `/cs/zahrada/<id>/` for each garden; titles, descriptions and
+  structured data in `lib/page-meta.ts`. `src/main.tsx` hydrates a page with
+  its route. There is no server: older `?zahrada=`, `?garden=` and `?lang=`
+  links are turned into page addresses by the script in the head of `/`
+  (`legacyRedirectScript` in `src/entry-server.tsx`). Check changes to
+  routing or headers on a Vercel preview deployment before merging.
 - `scripts/`: asset scripts (thumbnails, icons, sprites). `tests/`: unit
   tests; `tests/e2e/`: smoke, layout and accessibility tests.
 - Design work: the Impeccable skill (`.agents/skills/impeccable`,

@@ -1,8 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Browser tests run against the production build:
- *   VERCEL=1 npm run build:vercel && npm run test:e2e
+ * Browser tests run against the static build, served like Vercel serves it
+ * (scripts/serve-static.mjs applies the headers from vercel.json):
+ *   npm run build && npm run test:e2e
  */
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -16,7 +17,7 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'node scripts/serve-vercel-output.mjs',
+    command: 'node scripts/serve-static.mjs',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
   },
