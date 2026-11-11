@@ -280,6 +280,11 @@
     .map-stage {
     bottom: 58svh;
   }
+  /* The blurred backdrop needs no detail: the 1.5 kB placeholder keeps the
+   * phone from fetching the 621 kB original just for it. */
+  .map-canvas::before {
+    background-image: url('/map/prague-storybook-vltava-v6-placeholder.webp');
+  }
 }
 /* Narrow phones: both footer chips stay on one line with the shorter
  * OpenStreetMap credit. */

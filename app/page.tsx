@@ -49,6 +49,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { MapArt } from '@/components/map/MapArt';
 import { MapMotionLayer } from '@/components/map/MapMotionLayer';
 import { MapViewport } from '@/components/map/MapViewport';
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
@@ -467,11 +468,7 @@ export default function Home({
     return () => observer.disconnect();
   }, [introMinimized, introGeometry]);
 
-  // The map may finish loading before hydration, when onLoad has already
-  // fired; the ref callback sees the element's state as soon as it mounts.
-  const mapArtRef = useCallback((art: HTMLImageElement | null) => {
-    if (art?.complete && art.naturalWidth > 0) setMapLoaded(true);
-  }, []);
+  const showMap = useCallback(() => setMapLoaded(true), []);
 
   useEffect(() => {
     function keepIntroInViewport() {
@@ -1236,17 +1233,7 @@ export default function Home({
               aria-hidden="true"
             />
           )}
-          <Image
-            ref={mapArtRef}
-            className="map-art"
-            src="/map/prague-storybook-vltava-v6-wide.webp"
-            alt={t.map.artAlt}
-            fill
-            priority
-            sizes="100vw"
-            onLoad={() => setMapLoaded(true)}
-            onError={() => setMapLoaded(true)}
-          />
+          <MapArt alt={t.map.artAlt} onReady={showMap} />
           <div className="map-wash" aria-hidden="true" />
           <div className="paper-grain" aria-hidden="true" />
           <MapMotionLayer
@@ -1566,7 +1553,7 @@ export default function Home({
           <div className="about-botanical-field" aria-hidden="true">
             <Image
               className="about-canopy about-canopy-left"
-              src="/map/motion/tree-cluster-v1.png"
+              src="/map/motion/tree-cluster-v1.webp"
               alt=""
               width={384}
               height={256}
@@ -1574,7 +1561,7 @@ export default function Home({
             />
             <Image
               className="about-canopy about-canopy-right"
-              src="/map/motion/tree-cluster-v1.png"
+              src="/map/motion/tree-cluster-v1.webp"
               alt=""
               width={384}
               height={256}

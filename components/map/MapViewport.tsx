@@ -12,6 +12,7 @@ import {
 import { Maximize2, Minimize2, Minus, Plus, RotateCcw } from 'lucide-react';
 
 import { useT } from '@/components/i18n/LocaleProvider';
+import { MapZoomContext } from '@/components/map/MapZoomContext';
 import {
   boundMapView,
   coverZoom,
@@ -358,7 +359,9 @@ export function MapViewport({
             event.stopPropagation();
           }}
         >
-          {children}
+          <MapZoomContext.Provider value={view.zoom}>
+            {children}
+          </MapZoomContext.Provider>
         </div>
       </div>
       <fieldset className="map-navigation">

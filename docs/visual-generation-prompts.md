@@ -52,7 +52,7 @@ Create a seamless-loop instrumental soundscape for an illustrated interactive ma
 - Mode: built-in image generation, image edit/outpainting.
 - Edit target: `public/map/prague-storybook-vltava-v5.webp`.
 - Original generated file: kept outside the repository (`prague-storybook-vltava-zoomed-out-25pct-v1.png` in the owner's map-candidates folder); only the converted production asset is committed.
-- Workspace production asset: `public/map/prague-storybook-vltava-v6-wide.webp`.
+- Workspace production asset: `public/map/prague-storybook-vltava-v6-wide.webp`. Phones start with `-960.webp` and `-1280.webp`, resized from it by `scripts/build-map-variants.mjs` (Lanczos, WebP quality 75).
 
 Exact production prompt:
 
@@ -74,7 +74,7 @@ Avoid: labels, lettering, captions, symbols, pins, UI, buttons, borders, frames,
 
 - Mode: built-in image generation, transparent sprite.
 - Original generated file: kept outside the repository (the generation tool's local output folder); only the resized production asset is committed.
-- Workspace production asset: `public/map/motion/tree-cluster-v1.png` (mechanically resized to 384 × 256 px, RGBA preserved).
+- Workspace production asset: `public/map/motion/tree-cluster-v1.png` (mechanically resized to 384 × 256 px, RGBA preserved). The page uses `tree-cluster-v1.webp`, converted from it by `scripts/build-map-variants.mjs` (WebP quality 85, alpha 100; 165 kB → 27 kB).
 
 Exact production prompt:
 
