@@ -20,6 +20,7 @@ fully available in Czech.
 ![The illustrated map of Prague with the thirteen garden markers, search, the EN | CS switcher, filters and the character-of-the-place legend](docs/screenshots/atlas-desktop.webp)
 
 <p align="center">
+  <img src="docs/screenshots/atlas-phone.webp" alt="The illustrated map on a phone held upright: as high as the screen between the search and the map controls, with garden markers; it pans sideways to the other gardens" width="32%">
   <img src="docs/screenshots/garden-detail-phone.webp" alt="A garden detail on a phone: illustration labelled as an artistic rendering, description, tags and sourced visiting information" width="32%">
 </p>
 
@@ -51,8 +52,9 @@ fully available in Czech.
 - **No tracking, no data collection.** No analytics, no cookies, no forms. The
   only things stored are in your own browser: the chosen language and the
   postcard's position.
-- Built for desktop; a phone layout exists (map full screen, details and list
-  as bottom sheets) but is secondary.
+- Built for desktop; a phone layout exists (held upright, the map fills the
+  height and pans sideways; details and list as bottom sheets) but is
+  secondary.
 
 ## Who it is for
 
@@ -137,8 +139,8 @@ src/
   fonts.css             The fonts (latin-ext cut to Czech and Slovak letters)
 components/
   i18n/                 LocaleProvider (locale state, useT hook) and LanguageSwitcher
-  map/                  MapViewport (pan/zoom, keyboard), MapArt (the illustration,
-                        lighter on phones) and MapMotionLayer (boats, birds)
+  map/                  MapViewport (pan/zoom, keyboard), MapArt (the illustration
+                        and its phone versions) and MapMotionLayer (boats, birds)
   ui/                   shadcn/Base UI primitives
 lib/
   i18n.ts               Interface dictionary (en, cs), locale helpers, date formatting
@@ -157,7 +159,7 @@ tests/production/       Live-site check run after each production deployment
 docs/                   Rebuild notes and media provenance (prompts and tools)
 design/                 Design tokens and theme reference
 scripts/                The static build, its server and asset scripts (sprites,
-                        phone copies of the map, thumbnails)
+                        phone versions of the map, thumbnails)
 PRODUCT.md              Product principles the project is held to
 ```
 

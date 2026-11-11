@@ -52,7 +52,7 @@ Create a seamless-loop instrumental soundscape for an illustrated interactive ma
 - Mode: built-in image generation, image edit/outpainting.
 - Edit target: `public/map/prague-storybook-vltava-v5.webp`.
 - Original generated file: kept outside the repository (`prague-storybook-vltava-zoomed-out-25pct-v1.png` in the owner's map-candidates folder); only the converted production asset is committed.
-- Workspace production asset: `public/map/prague-storybook-vltava-v6-wide.webp`. Phones start with `-960.webp` and `-1280.webp`, resized from it by `scripts/build-map-variants.mjs` (Lanczos, WebP quality 75).
+- Workspace production asset: `public/map/prague-storybook-vltava-v6-wide.webp`. Phones held upright show it in three full-resolution strips, `-strip-left.webp`, `-strip-centre.webp` and `-strip-right.webp` (cut at 30 % and 70 % of the width with 2 px of overlap, WebP quality 78); small phones held sideways start with `-960.webp` and `-1280.webp`, resized from it (Lanczos, WebP quality 75). `scripts/build-map-variants.mjs` makes both.
 
 Exact production prompt:
 
