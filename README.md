@@ -238,7 +238,12 @@ Deliberate gaps and what comes next:
   storage and no review process; there is no fake "sent" state. Suggestions
   arrive through GitHub issues and pull requests instead.
 - Visiting facts need periodic re-verification; the check date is shown in
-  every detail panel.
+  every detail panel. On the 3rd of every month a workflow
+  ([`source-check.yml`](.github/workflows/source-check.yml), run by
+  `scripts/check-sources.mjs`) opens every source and updates one issue
+  labelled `source-check` with the addresses that no longer answer or now
+  lead elsewhere and the facts last checked more than 120 days ago. It changes
+  nothing itself: a person reads the source and corrects the fact.
 - Possible later increments: curated walking routes based on verified public
   access, more gardens, and a review process for public suggestions once
   storage and moderation exist.
