@@ -90,7 +90,7 @@ await test('each page is served in its language and the switcher is wired into t
     readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
   const template = read('index.html');
   const server = read('src/entry-server.tsx');
-  const client = read('src/main.tsx');
+  const client = read('src/hydrate.tsx');
   const page = read('app/page.tsx');
   // English by default; the build writes each page's own language.
   assert.ok(template.includes('<html lang="en">'));

@@ -28,6 +28,11 @@
     clip-path: inset(50%);
     white-space: nowrap;
   }
+  /* Hidden text needs no display font; the serif then waits until after the
+   * map (src/main.tsx). */
+  .map-experience .gallery-caption h1 {
+    font-family: inherit;
+  }
   .gallery-postcard-slot,
   .gallery-seal {
     display: none !important;
