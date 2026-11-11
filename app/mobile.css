@@ -291,6 +291,26 @@
     background-image: url('/map/prague-storybook-vltava-v6-placeholder.webp');
   }
 }
+/* A phone in portrait: the map fills the height between the header and the
+ * controls (chosen on 11 November 2026) and pans sideways, drawn from three
+ * full-resolution strips. */
+@media (max-width: 720px) and (orientation: portrait) {
+  .map-experience .map-stage {
+    bottom: calc(112px + env(safe-area-inset-bottom));
+  }
+  .map-art-strips {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  /* Before the app places the camera (components/map/MapViewport.tsx), the
+   * map already fills the stage height, as the placed view will. */
+  .map-experience .map-plane:not(.is-placed) {
+    width: calc(100cqh * 1.776833);
+  }
+}
 /* Narrow phones: both footer chips stay on one line with the shorter
  * OpenStreetMap credit. */
 @media (max-width: 400px) {

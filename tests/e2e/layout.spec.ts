@@ -3,10 +3,12 @@ import { expect, test, type Page } from '@playwright/test';
 import { openAtlas } from './atlas';
 
 /**
- * Markers whose round core is outside the visible map stage or overlaps any
- * control (header, map controls, footer chips, postcard, seal).
+ * Where each garden marker's round core is: fully on the visible map stage
+ * ('shown'), beside it to the left or right ('beside'), above or below it
+ * ('outside'), or under a control (header, map controls, footer chips,
+ * postcard, seal).
  */
-async function blockedMarkers(page: Page) {
+async function markerPlaces(page: Page) {
   return page.evaluate(() => {
     const isShown = (element: Element) => {
       const style = getComputedStyle(element);
@@ -24,22 +26,22 @@ async function blockedMarkers(page: Page) {
       ),
     ].filter(isShown);
     const stage = document.querySelector('.map-stage')?.getBoundingClientRect();
-    if (!stage) return ['no map stage'];
+    if (!stage) return [{ name: 'no map stage', place: 'outside' }];
     const bottom = Math.min(stage.bottom, window.innerHeight);
-    const problems: string[] = [];
+    const places: { name: string; place: string }[] = [];
     for (const marker of document.querySelectorAll('.garden-marker')) {
-      const name = marker.querySelector('.marker-label strong')?.textContent;
+      const name =
+        marker.querySelector('.marker-label strong')?.textContent ?? '';
       const core = marker
         .querySelector('.marker-core')
         ?.getBoundingClientRect();
       if (!core) continue;
-      if (
-        core.left < stage.left ||
-        core.right > stage.right ||
-        core.top < stage.top ||
-        core.bottom > bottom
-      ) {
-        problems.push(`${name}: outside the visible map`);
+      if (core.top < stage.top || core.bottom > bottom) {
+        places.push({ name, place: 'outside' });
+        continue;
+      }
+      if (core.left < stage.left || core.right > stage.right) {
+        places.push({ name, place: 'beside' });
         continue;
       }
       const cover = controls.find((control) => {
@@ -51,10 +53,29 @@ async function blockedMarkers(page: Page) {
           rect.bottom > core.top
         );
       });
-      if (cover) problems.push(`${name}: under .${cover.className}`);
+      places.push({
+        name,
+        place: cover ? `under .${cover.className}` : 'shown',
+      });
     }
-    return problems;
+    return places;
   });
+}
+
+/**
+ * Markers outside the visible map stage or under a control. A phone in
+ * portrait pans the map sideways, so there a marker beside the stage is fine.
+ */
+async function blockedMarkers(page: Page, { pansSideways = false } = {}) {
+  return (await markerPlaces(page))
+    .filter(
+      ({ place }) => place !== 'shown' && !(pansSideways && place === 'beside'),
+    )
+    .map(({ name, place }) =>
+      place === 'beside' || place === 'outside'
+        ? `${name}: outside the visible map`
+        : `${name}: ${place}`,
+    );
 }
 
 const sizes = [
@@ -66,7 +87,8 @@ const sizes = [
   [1280, 720],
   [1024, 768],
   [768, 1024],
-  // phones: the whole atlas fits between the header and the controls
+  // a phone in portrait: the map fills the height between the header and the
+  // controls and pans sideways
   [390, 844],
   [360, 740],
   // a phone held sideways gets the phone layout with side panels
@@ -87,11 +109,86 @@ for (const locale of ['en', 'cs'] as const) {
       }) => {
         await page.setViewportSize({ width, height });
         await openAtlas(page);
-        expect(await blockedMarkers(page)).toEqual([]);
+        expect(
+          await blockedMarkers(page, {
+            pansSideways: width < height && width <= 720,
+          }),
+        ).toEqual([]);
       });
     }
   });
 }
+
+test.describe('on a phone in portrait', () => {
+  for (const [width, height] of [
+    [390, 844],
+    [360, 740],
+    [320, 568],
+  ] as const)
+    test(`the map fills the height and panning reaches every garden at ${width}×${height}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height });
+      await openAtlas(page);
+      const fit = await page.evaluate(() => {
+        const rect = (selector: string) =>
+          document.querySelector(selector)!.getBoundingClientRect();
+        const stage = rect('.map-stage');
+        const plane = rect('.map-plane');
+        const controls = rect('.map-navigation');
+        return {
+          top: plane.top - stage.top,
+          bottom: stage.bottom - plane.bottom,
+          widths: plane.width / stage.width,
+          aboveControls: controls.top - stage.bottom,
+        };
+      });
+      expect(Math.abs(fit.top)).toBeLessThan(1);
+      expect(Math.abs(fit.bottom)).toBeLessThan(1);
+      // about two to three screens wide
+      expect(fit.widths).toBeGreaterThan(1.8);
+      expect(fit.aboveControls).toBeGreaterThanOrEqual(0);
+
+      // At the left end, in the middle and at the right end together, every
+      // garden is shown clear of the controls at least once.
+      const shown = new Set<string>();
+      const look = async () => {
+        for (const { name, place } of await markerPlaces(page))
+          if (place === 'shown') shown.add(name);
+      };
+      await look();
+      const plane = page.locator('.map-plane');
+      await plane.focus();
+      for (const key of ['ArrowLeft', 'ArrowRight']) {
+        for (let step = 0; step < 16; step += 1) await plane.press(key);
+        await look();
+      }
+      expect(shown.size).toBe(await page.locator('.garden-marker').count());
+    });
+
+  test('the map stands where it will before the app script runs', async ({
+    browser,
+  }) => {
+    const planes: number[][] = [];
+    for (const app of [false, true]) {
+      const page = await browser.newPage({
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+      });
+      if (!app)
+        await page.route('**/assets/hydrate-*.js', (route) => route.abort());
+      await page.goto('/');
+      await expect(page.locator('.map-plane')).toHaveClass(
+        app ? /is-placed/ : /^map-plane$/,
+      );
+      const box = (await page.locator('.map-plane').boundingBox())!;
+      planes.push([box.x, box.y, box.width, box.height].map(Math.round));
+      await page.close();
+    }
+    expect(planes[0]).toEqual(planes[1]);
+  });
+});
 
 /** Whether the detail's close button covers its picture caption or any text. */
 async function closeButtonCover(page: Page) {

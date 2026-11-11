@@ -68,7 +68,8 @@ body {
 .map-wash {
   background: none;
 }
-.map-art {
+.map-art,
+.map-art-strip {
   filter: saturate(0.87) contrast(0.98);
 }
 .gallery-caption {
@@ -1054,6 +1055,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+}
+
+/* A phone in portrait shows the map in three full-resolution strips
+ * (components/map/MapArt.tsx); they overlap by a few pixels, so no seam shows. */
+.map-art-strips {
+  display: none;
+}
+.map-art-strip {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  object-fit: fill;
 }
 
 /* The original map laid over a phone's lighter copy once zoomed in
