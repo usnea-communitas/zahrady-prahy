@@ -72,7 +72,10 @@ hand (desktop and, if relevant, a phone-sized window).
 - Catalogue: [`lib/gardens.ts`](lib/gardens.ts). Visiting facts:
   [`lib/garden-visits.ts`](lib/garden-visits.ts). The comments at the top of
   each file explain the fields.
-- Keep access, opening hours, entrance and participation as separate facts.
+- Every garden answers the same questions as separate facts: what makes it
+  special, opening hours, access, entrance (optional), getting there,
+  accessibility and how to join in. Name a public transport stop or step-free
+  access only when a source does; otherwise admit the gap.
 - Use `published` only for a concrete statement in the source; use
   `not-found` when you looked and the source does not publish it.
 - `GARDEN_VISIT_CHECKED_AT` is the day all sources were last verified. Change
