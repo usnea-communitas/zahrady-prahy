@@ -6,6 +6,7 @@ Notable changes to Zahrady Prahy (Gardens of Prague). The version lives in
 
 ## Unreleased
 
+- **A monthly look at the sources.** On the 3rd of every month a workflow opens every source the atlas names and updates one issue (label `source-check`) with the addresses that no longer answer or now lead elsewhere, the facts last checked more than 120 days ago and the seasonal facts whose season is over. It changes nothing in the atlas.
 - **A static atlas with an address for every garden.** The atlas is now 28 prerendered pages instead of a server function: `/` and `/cs/` for the atlas, `/zahrada/<id>/` and `/cs/zahrada/<id>/` for each of the 13 gardens. Every page has its own title, description, canonical address, `hreflang` alternates, share picture made from the garden's illustration and, for a garden, schema.org `Place` data; all of them are in the sitemap. The Czech pages exist for search engines, and a garden's detail is in its page before any script runs.
 - Older links keep working: `?zahrada=`, `?garden=` and `?lang=cs` are turned into the new addresses before anything renders, and a visitor who chose Czech is sent from `/` to `/cs/`. Choosing a garden or the language changes the address without loading a new page.
 - "About the map" is reachable on phones from the header.

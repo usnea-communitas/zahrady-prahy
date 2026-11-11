@@ -78,6 +78,10 @@ hand (desktop and, if relevant, a phone-sized window).
 - `GARDEN_VISIT_CHECKED_AT` is the day all sources were last verified. Change
   it only after re-checking every source. For a single correction, state the
   date you checked in the pull request description.
+- The open issue labelled `source-check` lists what is due: sources that no
+  longer answer or now lead elsewhere, and facts last checked more than 120
+  days ago. `node scripts/check-sources.mjs` makes the same list on your
+  machine.
 - Run `npm test`; the tests check that every field exists in both languages,
   that sources are HTTPS URLs, and that an admitted gap is admitted in both
   languages.

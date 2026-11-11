@@ -65,6 +65,9 @@ local build with `PROD_URL=http://127.0.0.1:4173/`.
   links are turned into page addresses by the script in the head of `/`
   (`legacyRedirectScript` in `src/entry-server.tsx`). Check changes to
   routing or headers on a Vercel preview deployment before merging.
+- `scripts/check-sources.mjs`: the monthly check of every source address and
+  of the facts' check dates; `.github/workflows/source-check.yml` writes its
+  result into one issue labelled `source-check` (it never edits data).
 - `scripts/`: asset scripts (thumbnails, icons, sprites, map copies). The
   latin-ext fonts hold only Czech and Slovak letters; `src/fonts.css` says how
   to cut them, and `tests/fonts.test.mjs` fails when a text needs another
