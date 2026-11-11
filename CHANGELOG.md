@@ -4,7 +4,11 @@ Notable changes to Zahrady Prahy (Gardens of Prague). The version lives in
 `package.json`; each version is also a
 [GitHub release](https://github.com/usnea-communitas/zahrady-prahy/releases).
 
-## Unreleased
+## 1.2.0 — 2026-11-12
+
+Live since 10–11 November 2026: a static atlas with an address for every
+garden, seven sourced answers on every garden page, a faster start on phones
+and a monthly check of the sources.
 
 - **Deeper garden pages.** Every garden now says what makes it special, how to get there, how accessible it is and how to join in, each with its source, or admits that the sources do not say. Three gardens name a stop (Prales, Troja, Libóza), one describes step-free beds and toilets (Prales); the rest admit the gap instead of guessing. All 28 sources of the visiting facts were read again on 11 November 2026 (89 facts, 34 of them admitted gaps), and the facts that had changed are corrected: the Prales winter hours start on 10 October, Vidimova is run by its own association and Kokoza no longer lists weekly hours, Na Polské has its own website (napolske.eu), and the place of the Na Pláni garden inside the park is no longer stated, because no current source gives it. In the detail panel each label now sits above its answer and an admitted gap reads quieter than a found fact.
 - **A monthly look at the sources.** On the 3rd of every month a workflow opens every source the atlas names and updates one issue (label `source-check`) with the addresses that no longer answer or now lead elsewhere, the facts last checked more than 120 days ago and the seasonal facts whose season is over. It changes nothing in the atlas.
@@ -15,6 +19,15 @@ Notable changes to Zahrady Prahy (Gardens of Prague). The version lives in
 - vinext, Nitro, the Cloudflare and OpenAI Sites variants and wrangler are gone (152 fewer packages); the fonts are stored with the site; `npm audit` reports nothing high or critical.
 - **Faster on phones.** A phone starts with a lighter copy of the map (960 or 1280 px, 136 or 218 kB instead of 621 kB, chosen by screen density) and gets the original only once the map is zoomed in; the blurred backdrop uses the 1.5 kB placeholder. The page is shown before the app script loads, the animated sprites follow the map, the tree sprite is WebP (165 → 27 kB) and the latin-ext fonts hold only Czech and Slovak letters (Inter 85 → 6 kB). Lighthouse on a phone (median of three runs), live site before → preview after: performance 71 → 93, largest paint 6.3 → 2.5 s, first visit 1 158 → 457 KiB. Wide screens look and load as before.
 - **The map as high as a phone held upright.** Chosen on 11 November 2026: the overview fills the height between the header and the controls and pans sideways, instead of showing the whole map small. A garden link opens at the same height, and the map stands at that height before the app script runs. Panning reaches all 13 gardens (checked at 320 × 568, 360 × 740 and 390 × 844). For the sharpness this needs, a phone held upright gets the original's pixels in three strips instead of the lighter copy: the middle one (165 kB) first, the other two (247 kB) once the app runs. A small phone held sideways now picks its copy by the map's real width (960 px instead of 1280 px at 2×). Lighthouse on a phone (median of three runs, Vercel previews of `main` → this change): performance 95 → 94, largest paint 2.5 → 2.6 s, first visit 457 → 735 KiB. Wide screens, tablets and larger phones held sideways look exactly as before.
+- **Security headers.** `X-Content-Type-Options`, a referrer policy, frame
+  protection and a permissions policy on every page; `favicon.ico` and
+  `sitemap.xml`.
+- Prazelenina's bar hours say that they were for the 2026 season.
+- A screen-reader checklist for manual testing
+  ([`docs/screen-reader-checklist.md`](docs/screen-reader-checklist.md)), an
+  honest note that the original illustration prompts were lost, the favicon
+  described in `LICENSE-ASSETS.md`, and 1.6 MB of unused media removed.
+- Dependabot proposes dependency and workflow updates once a month.
 
 ## 1.1.0 — 2026-11-10
 
