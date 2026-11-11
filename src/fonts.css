@@ -1,16 +1,23 @@
 /* Inter, Playfair Display and JetBrains Mono, the latin and latin-ext files from
-   Google Fonts. SIL Open Font License 1.1: public/fonts/OFL-*.txt */
+   Google Fonts. SIL Open Font License 1.1: public/fonts/OFL-*.txt
+
+   The latin-ext files hold only the Czech and Slovak letters beyond Latin-1
+   (Inter 85 → 6 kB), cut from the Google Fonts files (in git before 11 Nov
+   2026: inter-749a3084, playfair-display-f556cda9, jetbrains-mono-76306ee8):
+     pyftsubset <file>.woff2 --flavor=woff2 --layout-features='*' \
+       --name-IDs='*' --name-languages='*' --unicodes=<the range below>
+   Name the result by the first 8 hex digits of its SHA-256. A test
+   (tests/fonts.test.mjs) checks that every letter of the texts is covered. */
 /* latin-ext */
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url('/fonts/inter-749a3084.woff2') format('woff2');
+  src: url('/fonts/inter-2fa406c4.woff2') format('woff2');
   unicode-range:
-    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
-    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
-    U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    U+010C-010F, U+011A-011B, U+0139-013A, U+013D-013E, U+0147-0148,
+    U+0154-0155, U+0158-0159, U+0160-0161, U+0164-0165, U+016E-016F, U+017D-017E;
 }
 /* latin */
 @font-face {
@@ -30,11 +37,10 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/inter-749a3084.woff2') format('woff2');
+  src: url('/fonts/inter-2fa406c4.woff2') format('woff2');
   unicode-range:
-    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
-    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
-    U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    U+010C-010F, U+011A-011B, U+0139-013A, U+013D-013E, U+0147-0148,
+    U+0154-0155, U+0158-0159, U+0160-0161, U+0164-0165, U+016E-016F, U+017D-017E;
 }
 /* latin */
 @font-face {
@@ -54,11 +60,10 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/inter-749a3084.woff2') format('woff2');
+  src: url('/fonts/inter-2fa406c4.woff2') format('woff2');
   unicode-range:
-    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
-    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
-    U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    U+010C-010F, U+011A-011B, U+0139-013A, U+013D-013E, U+0147-0148,
+    U+0154-0155, U+0158-0159, U+0160-0161, U+0164-0165, U+016E-016F, U+017D-017E;
 }
 /* latin */
 @font-face {
@@ -78,11 +83,10 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/fonts/inter-749a3084.woff2') format('woff2');
+  src: url('/fonts/inter-2fa406c4.woff2') format('woff2');
   unicode-range:
-    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
-    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
-    U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    U+010C-010F, U+011A-011B, U+0139-013A, U+013D-013E, U+0147-0148,
+    U+0154-0155, U+0158-0159, U+0160-0161, U+0164-0165, U+016E-016F, U+017D-017E;
 }
 /* latin */
 @font-face {
@@ -102,11 +106,10 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/jetbrains-mono-76306ee8.woff2') format('woff2');
+  src: url('/fonts/jetbrains-mono-9d4ed3f4.woff2') format('woff2');
   unicode-range:
-    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
-    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
-    U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    U+010C-010F, U+011A-011B, U+0139-013A, U+013D-013E, U+0147-0148,
+    U+0154-0155, U+0158-0159, U+0160-0161, U+0164-0165, U+016E-016F, U+017D-017E;
 }
 /* latin */
 @font-face {
@@ -126,11 +129,10 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/jetbrains-mono-76306ee8.woff2') format('woff2');
+  src: url('/fonts/jetbrains-mono-9d4ed3f4.woff2') format('woff2');
   unicode-range:
-    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
-    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
-    U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    U+010C-010F, U+011A-011B, U+0139-013A, U+013D-013E, U+0147-0148,
+    U+0154-0155, U+0158-0159, U+0160-0161, U+0164-0165, U+016E-016F, U+017D-017E;
 }
 /* latin */
 @font-face {
@@ -150,11 +152,10 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/fonts/jetbrains-mono-76306ee8.woff2') format('woff2');
+  src: url('/fonts/jetbrains-mono-9d4ed3f4.woff2') format('woff2');
   unicode-range:
-    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
-    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
-    U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    U+010C-010F, U+011A-011B, U+0139-013A, U+013D-013E, U+0147-0148,
+    U+0154-0155, U+0158-0159, U+0160-0161, U+0164-0165, U+016E-016F, U+017D-017E;
 }
 /* latin */
 @font-face {
@@ -174,11 +175,10 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/playfair-display-f556cda9.woff2') format('woff2');
+  src: url('/fonts/playfair-display-72fc1854.woff2') format('woff2');
   unicode-range:
-    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
-    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
-    U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    U+010C-010F, U+011A-011B, U+0139-013A, U+013D-013E, U+0147-0148,
+    U+0154-0155, U+0158-0159, U+0160-0161, U+0164-0165, U+016E-016F, U+017D-017E;
 }
 /* latin */
 @font-face {
@@ -198,11 +198,10 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/playfair-display-f556cda9.woff2') format('woff2');
+  src: url('/fonts/playfair-display-72fc1854.woff2') format('woff2');
   unicode-range:
-    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
-    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
-    U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    U+010C-010F, U+011A-011B, U+0139-013A, U+013D-013E, U+0147-0148,
+    U+0154-0155, U+0158-0159, U+0160-0161, U+0164-0165, U+016E-016F, U+017D-017E;
 }
 /* latin */
 @font-face {
