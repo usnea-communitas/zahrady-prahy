@@ -315,7 +315,7 @@ const gardenRecords: Omit<Garden, 'artPosition' | 'visit'>[] = [
     tags: ['children', 'beds', 'ecology'],
     lat: 50.13762,
     lon: 14.4386,
-    sourceUrl: 'https://www.3udoli.cz/komunitni-zahrada/',
+    sourceUrl: 'https://napolske.eu/komunitni-zahrada/',
     illustration: '/gardens/na-polske-illustrated.webp',
     category: 'education',
   },

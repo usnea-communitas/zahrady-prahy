@@ -400,15 +400,16 @@ body {
   font: 400 12px/1.2 var(--font-helvetica-now);
   white-space: nowrap;
 }
+/* Seven facts in a panel about 300px wide: each label sits above its answer,
+   so the answer gets the full width and long labels never squeeze it. */
 .visit-facts {
   display: grid;
-  gap: 8px;
+  gap: 11px;
   margin: 0;
 }
 .visit-fact {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
-  gap: 10px;
+  gap: 2px;
   margin: 0;
 }
 .visit-fact dt {
@@ -421,6 +422,11 @@ body {
   margin: 0;
   color: var(--color-ink);
   font: 400 12px/1.45 var(--font-helvetica-now);
+}
+/* An admitted gap reads quieter than a found fact, so the eye lands on what
+   the sources do say. */
+.visit-fact dd[data-state='not-found'] {
+  color: var(--color-graphite);
 }
 .visit-fact dd small {
   display: block;
@@ -443,9 +449,6 @@ body {
   border-top: 1px solid rgba(89, 88, 85, 0.18);
 }
 .visit-sources a {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
   color: var(--color-ink);
   font: 500 12px/1.3 var(--font-helvetica-now);
   text-decoration: underline;
@@ -456,9 +459,15 @@ body {
   color: var(--color-meadow);
   text-decoration-color: currentColor;
 }
+/* The arrow follows the last word, also when a long source name wraps. */
+.visit-sources .link-tail {
+  white-space: nowrap;
+}
 .visit-sources svg {
+  display: inline-block;
   width: 12px;
   height: 12px;
+  vertical-align: -2px;
 }
 .preview-body .tag-list li {
   background: transparent;
@@ -1192,8 +1201,7 @@ body {
     gap: 9px;
     padding: 12px;
   }
-  .visit-fact {
-    grid-template-columns: 88px minmax(0, 1fr);
-    gap: 7px;
+  .visit-facts {
+    gap: 9px;
   }
 }
