@@ -45,7 +45,7 @@ A storybook-style illustrated map of Prague in which every practical piece of vi
 ## Evidence on Hand
 
 - Illustrations and maps in `public/`; provenance and prompts in `docs/visual-generation-prompts.md`; media licence in `LICENSE-ASSETS.md`.
-- Verified visiting information (check date 6 September 2026).
+- Verified visiting information (check date 11 November 2026): for every garden what makes it special, when to come, access, where, getting there, accessibility and how to join in, or an admitted gap.
 - No testimonials, visitor quotes or statistics exist; do not invent them.
 
 ## Product Principles

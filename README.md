@@ -38,11 +38,12 @@ fully available in Czech.
 - **Shareable links.** `?zahrada=liboza` opens a garden directly (`?garden=`
   is accepted as an alias); search, category and filters round-trip through
   the URL too.
-- **Sourced visiting information.** Access, opening hours, where to find the
-  entrance and how to take part are separate facts, each with a source link
-  and a check date. When a source does not publish a regular schedule, the
-  atlas says so instead of guessing: _not found_ means "no regular schedule
-  found", never "closed".
+- **Sourced visiting information.** Every garden answers the same questions:
+  what makes it special, when to come, access, where to find the entrance,
+  how to get there, accessibility and how to join in. Each answer is a
+  separate fact with a source link and a check date. When a source does not
+  say, the atlas admits it instead of guessing: _not found_ means "the
+  sources do not say", never "closed", "out of reach" or "not accessible".
 - **An optional soundscape**, "Zahrady nad Vltavou", that plays only when you
   press the note button. Nothing autoplays.
 - **Keyboard accessible**: the map pans with the arrow keys and zooms with
@@ -175,9 +176,12 @@ The catalogue is plain TypeScript, so a correction is a small pull request.
 2. **Visiting information** lives in [`lib/garden-visits.ts`](lib/garden-visits.ts).
    Each fact has a `text` in both languages, a `state` (`published`,
    `not-found` or `not-checked`), one or more `sources` (URL and label) and
-   inherits the check date. Keep access, opening hours, entrance and
-   participation as separate facts; do not present the opening hours of a
-   wider site as the garden's own.
+   inherits the check date. Every garden has the same facts, in the order the
+   detail panel shows them (`visitFactKeys`): what makes it special, hours,
+   access, entrance (the only optional one), getting there, accessibility and
+   how to join in. Keep them separate; do not present the opening hours of a
+   wider site as the garden's own, and name a stop or step-free access only
+   when a source does.
 3. **Say what the source says, in both languages.** If the Czech text says a
    schedule was not found, the English text must say the same. Never fill a
    gap with a guess; a test checks this.
@@ -226,7 +230,7 @@ content field.
 What is live today:
 
 - The illustrated map and the content for all 13 gardens, with sources checked
-  on 6 September 2026.
+  on 11 November 2026.
 - English and Czech interface and content.
 - Search, filters, shareable links, keyboard navigation, the soundscape.
 - A phone layout that works but is secondary to the desktop experience.
