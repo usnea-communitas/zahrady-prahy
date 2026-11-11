@@ -182,46 +182,68 @@ export function formatReport({
   factCount,
 }) {
   const byUrl = new Map(results.map((r) => [r.url, r]));
-  const broken = sources.filter(
-    (s) => !(byUrl.get(s.url)?.status >= 200 && byUrl.get(s.url)?.status < 300),
+  const ok = (r) => r && r.status >= 200 && r.status < 300;
+  // an error page, or no connection at all (status 0)
+  const failed = sources.filter(
+    (s) => byUrl.get(s.url)?.status > 0 && !ok(byUrl.get(s.url)),
   );
+  const unreachable = sources.filter((s) => !(byUrl.get(s.url)?.status > 0));
   const moved = sources.filter((s) => {
     const r = byUrl.get(s.url);
-    return (
-      r && r.status >= 200 && r.status < 300 && !samePage(s.url, r.finalUrl)
-    );
+    return ok(r) && !samePage(s.url, r.finalUrl);
   });
-  const todo = broken.length + moved.length + stale.length + seasons.length;
+  const answering =
+    sources.length - failed.length - unreachable.length - moved.length;
+  const todo =
+    failed.length +
+    unreachable.length +
+    moved.length +
+    stale.length +
+    seasons.length;
   const lines = [
     `## Source check, ${today}`,
     '',
     `**${todo ? `${todo} to look at` : 'Nothing to look at'}.** ` +
       `${count(sources.length, 'source address', 'source addresses')}: ` +
-      `${count(sources.length - broken.length - moved.length, 'answers', 'answer')} as before, ` +
-      `${count(moved.length, 'now leads', 'now lead')} elsewhere, ${count(broken.length, 'does', 'do')} not answer. ` +
+      `${count(answering, 'answers', 'answer')} as before, ` +
+      `${count(moved.length, 'now leads', 'now lead')} elsewhere, ` +
+      `${count(failed.length, 'answers', 'answer')} with an error, ` +
+      `${count(unreachable.length, 'could', 'could')} not be reached. ` +
       `${count(factCount, 'visiting fact', 'visiting facts')}: ` +
       `${count(stale.length, 'was', 'were')} last checked more than ${MAX_AGE_DAYS} days ago, ` +
       `${count(seasons.length, 'is', 'are')} for a season that is over.`,
   ];
-  if (broken.length) {
+  if (failed.length) {
     lines.push(
       '',
-      '### Sources that do not answer',
+      '### Sources that answer with an error',
       '',
       'A 403 can mean the site refuses automated visits; open the address in a browser before changing anything.',
       '',
       table(
         ['Address', 'Answer', 'Used for'],
-        broken.map((s) => {
-          const r = byUrl.get(s.url);
-          return [
-            s.url,
-            r?.status
-              ? String(r.status)
-              : `no answer (${r?.error || 'unknown'})`,
-            usedFor(s.uses),
-          ];
-        }),
+        failed.map((s) => [
+          s.url,
+          String(byUrl.get(s.url).status),
+          usedFor(s.uses),
+        ]),
+      ),
+    );
+  }
+  if (unreachable.length) {
+    lines.push(
+      '',
+      '### Sources the check could not reach',
+      '',
+      "The check runs on GitHub's servers abroad, and some Czech sites do not accept connections from there. Open the address in a browser: if the page is there and still says the same, nothing needs to change.",
+      '',
+      table(
+        ['Address', 'What happened', 'Used for'],
+        unreachable.map((s) => [
+          s.url,
+          `no connection (${byUrl.get(s.url)?.error || 'unknown'})`,
+          usedFor(s.uses),
+        ]),
       ),
     );
   }

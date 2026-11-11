@@ -144,13 +144,15 @@ await test('the report lists only what needs a look', () => {
   assert.match(quiet, /\*\*Nothing to look at\.\*\*/);
   assert.doesNotMatch(quiet, /###/);
 
-  const [first, second] = sources;
+  const [first, second, third] = sources;
   const results = allFine.map((r) =>
     r.url === first.url
       ? { ...r, status: 404 }
       : r.url === second.url
         ? { ...r, finalUrl: second.url + 'elsewhere/' }
-        : r,
+        : r.url === third.url
+          ? { ...r, status: 0, error: 'ETIMEDOUT' }
+          : r,
   );
   const stale = staleFacts(
     gardens,
@@ -164,10 +166,17 @@ await test('the report lists only what needs a look', () => {
     seasons: [],
     factCount: facts.length,
   });
-  assert.match(report, /\*\*3 to look at\.\*\*/);
-  assert.match(report, /### Sources that do not answer[\s\S]*\| 404 \|/);
+  assert.match(report, /\*\*4 to look at\.\*\*/);
+  assert.match(report, /1 answers with an error, 1 could not be reached/);
+  assert.match(report, /### Sources that answer with an error[\s\S]*\| 404 \|/);
+  assert.match(
+    report,
+    /### Sources the check could not reach[\s\S]*no connection \(ETIMEDOUT\)/,
+  );
   assert.match(report, /### Sources that now lead elsewhere/);
   assert.match(report, /### Facts last checked more than 120 days ago/);
   assert.doesNotMatch(report, /### Seasonal facts/);
-  assert.ok(report.includes(first.url) && report.includes(second.url));
+  for (const source of [first, second, third]) {
+    assert.ok(report.includes(source.url), source.url);
+  }
 });
