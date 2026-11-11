@@ -13,6 +13,7 @@ import { Maximize2, Minimize2, Minus, Plus, RotateCcw } from 'lucide-react';
 
 import { useT } from '@/components/i18n/LocaleProvider';
 import { MapZoomContext } from '@/components/map/MapZoomContext';
+import { MAP_ART_PORTRAIT_PHONE } from '@/lib/map/art';
 import {
   boundMapView,
   coverZoom,
@@ -92,12 +93,16 @@ function usableMapArea(frame = mapFrame()): MapRect {
   return bounds;
 }
 /**
- * Default overview: the whole map on wide screens. On portrait phones the map
- * is brought as close as it can be while every garden stays in view.
+ * Default overview: the whole map on wide screens. A phone in portrait shows
+ * the map as high as its stage (chosen on 11 November 2026) and pans it
+ * sideways; other portrait screens bring it as close as they can while every
+ * garden stays in view.
  */
 function homeView(gardenBounds?: MapRect): View {
   const frame = mapFrame();
   if (frame.height <= frame.width || !gardenBounds) return initialView;
+  if (window.matchMedia(MAP_ART_PORTRAIT_PHONE).matches)
+    return { zoom: coverZoom(frame.width, frame.height), x: 0, y: 0 };
   const fit = fitMapZoom(
     frame.width,
     frame.height,
@@ -144,6 +149,9 @@ export function MapViewport({
   const viewRef = useRef(view);
   const [maxZoom, setMaxZoom] = useState(2.4);
   const placed = useRef(false);
+  // Until the camera is placed, a phone in portrait shows the map as high as
+  // its stage with CSS alone (app/mobile.css), as the placed view will.
+  const [isPlaced, setPlaced] = useState(false);
   const drag = useRef<{ id: number; x: number; y: number; view: View } | null>(
     null,
   );
@@ -192,10 +200,14 @@ export function MapViewport({
       setMaxZoom(maxMapZoom(frame.width, frame.height));
       if (!placed.current) {
         placed.current = true;
+        setPlaced(true);
         if (targetX === undefined || targetY === undefined) {
           setView(homeView(gardenBounds));
           return;
         }
+        // A phone in portrait shows a garden on the map as high as the stage.
+        if (window.matchMedia(MAP_ART_PORTRAIT_PHONE).matches)
+          setView({ zoom: coverZoom(frame.width, frame.height), x: 0, y: 0 });
       }
       setView((current) =>
         targetX !== undefined && targetY !== undefined
@@ -240,7 +252,7 @@ export function MapViewport({
         {/* A focusable two-dimensional map implements its own arrow/zoom keyboard contract. */}
         {/* oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
         <div
-          className="map-plane"
+          className={`map-plane${isPlaced ? ' is-placed' : ''}`}
           role="application"
           aria-roledescription={t.map.planeRole}
           aria-label={t.map.planeLabel}

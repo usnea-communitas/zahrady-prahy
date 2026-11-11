@@ -12,9 +12,13 @@ import {
 import { MapZoomContext } from '@/components/map/MapZoomContext';
 import {
   MAP_ART_FULL,
+  MAP_ART_NONE,
   MAP_ART_PHONE_MEDIA,
   MAP_ART_PHONE_SIZES,
   MAP_ART_PHONE_SRCSET,
+  MAP_ART_PLACEHOLDER,
+  MAP_ART_PORTRAIT_PHONE,
+  MAP_ART_STRIPS,
 } from '@/lib/map/art';
 
 /** How far a copy may be enlarged on screen before the original is needed. */
@@ -33,6 +37,12 @@ function needsOriginal(art: HTMLImageElement) {
   return shown > Number(copy[1]) * ENLARGEMENT_LIMIT;
 }
 
+/** Whether an image shows the map, not something that stands in for it. */
+const showsPicture = (image: HTMLImageElement) =>
+  image.naturalWidth > 0 &&
+  !image.currentSrc.startsWith('data:') &&
+  !image.currentSrc.endsWith(MAP_ART_PLACEHOLDER);
+
 const fill: CSSProperties = {
   position: 'absolute',
   inset: 0,
@@ -41,9 +51,12 @@ const fill: CSSProperties = {
 };
 
 /**
- * The illustrated map. On phones the original is laid over the lighter copy
- * only when the map is zoomed in beyond what the copy shows sharply; it fades
- * in once it has loaded, so the map never goes blank.
+ * The illustrated map. Wide screens show the original. A phone in portrait
+ * shows three full-resolution strips over the blurred placeholder instead:
+ * the middle one first, the other two once it is on screen and the app runs.
+ * A small phone held sideways starts with a lighter copy and gets the
+ * original laid over it once the map is zoomed in beyond what the copy shows
+ * sharply (it fades in when loaded, so the map never goes blank).
  */
 export function MapArt({
   alt,
@@ -57,6 +70,7 @@ export function MapArt({
   const [art, setArt] = useState<HTMLImageElement | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [detail, setDetail] = useState<'none' | 'loading' | 'shown'>('none');
+  const [sides, setSides] = useState(false);
   const ready = useRef(onReady);
   useEffect(() => {
     ready.current = onReady;
@@ -66,15 +80,36 @@ export function MapArt({
     setLoaded(true);
     ready.current();
   }, []);
-  // The picture may finish loading before hydration, when onLoad has already
-  // fired; the ref callback sees the element's state as soon as it mounts.
-  const artRef = useCallback(
-    (node: HTMLImageElement | null) => {
-      setArt(node);
-      if (node?.complete && node.naturalWidth > 0) finish();
+  // Ready once the picture this screen shows has loaded: the whole map, or on
+  // a phone in portrait its first strip. It may finish before hydration, when
+  // onLoad has already fired; the ref callbacks see it as soon as they mount.
+  const shown = useCallback(
+    (image: HTMLImageElement) => {
+      if (showsPicture(image)) finish();
     },
     [finish],
   );
+  const artRef = useCallback(
+    (node: HTMLImageElement | null) => {
+      setArt(node);
+      if (node?.complete) shown(node);
+    },
+    [shown],
+  );
+  const stripRef = useCallback(
+    (node: HTMLImageElement | null) => {
+      if (node?.complete) shown(node);
+    },
+    [shown],
+  );
+
+  // The strips beside the first view follow it, so they never compete with
+  // it for the connection.
+  useEffect(() => {
+    if (!loaded || sides) return;
+    const frame = requestAnimationFrame(() => setSides(true));
+    return () => cancelAnimationFrame(frame);
+  }, [loaded, sides]);
 
   // After each zoom, measure in the next frame whether the copy is enlarged
   // too much to stay sharp.
@@ -89,6 +124,7 @@ export function MapArt({
   return (
     <>
       <picture>
+        <source media={MAP_ART_PORTRAIT_PHONE} srcSet={MAP_ART_PLACEHOLDER} />
         <source
           media={MAP_ART_PHONE_MEDIA}
           srcSet={MAP_ART_PHONE_SRCSET}
@@ -103,10 +139,35 @@ export function MapArt({
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          onLoad={finish}
+          onLoad={(event) => shown(event.currentTarget)}
           onError={finish}
         />
       </picture>
+      <div className="map-art-strips">
+        {MAP_ART_STRIPS.filter((strip) => strip.first || sides).map((strip) => (
+          <picture key={strip.name}>
+            <source
+              media={`not all and ${MAP_ART_PORTRAIT_PHONE}`}
+              srcSet={MAP_ART_NONE}
+            />
+            <img
+              ref={strip.first ? stripRef : undefined}
+              className="map-art-strip"
+              src={strip.src}
+              alt=""
+              aria-hidden="true"
+              style={{ left: `${strip.left}%`, width: `${strip.width}%` }}
+              loading="eager"
+              fetchPriority={strip.first ? 'high' : 'low'}
+              decoding="async"
+              onLoad={
+                strip.first ? (event) => shown(event.currentTarget) : undefined
+              }
+              onError={strip.first ? finish : undefined}
+            />
+          </picture>
+        ))}
+      </div>
       {detail !== 'none' && (
         <img
           className={`map-art map-art-detail${detail === 'shown' ? ' is-shown' : ''}`}
