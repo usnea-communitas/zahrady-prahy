@@ -11,6 +11,7 @@ Notable changes to Zahrady Prahy (Gardens of Prague). The version lives in
 - "About the map" is reachable on phones from the header.
 - A Content-Security-Policy for scripts: only the site's own scripts and one inline script, allowed by its hash.
 - vinext, Nitro, the Cloudflare and OpenAI Sites variants and wrangler are gone (152 fewer packages); the fonts are stored with the site; `npm audit` reports nothing high or critical.
+- **Faster on phones.** A phone starts with a lighter copy of the map (960 or 1280 px, 136 or 218 kB instead of 621 kB, chosen by screen density) and gets the original only once the map is zoomed in; the blurred backdrop uses the 1.5 kB placeholder. The page is shown before the app script loads, the animated sprites follow the map, the tree sprite is WebP (165 → 27 kB) and the latin-ext fonts hold only Czech and Slovak letters (Inter 85 → 6 kB). Lighthouse on a phone (median of three runs), live site before → preview after: performance 71 → 93, largest paint 6.3 → 2.5 s, first visit 1 158 → 457 KiB. Wide screens look and load as before.
 
 ## 1.1.0 — 2026-11-10
 

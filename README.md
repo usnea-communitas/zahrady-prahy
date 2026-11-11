@@ -126,30 +126,38 @@ visitor who chose Czech before from `/` to `/cs/`.
 
 ```
 app/
-  layout.tsx            Metadata (English by default) and the locale provider
   page.tsx              The whole atlas: map, header, filters, details, dialogs
   globals.css           Base styles and atlas chrome
   atlas.css, gallery.css, mobile.css
                         Structural, theme and phone-layout overrides
+src/
+  main.tsx              Styles, then the app once the page is on screen
+  hydrate.tsx           Hydrates the prerendered page with its route
+  entry-server.tsx      Renders each page and its head for the build
+  fonts.css             The fonts (latin-ext cut to Czech and Slovak letters)
 components/
   i18n/                 LocaleProvider (locale state, useT hook) and LanguageSwitcher
-  map/                  MapViewport (pan/zoom, keyboard) and MapMotionLayer (boats, birds)
+  map/                  MapViewport (pan/zoom, keyboard), MapArt (the illustration,
+                        lighter on phones) and MapMotionLayer (boats, birds)
   ui/                   shadcn/Base UI primitives
 lib/
   i18n.ts               Interface dictionary (en, cs), locale helpers, date formatting
   gardens.ts            The garden catalogue, categories, tags, filters and search
   garden-visits.ts      Visiting facts with sources and check dates, per garden
-  atlas-navigation.ts   URL state: ?q, ?zahrada (alias ?garden), ?typ, ?filtry
+  routes.ts             Page addresses: /, /cs/, /zahrada/<id>/, /cs/zahrada/<id>/
+  page-meta.ts          Titles, descriptions, share pictures and structured data
+  atlas-navigation.ts   Address state: the page path plus ?q, ?typ, ?filtry
   webmcp.ts             Optional read-only catalogue search for browsers with WebMCP
-  map/                  Viewport maths, projection and river geometry
+  map/                  Viewport maths, projection, river geometry, map picture files
 public/
   map/, gardens/, audio/  Illustrations, sprites and the soundscape (see LICENSE-ASSETS.md)
-tests/                  Unit tests: catalogue, i18n, navigation, viewport
-tests/e2e/              Browser tests (Playwright): smoke, layout, accessibility
+tests/                  Unit tests: catalogue, fonts, i18n, navigation, viewport
+tests/e2e/              Browser tests (Playwright): smoke, layout, map picture, accessibility
 tests/production/       Live-site check run after each production deployment
 docs/                   Rebuild notes and media provenance (prompts and tools)
 design/                 Design tokens and theme reference
-scripts/                One-off asset build scripts (sprites, map reference)
+scripts/                The static build, its server and asset scripts (sprites,
+                        phone copies of the map, thumbnails)
 PRODUCT.md              Product principles the project is held to
 ```
 
