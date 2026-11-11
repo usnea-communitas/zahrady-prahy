@@ -10,6 +10,9 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === 'seatbelt';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // One stylesheet, linked from every page: the app script is loaded after
+  // the first paint (src/main.tsx), and the page must be styled before that.
+  build: { cssCodeSplit: false },
   resolve: {
     alias: [
       {

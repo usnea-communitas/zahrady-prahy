@@ -53,6 +53,9 @@ const escape = (value: string) =>
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
+/** Playfair Display, latin (src/fonts.css). */
+const SERIF_FONT = '/fonts/playfair-display-9deeae77.woff2';
+
 /** Title, description, addresses, share preview and structured data. */
 export function head(route: Route): string {
   const garden = gardens.find((item) => item.id === route.gardenId) ?? null;
@@ -68,6 +71,9 @@ export function head(route: Route): string {
   const shareDescription = garden ? description : meta.shareDescription;
   const ogLocale = (locale: string) => (locale === 'cs' ? 'cs_CZ' : 'en_US');
   const tags = [
+    // Wide screens set the title in the serif; phones show it only in a
+    // garden's name, and src/main.tsx loads it there after the first paint.
+    `<link rel="preload" href="${SERIF_FONT}" as="font" type="font/woff2" crossorigin${garden ? '' : ' media="(min-width: 721px)"'}>`,
     // The map is the largest picture: the one this screen will choose.
     `<link rel="preload" as="image" imagesrcset="${MAP_ART_PHONE_SRCSET}" imagesizes="${MAP_ART_PHONE_SIZES}" media="${MAP_ART_PHONE_MEDIA}" fetchpriority="high">`,
     `<link rel="preload" as="image" href="${MAP_ART_FULL}" media="not all and ${MAP_ART_PHONE_MEDIA}" fetchpriority="high">`,
