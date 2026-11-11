@@ -52,16 +52,22 @@ local build with `PROD_URL=http://127.0.0.1:4173/`.
   with sources), `lib/i18n.ts` (dictionary: `en` sets the shape, `cs` mirrors
   it).
 - `components/map/MapViewport.tsx` and `lib/map/viewport.ts`: pan, zoom,
-  pinch and the camera maths.
+  pinch and the camera maths. `components/map/MapArt.tsx`: the illustration;
+  phones start with a lighter copy (`lib/map/art.ts`, made by
+  `scripts/build-map-variants.mjs`) and get the original once zoomed in.
 - Addresses (`lib/routes.ts`): `/` and `/cs/` for the atlas, `/zahrada/<id>/`
   and `/cs/zahrada/<id>/` for each garden; titles, descriptions and
-  structured data in `lib/page-meta.ts`. `src/main.tsx` hydrates a page with
+  structured data in `lib/page-meta.ts`. `src/main.tsx` loads the styles
+  and, once the page is on screen, `src/hydrate.tsx`, which hydrates it with
   its route. There is no server: older `?zahrada=`, `?garden=` and `?lang=`
   links are turned into page addresses by the script in the head of `/`
   (`legacyRedirectScript` in `src/entry-server.tsx`). Check changes to
   routing or headers on a Vercel preview deployment before merging.
-- `scripts/`: asset scripts (thumbnails, icons, sprites). `tests/`: unit
-  tests; `tests/e2e/`: smoke, layout and accessibility tests.
+- `scripts/`: asset scripts (thumbnails, icons, sprites, map copies). The
+  latin-ext fonts hold only Czech and Slovak letters; `src/fonts.css` says how
+  to cut them, and `tests/fonts.test.mjs` fails when a text needs another
+  letter. `tests/`: unit tests; `tests/e2e/`: smoke, layout, map picture and
+  accessibility tests.
 - Design work: the Impeccable skill (`.agents/skills/impeccable`,
   `.claude/skills/impeccable`) with its hooks, and `design/README.md`.
 
