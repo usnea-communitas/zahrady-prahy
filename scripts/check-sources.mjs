@@ -25,10 +25,13 @@ import { pathToFileURL } from 'node:url';
 export const MAX_AGE_DAYS = 120;
 
 const FACT_NAMES = {
-  access: 'access',
+  special: 'what makes it special',
   hours: 'hours',
+  access: 'access',
   entrance: 'entrance',
-  participation: 'taking part',
+  transport: 'getting there',
+  accessibility: 'accessibility',
+  participation: 'how to join in',
 };
 const DAY = 24 * 60 * 60 * 1000;
 

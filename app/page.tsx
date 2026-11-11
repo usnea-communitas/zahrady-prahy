@@ -75,7 +75,12 @@ import {
   type GardenCategory,
   type FilterId,
 } from '@/lib/gardens';
-import type { GardenVisit } from '@/lib/garden-visits';
+import {
+  type GardenVisit,
+  type VisitFactKey,
+  visitCheckedAt,
+  visitFacts,
+} from '@/lib/garden-visits';
 import { formatDate } from '@/lib/i18n';
 
 const gardenCategoryIcons = {
@@ -137,14 +142,39 @@ function clamp(value: number, min: number, max: number) {
 }
 
 function uniqueVisitSources(visit: GardenVisit) {
-  return [visit.access, visit.hours, visit.entrance, visit.participation]
-    .flatMap((fact) => fact?.sources ?? [])
+  return visitFacts(visit)
+    .flatMap(({ fact }) => fact.sources)
     .filter(
       (source, index, sources) =>
         sources.findIndex((candidate) => candidate.url === source.url) ===
         index,
     );
 }
+
+/** A link text whose arrow never wraps onto a line of its own: the last
+ * word and the arrow stay together. */
+function ArrowAfterLastWord({ text }: { text: string }) {
+  const cut = text.lastIndexOf(' ') + 1;
+  return (
+    <>
+      {text.slice(0, cut)}
+      <span className="link-tail">
+        {text.slice(cut)} <ArrowRight />
+      </span>
+    </>
+  );
+}
+
+/** The label each visiting fact has in the detail panel. */
+const visitFactLabels = {
+  special: 'special',
+  hours: 'when',
+  access: 'access',
+  entrance: 'where',
+  transport: 'transport',
+  accessibility: 'accessibility',
+  participation: 'participation',
+} as const satisfies Record<VisitFactKey, string>;
 
 /** The atlas. `initialGardenId` is the garden of the page being built or
  * hydrated (`/zahrada/<id>/`), so its detail is already in the static HTML. */
@@ -1398,59 +1428,22 @@ export default function Home({
                       <strong>{t.preview.visit}</strong>
                       <span>
                         {t.preview.sourcesChecked(
-                          formatDate(selectedVisit.access.checkedAt, locale),
+                          formatDate(visitCheckedAt(selectedVisit), locale),
                         )}
                       </span>
                     </div>
                     <dl className="visit-facts">
-                      <div className="visit-fact">
-                        <dt>{t.preview.when}</dt>
-                        <dd>
-                          {selectedVisit.hours.text[locale]}
-                          {selectedVisit.hours.appliesTo && (
-                            <small>
-                              {selectedVisit.hours.appliesTo[locale]}
-                            </small>
-                          )}
-                        </dd>
-                      </div>
-                      <div className="visit-fact">
-                        <dt>{t.preview.access}</dt>
-                        <dd>
-                          {selectedVisit.access.text[locale]}
-                          {selectedVisit.access.appliesTo && (
-                            <small>
-                              {selectedVisit.access.appliesTo[locale]}
-                            </small>
-                          )}
-                        </dd>
-                      </div>
-                      {selectedVisit.entrance && (
-                        <div className="visit-fact">
-                          <dt>{t.preview.where}</dt>
-                          <dd>
-                            {selectedVisit.entrance.text[locale]}
-                            {selectedVisit.entrance.appliesTo && (
-                              <small>
-                                {selectedVisit.entrance.appliesTo[locale]}
-                              </small>
+                      {visitFacts(selectedVisit).map(({ key, fact }) => (
+                        <div className="visit-fact" key={key}>
+                          <dt>{t.preview[visitFactLabels[key]]}</dt>
+                          <dd data-state={fact.state}>
+                            {fact.text[locale]}
+                            {fact.appliesTo && (
+                              <small>{fact.appliesTo[locale]}</small>
                             )}
                           </dd>
                         </div>
-                      )}
-                      {selectedVisit.participation && (
-                        <div className="visit-fact">
-                          <dt>{t.preview.participation}</dt>
-                          <dd>
-                            {selectedVisit.participation.text[locale]}
-                            {selectedVisit.participation.appliesTo && (
-                              <small>
-                                {selectedVisit.participation.appliesTo[locale]}
-                              </small>
-                            )}
-                          </dd>
-                        </div>
-                      )}
+                      ))}
                     </dl>
                     <p className="visit-disclaimer">
                       {t.preview.disclaimer}
@@ -1467,7 +1460,7 @@ export default function Home({
                           target="_blank"
                           rel="noreferrer"
                         >
-                          {source.label[locale]} <ArrowRight />
+                          <ArrowAfterLastWord text={source.label[locale]} />
                         </a>
                       ))}
                     </div>

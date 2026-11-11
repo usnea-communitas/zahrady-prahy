@@ -12,7 +12,12 @@ import {
   tagLabels,
   thumbnailUrl,
 } from '../lib/gardens.ts';
-import { GARDEN_VISIT_CHECKED_AT } from '../lib/garden-visits.ts';
+import {
+  GARDEN_VISIT_CHECKED_AT,
+  visitCheckedAt,
+  visitFactKeys,
+  visitFacts,
+} from '../lib/garden-visits.ts';
 import { locales } from '../lib/i18n.ts';
 
 const isBilingual = (value) =>
@@ -61,17 +66,12 @@ await test('every reader-facing catalogue field exists in both languages', () =>
   for (const option of filterOptions) assert.ok(isBilingual(option.label));
 });
 await test('every garden has sourced visit facts and explicit gaps', () => {
-  const factsFor = (visit) =>
-    [visit.access, visit.hours, visit.entrance, visit.participation].filter(
-      Boolean,
-    );
-
   assert.match(GARDEN_VISIT_CHECKED_AT, /^\d{4}-\d{2}-\d{2}$/);
   for (const garden of gardens) {
     assert.ok(garden.visit);
-    assert.equal(garden.visit.access.checkedAt, GARDEN_VISIT_CHECKED_AT);
-    assert.equal(garden.visit.hours.checkedAt, GARDEN_VISIT_CHECKED_AT);
-    for (const fact of factsFor(garden.visit)) {
+    assert.equal(visitCheckedAt(garden.visit), GARDEN_VISIT_CHECKED_AT);
+    for (const { fact } of visitFacts(garden.visit)) {
+      assert.match(fact.checkedAt, /^\d{4}-\d{2}-\d{2}$/);
       assert.ok(isBilingual(fact.text), garden.id);
       for (const locale of locales) assert.ok(fact.text[locale].length > 10);
       if (fact.appliesTo) assert.ok(isBilingual(fact.appliesTo), garden.id);
@@ -84,14 +84,56 @@ await test('every garden has sourced visit facts and explicit gaps', () => {
     }
   }
 });
-await test('an admitted gap in one language is never filled in the other', () => {
-  // A `not-found` hours fact says "we did not find" in both languages, so a
-  // translation can never turn an honest gap into an invented schedule.
+await test('every garden answers the same questions, in the same order', () => {
+  // What makes it special, when, access, getting there, accessibility and how
+  // to join in: answered with a source or as an admitted gap. Only the
+  // entrance may be missing, when no source names a way in.
+  const required = visitFactKeys.filter((key) => key !== 'entrance');
   for (const garden of gardens) {
-    const fact = garden.visit.hours;
-    if (fact.state !== 'not-found') continue;
-    assert.match(fact.text.cs, /nenašli/, garden.id);
-    assert.match(fact.text.en, /did not find/, garden.id);
+    for (const key of required)
+      assert.ok(garden.visit[key], `${garden.id}.${key}`);
+    assert.deepEqual(
+      visitFacts(garden.visit).map(({ key }) => key),
+      visitFactKeys.filter((key) => garden.visit[key]),
+    );
+    assert.deepEqual(
+      Object.keys(garden.visit).sort(),
+      visitFacts(garden.visit)
+        .map(({ key }) => key)
+        .sort(),
+      `${garden.id} has a fact the panel does not show`,
+    );
+  }
+});
+await test('an admitted gap in one language is never filled in the other', () => {
+  // A `not-found` fact says "we did not find" in both languages, so a
+  // translation can never turn an honest gap into an invented schedule, stop
+  // or step-free entrance.
+  let gaps = 0;
+  for (const garden of gardens) {
+    for (const { key, fact } of visitFacts(garden.visit)) {
+      if (fact.state !== 'not-found') continue;
+      gaps += 1;
+      assert.match(fact.text.cs, /nenašli/, `${garden.id}.${key}`);
+      assert.match(fact.text.en, /did not find/, `${garden.id}.${key}`);
+    }
+  }
+  assert.ok(gaps > 0);
+});
+await test('a stop or a step-free claim always comes from a source, never a guess', () => {
+  // Published transport and accessibility facts name what their source says;
+  // the gaps admit it. No garden is called step-free without a source saying so.
+  for (const garden of gardens) {
+    for (const key of ['transport', 'accessibility']) {
+      const fact = garden.visit[key];
+      assert.ok(['published', 'not-found'].includes(fact.state), garden.id);
+      assert.ok(fact.sources.length > 0, `${garden.id}.${key}`);
+    }
+    const stepFree = /bezbariérov/.test(garden.visit.accessibility.text.cs);
+    const gap = garden.visit.accessibility.state === 'not-found';
+    if (garden.tags.includes('accessible')) {
+      assert.ok(stepFree && !gap, `${garden.id} is tagged accessible`);
+    }
   }
 });
 await test('search is accent-insensitive, case-insensitive and matches words in any order', () => {

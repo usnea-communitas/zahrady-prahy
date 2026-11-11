@@ -25,7 +25,20 @@ test('a shared link opens the garden with its sourced visiting facts', async ({
   await expect(detail.getByRole('heading', { level: 2 })).toHaveText(
     'Komunitní centrum a zahrada Kotlaska',
   );
-  await expect(detail).toContainText('Sources checked 6 September 2026');
+  await expect(detail).toContainText('Sources checked 11 November 2026');
+  await expect(detail.locator('.visit-fact dt')).toHaveText([
+    'What makes it special',
+    'When to come',
+    'Access',
+    'Where',
+    'Getting there',
+    'Accessibility',
+    'How to join in',
+  ]);
+  // a gap the sources leave is admitted, never filled
+  await expect(
+    detail.locator('.visit-fact dd[data-state="not-found"]').first(),
+  ).toContainText('We did not find');
   await expect(detail.locator('.visit-sources a').first()).toHaveAttribute(
     'href',
     /^https:\/\//,
