@@ -18,6 +18,12 @@ import {
   pageTitle,
   shareImage,
 } from '@/lib/page-meta';
+import {
+  MAP_ART_FULL,
+  MAP_ART_PHONE_MEDIA,
+  MAP_ART_PHONE_SIZES,
+  MAP_ART_PHONE_SRCSET,
+} from '@/lib/map/art';
 import { SITE_URL, allRoutes, routePath, type Route } from '@/lib/routes';
 
 export { routePath };
@@ -62,6 +68,9 @@ export function head(route: Route): string {
   const shareDescription = garden ? description : meta.shareDescription;
   const ogLocale = (locale: string) => (locale === 'cs' ? 'cs_CZ' : 'en_US');
   const tags = [
+    // The map is the largest picture: the one this screen will choose.
+    `<link rel="preload" as="image" imagesrcset="${MAP_ART_PHONE_SRCSET}" imagesizes="${MAP_ART_PHONE_SIZES}" media="${MAP_ART_PHONE_MEDIA}" fetchpriority="high">`,
+    `<link rel="preload" as="image" href="${MAP_ART_FULL}" media="not all and ${MAP_ART_PHONE_MEDIA}" fetchpriority="high">`,
     `<title>${escape(title)}</title>`,
     `<meta name="description" content="${escape(description)}">`,
     `<link rel="canonical" href="${url}">`,

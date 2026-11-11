@@ -1056,6 +1056,17 @@ body {
   justify-content: flex-end;
 }
 
+/* The original map laid over a phone's lighter copy once zoomed in
+ * (components/map/MapArt.tsx); it fades in when it has loaded. */
+.map-art-detail {
+  opacity: 0;
+  transition: opacity 420ms ease;
+  pointer-events: none;
+}
+.map-art-detail.is-shown {
+  opacity: 1;
+}
+
 /* Loading state of the illustrated map */
 .map-art-placeholder {
   position: absolute;
@@ -1099,6 +1110,9 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .map-loading svg {
     animation: none;
+  }
+  .map-art-detail {
+    transition: none;
   }
 }
 
