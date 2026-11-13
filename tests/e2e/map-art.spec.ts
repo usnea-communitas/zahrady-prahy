@@ -49,6 +49,7 @@ test.describe('on a phone in portrait', () => {
 
   test('the map comes in full-resolution strips, the middle one first', async ({
     page,
+    browserName,
   }) => {
     const downloads = collectMapDownloads(page);
     await openAtlas(page);
@@ -57,7 +58,13 @@ test.describe('on a phone in portrait', () => {
     expect(downloads[0]?.path).toBe(`${ART}-strip-centre.webp`);
     await expect.poll(() => downloads[0].bytes).toBeDefined();
     expect(downloads[0].bytes).toBeLessThanOrEqual(220_000);
-    await expect.poll(() => paths(downloads)).toEqual([...STRIPS].sort());
+    // the side strips wait for a frame after the first one: WebKit without a
+    // graphics card has about one a second (docs/BROWSERS.md)
+    await expect
+      .poll(() => paths(downloads), {
+        timeout: browserName === 'webkit' ? 20_000 : 5_000,
+      })
+      .toEqual([...STRIPS].sort());
 
     // The strips meet without a gap and together cover the whole map.
     const plane = await page.locator('.map-plane').boundingBox();
