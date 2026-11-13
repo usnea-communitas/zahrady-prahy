@@ -1,0 +1,13 @@
+{
+  "about": "Sources that GitHub's servers cannot open (they time out from abroad), with the day a person last read each one in a browser. The monthly check lists them under 'Sources read by hand' and leaves them out of its count while that reading is at most 120 days old; an older reading counts again. After reading a source and finding it still says the same, update its date here in a pull request. The dates below are the day the facts that use them were checked (lib/garden-visits.ts).",
+  "sources": [
+    {
+      "url": "https://nesedimsousedim.cz/wp-content/uploads/2025/05/Sousedsky-pruvodce_Praha6-online-final.pdf",
+      "readAt": "2026-11-11"
+    },
+    {
+      "url": "https://prazsky-magazin.cz/zpravy-prazskeho-magazinu/zpravy-z-prahy/deti-z-cimic-si-samy-stavi-skolu/",
+      "readAt": "2026-11-11"
+    }
+  ]
+}
