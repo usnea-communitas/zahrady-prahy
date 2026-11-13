@@ -11,7 +11,13 @@ import {
   navigationUrl,
   tagLabels,
   thumbnailUrl,
+  illustrationSrcSet,
 } from '../lib/gardens.ts';
+import {
+  MAP_ART_FULL,
+  MAP_ART_FULL_AVIF,
+  MAP_ART_STRIPS,
+} from '../lib/map/art.ts';
 import {
   GARDEN_VISIT_CHECKED_AT,
   visitCheckedAt,
@@ -53,6 +59,37 @@ await test('every garden has a small list thumbnail', () => {
       `${garden.id}: run scripts/build-thumbnails.mjs`,
     );
     assert.ok(readFileSync(file).length < 20_000, garden.id);
+  }
+});
+await test('every garden illustration comes in three widths, each smaller than the next', () => {
+  for (const garden of gardens) {
+    const files = illustrationSrcSet(garden)
+      .split(', ')
+      .map((candidate) => candidate.split(' ')[0]);
+    assert.equal(files.length, 3, garden.id);
+    const sizes = files.map((file) => {
+      const url = new URL('../public' + file, import.meta.url);
+      assert.ok(
+        existsSync(url),
+        `${file}: run scripts/build-illustration-sizes.mjs`,
+      );
+      return readFileSync(url).length;
+    });
+    assert.ok(sizes[0] < sizes[1] && sizes[1] < sizes[2], garden.id);
+  }
+});
+await test('the map comes in AVIF too, smaller than each WebP', () => {
+  const pairs = [
+    [MAP_ART_FULL_AVIF, MAP_ART_FULL],
+    ...MAP_ART_STRIPS.map((strip) => [strip.avif, strip.src]),
+  ];
+  for (const [avif, webp] of pairs) {
+    const size = (file) =>
+      readFileSync(new URL('../public' + file, import.meta.url)).length;
+    assert.ok(
+      size(avif) < size(webp),
+      `${avif}: run scripts/build-map-variants.mjs`,
+    );
   }
 });
 await test('every reader-facing catalogue field exists in both languages', () => {

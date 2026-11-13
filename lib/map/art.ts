@@ -11,6 +11,13 @@ export const MAP_ART_FULL = `${ART}-wide.webp`;
 export const MAP_ART_WIDTH = 1672;
 
 /**
+ * The original and the strips also come in AVIF, two fifths and a fifth
+ * smaller with nothing lost to the eye (Z-13). A <picture> offers the AVIF
+ * first; a browser that cannot show it takes the WebP.
+ */
+export const MAP_ART_FULL_AVIF = `${ART}-wide.avif`;
+
+/**
  * A phone in portrait shows the map as high as the screen allows (chosen on
  * 11 November 2026), two to three times wider than the screen, and pans it
  * sideways. That needs the full resolution, so the map comes in three strips:
@@ -26,6 +33,7 @@ export const MAP_ART_STRIPS = [
 ].map((strip) => ({
   ...strip,
   src: `${ART}-strip-${strip.name}.webp`,
+  avif: `${ART}-strip-${strip.name}.avif`,
   left: (strip.from / MAP_ART_WIDTH) * 100,
   width: ((strip.to - strip.from) / MAP_ART_WIDTH) * 100,
 }));
@@ -46,6 +54,15 @@ export const MAP_ART_PHONE_SIZES = 'calc((100vh - 114px) * 1.78)';
  * rather than blank.
  */
 export const MAP_ART_PLACEHOLDER = `${ART}-placeholder.webp`;
+
+/**
+ * A one-pixel AVIF. What the page adds after it has loaded (the side strips,
+ * the original laid over a zoomed copy) names one file, chosen by whether the
+ * browser can show this: WebKit fetches the <img> of a <picture> added later
+ * before it reads its <source>s, and would download both formats.
+ */
+export const ONE_PIXEL_AVIF =
+  'data:image/avif;base64,AAAAHGZ0eXBhdmlmAAAAAG1pZjFhdmlmbWlhZgAAANZtZXRhAAAAAAAAACFoZGxyAAAAAAAAAABwaWN0AAAAAAAAAAAAAAAAAAAAACJpbG9jAAAAAERAAAEAAQAAAAAA+gABAAAAAAAAAB0AAAAjaWluZgAAAAAAAQAAABVpbmZlAgAAAAABAABhdjAxAAAAAA5waXRtAAAAAAABAAAAVmlwcnAAAAA4aXBjbwAAAAxhdjFDgSACAAAAABRpc3BlAAAAAAAAAAEAAAABAAAAEHBpeGkAAAAAAwgICAAAABZpcG1hAAAAAAAAAAEAAQOBAgMAAAAlbWRhdBIACgc4AAaQENBpMhAZQmMEwAA0AACQQMkcYIpq';
 
 /** A transparent pixel: what a picture shows where another one stands in. */
 export const MAP_ART_NONE =

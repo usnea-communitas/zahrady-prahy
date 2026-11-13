@@ -70,6 +70,11 @@
   inset: -32px;
   z-index: -1;
   background: url('/map/prague-storybook-vltava-v6-wide.webp') center / cover;
+  /* the same file the map picture takes, so it downloads once (Z-13) */
+  background-image: image-set(
+    url('/map/prague-storybook-vltava-v6-wide.avif') type('image/avif'),
+    url('/map/prague-storybook-vltava-v6-wide.webp') type('image/webp')
+  );
   filter: blur(24px);
   opacity: 0.62;
 }

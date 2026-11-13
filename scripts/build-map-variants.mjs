@@ -7,7 +7,10 @@
  *   the middle strip is needed first (components/map/MapArt.tsx);
  * - the map 960 and 1280 px wide (the original is 1672 px and 621 kB) for
  *   small phones held sideways, which show it about as wide as the screen;
- * - the animated tree cluster as WebP instead of PNG (165 kB → 27 kB).
+ * - the animated tree cluster as WebP instead of PNG (165 kB → 27 kB);
+ * - the strips and the original also in AVIF, about a fifth and two fifths
+ *   smaller with no difference to see at the enlargement of a 3× phone or a
+ *   2× laptop (Z-13); browsers that cannot show AVIF get the WebP.
  *
  * The originals stay as they are. Run after replacing one of them:
  *   node scripts/build-map-variants.mjs
@@ -49,12 +52,29 @@ for (const [index, name] of ['left', 'centre', 'right'].entries()) {
   const target = path.resolve(
     `public/map/prague-storybook-vltava-v6-strip-${name}.webp`,
   );
-  const result = await sharp(original)
+  const strip = await sharp(original)
     .extract({ left, top: 0, width: right - left, height: mapHeight })
+    .png()
+    .toBuffer();
+  const result = await sharp(strip)
     .webp({ quality: 78, effort: 6, smartSubsample: true })
     .toFile(target);
   console.log(
     `${path.relative(process.cwd(), target)}: ${left}–${right} px, ${result.width}×${result.height}, ${result.size} bytes`,
+  );
+  await avif(strip, target);
+}
+
+await avif(original, map);
+
+/** The same picture in AVIF beside the WebP, from the uncompressed pixels. */
+async function avif(pixels, webpPath) {
+  const target = webpPath.replace(/\.webp$/, '.avif');
+  const result = await sharp(pixels)
+    .avif({ quality: 64, effort: 6 })
+    .toFile(target);
+  console.log(
+    `${path.relative(process.cwd(), target)}: ${result.width}×${result.height}, ${result.size} bytes`,
   );
 }
 

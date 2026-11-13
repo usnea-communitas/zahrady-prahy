@@ -410,6 +410,19 @@ export function matchesSearch(garden: Garden, query: string) {
 export function thumbnailUrl(garden: Pick<Garden, 'id'>) {
   return `/gardens/thumbnails/${garden.id}.webp`;
 }
+/**
+ * The illustration in three widths for the garden panel (Z-13): the 1000 px
+ * original and the 640 and 800 px copies made by
+ * `scripts/build-illustration-sizes.mjs`. The panel shows it at most about
+ * 440 px wide, full width on a phone and 386 px in the panel beside the map.
+ */
+export function illustrationSrcSet(garden: Pick<Garden, 'illustration'>) {
+  const copy = (width: number) =>
+    garden.illustration.replace(/\.webp$/, `-${width}.webp`);
+  return `${copy(640)} 640w, ${copy(800)} 800w, ${garden.illustration} 1000w`;
+}
+export const ILLUSTRATION_SIZES =
+  '(max-width: 720px) calc(100vw + 13px), 386px';
 export function navigationUrl(garden: Garden) {
   return (
     'https://www.google.com/maps/search/?api=1&query=' +

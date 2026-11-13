@@ -1,14 +1,32 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { ONE_PIXEL_AVIF } from '../../lib/map/art';
 import { openAtlas } from './atlas';
 
 // Firefox has no mobile emulation; its phone pages keep their size and touch.
 const firefox = process.env.BROWSER === 'firefox';
 
 const ART = '/map/prague-storybook-vltava-v6';
-const STRIPS = ['left', 'centre', 'right'].map(
-  (name) => `${ART}-strip-${name}.webp`,
-);
+
+/**
+ * The strips and the original come in AVIF and WebP (Z-13): a browser that
+ * can show AVIF must take it. Asked of the page with a one-pixel AVIF.
+ */
+async function pictureType(page: Page) {
+  const avif = await page.evaluate(
+    (source) =>
+      new Promise<boolean>((resolve) => {
+        const image = new Image();
+        image.onload = () => resolve(image.width === 1);
+        image.onerror = () => resolve(false);
+        image.src = source;
+      }),
+    ONE_PIXEL_AVIF,
+  );
+  return avif ? 'avif' : 'webp';
+}
+const stripFiles = (type: string) =>
+  ['left', 'centre', 'right'].map((name) => `${ART}-strip-${name}.${type}`);
 
 /** Every version of the illustrated map the page asks for, in that order. */
 function collectMapDownloads(page: Page) {
@@ -55,9 +73,13 @@ test.describe('on a phone in portrait', () => {
     await openAtlas(page);
     // Under the strips: the blurred placeholder, never the map itself.
     expect(await shownPicture(page)).toBe(`${ART}-placeholder.webp`);
-    expect(downloads[0]?.path).toBe(`${ART}-strip-centre.webp`);
+    const type = await pictureType(page);
+    const STRIPS = stripFiles(type);
+    expect(downloads[0]?.path).toBe(`${ART}-strip-centre.${type}`);
     await expect.poll(() => downloads[0].bytes).toBeDefined();
-    expect(downloads[0].bytes).toBeLessThanOrEqual(220_000);
+    expect(downloads[0].bytes).toBeLessThanOrEqual(
+      type === 'avif' ? 150_000 : 220_000,
+    );
     // the side strips wait for a frame after the first one: WebKit without a
     // graphics card has about one a second (docs/BROWSERS.md)
     await expect
@@ -108,7 +130,10 @@ test.describe('on a small phone held sideways', () => {
     // One step closer enlarges the copy past its own pixels.
     await page.getByRole('button', { name: 'Zoom in' }).click();
     await expect(page.locator('.map-art-detail.is-shown')).toHaveCount(1);
-    expect(paths(downloads)).toEqual([`${ART}-960.webp`, `${ART}-wide.webp`]);
+    expect(paths(downloads)).toEqual([
+      `${ART}-960.webp`,
+      `${ART}-wide.${await pictureType(page)}`,
+    ]);
   });
 
   test('a phone with more pixels gets the larger copy', async ({ browser }) => {
@@ -132,10 +157,19 @@ for (const [width, height] of [
     await page.setViewportSize({ width, height });
     const downloads = collectMapDownloads(page);
     await openAtlas(page);
-    expect(await shownPicture(page)).toBe(`${ART}-wide.webp`);
-    await expect.poll(() => paths(downloads)).toEqual([`${ART}-wide.webp`]);
+    const wide = `${ART}-wide.${await pictureType(page)}`;
+    expect(await shownPicture(page)).toBe(wide);
+    await expect.poll(() => paths(downloads)).toEqual([wide]);
     await page.getByRole('button', { name: 'Zoom in' }).click();
     await page.waitForTimeout(300);
     await expect(page.locator('.map-art-detail')).toHaveCount(0);
-    expect(paths(downloads)).toEqual([`${ART}-wide.webp`]);
+    expect(paths(downloads)).toEqual([wide]);
   });
+
+test('Chromium takes the AVIF map', async ({ page, browserName }) => {
+  test.skip(
+    browserName !== 'chromium',
+    'the other engines take what they can show',
+  );
+  expect(await pictureType(page)).toBe('avif');
+});
