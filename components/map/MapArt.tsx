@@ -20,6 +20,7 @@ import {
   MAP_ART_PLACEHOLDER,
   MAP_ART_PORTRAIT_PHONE,
   MAP_ART_STRIPS,
+  ONE_PIXEL_AVIF,
 } from '@/lib/map/art';
 
 /** How far a copy may be enlarged on screen before the original is needed. */
@@ -123,6 +124,16 @@ export function MapArt({
     return () => cancelAnimationFrame(frame);
   }, [loaded, sides, portrait]);
 
+  // Pictures added after the page has loaded name one file in the format the
+  // browser can show (ONE_PIXEL_AVIF in lib/map/art.ts says why).
+  const [avif, setAvif] = useState<boolean | null>(null);
+  useEffect(() => {
+    const probe = new Image();
+    probe.onload = () => setAvif(probe.width === 1);
+    probe.onerror = () => setAvif(false);
+    probe.src = ONE_PIXEL_AVIF;
+  }, []);
+
   // After each zoom, measure in the next frame whether the copy is enlarged
   // too much to stay sharp.
   useEffect(() => {
@@ -157,17 +168,20 @@ export function MapArt({
         />
       </picture>
       <div className="map-art-strips">
-        {MAP_ART_STRIPS.filter((strip) => strip.first || sides).map((strip) => (
+        {MAP_ART_STRIPS.filter(
+          (strip) => strip.first || (sides && avif !== null),
+        ).map((strip) => (
           <picture key={strip.name}>
             <source
               media={`not all and ${MAP_ART_PORTRAIT_PHONE}`}
               srcSet={MAP_ART_NONE}
             />
-            <source type="image/avif" srcSet={strip.avif} />
+            {/* in the page from the server, the first strip lets the browser choose */}
+            {strip.first && <source type="image/avif" srcSet={strip.avif} />}
             <img
               ref={strip.first ? stripRef : undefined}
               className="map-art-strip"
-              src={strip.src}
+              src={strip.first || !avif ? strip.src : strip.avif}
               alt=""
               aria-hidden="true"
               style={{ left: `${strip.left}%`, width: `${strip.width}%` }}
@@ -182,19 +196,16 @@ export function MapArt({
           </picture>
         ))}
       </div>
-      {detail !== 'none' && (
-        <picture>
-          <source type="image/avif" srcSet={MAP_ART_FULL_AVIF} />
-          <img
-            className={`map-art map-art-detail${detail === 'shown' ? ' is-shown' : ''}`}
-            src={MAP_ART_FULL}
-            alt=""
-            aria-hidden="true"
-            style={fill}
-            decoding="async"
-            onLoad={() => setDetail('shown')}
-          />
-        </picture>
+      {detail !== 'none' && avif !== null && (
+        <img
+          className={`map-art map-art-detail${detail === 'shown' ? ' is-shown' : ''}`}
+          src={avif ? MAP_ART_FULL_AVIF : MAP_ART_FULL}
+          alt=""
+          aria-hidden="true"
+          style={fill}
+          decoding="async"
+          onLoad={() => setDetail('shown')}
+        />
       )}
     </>
   );

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { ONE_PIXEL_AVIF } from '../../lib/map/art';
 import { openAtlas } from './atlas';
 
 // Firefox has no mobile emulation; its phone pages keep their size and touch.
@@ -11,8 +12,6 @@ const ART = '/map/prague-storybook-vltava-v6';
  * The strips and the original come in AVIF and WebP (Z-13): a browser that
  * can show AVIF must take it. Asked of the page with a one-pixel AVIF.
  */
-const ONE_PIXEL_AVIF =
-  'data:image/avif;base64,AAAAHGZ0eXBhdmlmAAAAAG1pZjFhdmlmbWlhZgAAANZtZXRhAAAAAAAAACFoZGxyAAAAAAAAAABwaWN0AAAAAAAAAAAAAAAAAAAAACJpbG9jAAAAAERAAAEAAQAAAAAA+gABAAAAAAAAAB0AAAAjaWluZgAAAAAAAQAAABVpbmZlAgAAAAABAABhdjAxAAAAAA5waXRtAAAAAAABAAAAVmlwcnAAAAA4aXBjbwAAAAxhdjFDgSACAAAAABRpc3BlAAAAAAAAAAEAAAABAAAAEHBpeGkAAAAAAwgICAAAABZpcG1hAAAAAAAAAAEAAQOBAgMAAAAlbWRhdBIACgc4AAaQENBpMhAZQmMEwAA0AACQQMkcYIpq';
 async function pictureType(page: Page) {
   const avif = await page.evaluate(
     (source) =>

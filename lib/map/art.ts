@@ -55,6 +55,15 @@ export const MAP_ART_PHONE_SIZES = 'calc((100vh - 114px) * 1.78)';
  */
 export const MAP_ART_PLACEHOLDER = `${ART}-placeholder.webp`;
 
+/**
+ * A one-pixel AVIF. What the page adds after it has loaded (the side strips,
+ * the original laid over a zoomed copy) names one file, chosen by whether the
+ * browser can show this: WebKit fetches the <img> of a <picture> added later
+ * before it reads its <source>s, and would download both formats.
+ */
+export const ONE_PIXEL_AVIF =
+  'data:image/avif;base64,AAAAHGZ0eXBhdmlmAAAAAG1pZjFhdmlmbWlhZgAAANZtZXRhAAAAAAAAACFoZGxyAAAAAAAAAABwaWN0AAAAAAAAAAAAAAAAAAAAACJpbG9jAAAAAERAAAEAAQAAAAAA+gABAAAAAAAAAB0AAAAjaWluZgAAAAAAAQAAABVpbmZlAgAAAAABAABhdjAxAAAAAA5waXRtAAAAAAABAAAAVmlwcnAAAAA4aXBjbwAAAAxhdjFDgSACAAAAABRpc3BlAAAAAAAAAAEAAAABAAAAEHBpeGkAAAAAAwgICAAAABZpcG1hAAAAAAAAAAEAAQOBAgMAAAAlbWRhdBIACgc4AAaQENBpMhAZQmMEwAA0AACQQMkcYIpq';
+
 /** A transparent pixel: what a picture shows where another one stands in. */
 export const MAP_ART_NONE =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
