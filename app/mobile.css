@@ -311,6 +311,28 @@
     width: calc(100cqh * 1.776833);
   }
 }
+/* Phones: the two dialogs get back their narrower padding (gallery.css sets
+ * 40px for every size) and a title size at which the longest word fits, so
+ * nothing runs past the right edge in either language from 320 px up. The
+ * column may shrink below its longest word; a word that still does not fit
+ * breaks instead of widening the dialog. */
+@media (max-width: 720px) {
+  .add-garden-dialog,
+  .about-dialog {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 28px 24px;
+  }
+  .add-garden-dialog [data-slot='dialog-title'],
+  .about-dialog [data-slot='dialog-title'] {
+    font-size: clamp(30px, 9.5vw, 44px);
+    overflow-wrap: break-word;
+  }
+  /* The label wraps before it reaches the close button in the corner. */
+  .add-garden-dialog .dialog-eyebrow,
+  .about-dialog .dialog-eyebrow {
+    max-width: calc(100% - 44px);
+  }
+}
 /* Narrow phones: both footer chips stay on one line with the shorter
  * OpenStreetMap credit. */
 @media (max-width: 400px) {
