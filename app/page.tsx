@@ -69,6 +69,8 @@ import {
   gardens,
   filterOptions,
   filterGardenCatalogue,
+  ILLUSTRATION_SIZES,
+  illustrationSrcSet,
   navigationUrl,
   tagLabels,
   thumbnailUrl,
@@ -1399,9 +1401,10 @@ export default function Home({
               <div className="preview-illustration">
                 <Image
                   src={selectedGarden.illustration}
+                  srcSet={illustrationSrcSet(selectedGarden)}
+                  sizes={ILLUSTRATION_SIZES}
                   alt={t.preview.illustrationAlt(selectedGarden.name)}
                   fill
-                  sizes="420px"
                 />
                 <span className="preview-glyph">
                   <Leaf />

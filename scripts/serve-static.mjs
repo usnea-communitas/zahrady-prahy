@@ -18,6 +18,7 @@ const rules = vercel.headers.map(({ source, headers }) => ({
   headers,
 }));
 const types = {
+  '.avif': 'image/avif',
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
   '.ico': 'image/x-icon',

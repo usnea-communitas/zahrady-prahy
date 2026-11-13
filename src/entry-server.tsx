@@ -21,7 +21,7 @@ import {
 } from '@/lib/page-meta';
 import {
   MAP_ART_FIRST_STRIP,
-  MAP_ART_FULL,
+  MAP_ART_FULL_AVIF,
   MAP_ART_PHONE_MEDIA,
   MAP_ART_PHONE_SIZES,
   MAP_ART_PHONE_SRCSET,
@@ -82,10 +82,12 @@ export function head(route: Route): string {
     // Wide screens set the title in the serif; phones show it only in a
     // garden's name, and src/main.tsx loads it there after the first paint.
     `<link rel="preload" href="${SERIF_FONT}" as="font" type="font/woff2" crossorigin${garden ? '' : ' media="(min-width: 721px)"'}>`,
-    // The map is the largest picture: the one this screen will choose.
-    `<link rel="preload" as="image" href="${MAP_ART_FIRST_STRIP.src}" media="${MAP_ART_PORTRAIT_PHONE}" fetchpriority="high">`,
+    // The map is the largest picture: the one this screen will choose. The
+    // strips and the original in AVIF; a browser that cannot show AVIF skips
+    // these and takes the WebP when the page asks for it.
+    `<link rel="preload" as="image" type="image/avif" href="${MAP_ART_FIRST_STRIP.avif}" media="${MAP_ART_PORTRAIT_PHONE}" fetchpriority="high">`,
     `<link rel="preload" as="image" imagesrcset="${MAP_ART_PHONE_SRCSET}" imagesizes="${MAP_ART_PHONE_SIZES}" media="${MAP_ART_PHONE_MEDIA} and (orientation: landscape)" fetchpriority="high">`,
-    `<link rel="preload" as="image" href="${MAP_ART_FULL}" media="not all and ${MAP_ART_PHONE_MEDIA}" fetchpriority="high">`,
+    `<link rel="preload" as="image" type="image/avif" href="${MAP_ART_FULL_AVIF}" media="not all and ${MAP_ART_PHONE_MEDIA}" fetchpriority="high">`,
     `<title>${escape(title)}</title>`,
     `<meta name="description" content="${escape(description)}">`,
     `<link rel="canonical" href="${url}">`,

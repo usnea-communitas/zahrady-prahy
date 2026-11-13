@@ -12,6 +12,7 @@ import {
 import { MapZoomContext } from '@/components/map/MapZoomContext';
 import {
   MAP_ART_FULL,
+  MAP_ART_FULL_AVIF,
   MAP_ART_NONE,
   MAP_ART_PHONE_MEDIA,
   MAP_ART_PHONE_SIZES,
@@ -141,6 +142,7 @@ export function MapArt({
           srcSet={MAP_ART_PHONE_SRCSET}
           sizes={MAP_ART_PHONE_SIZES}
         />
+        <source type="image/avif" srcSet={MAP_ART_FULL_AVIF} />
         <img
           ref={artRef}
           className="map-art"
@@ -161,6 +163,7 @@ export function MapArt({
               media={`not all and ${MAP_ART_PORTRAIT_PHONE}`}
               srcSet={MAP_ART_NONE}
             />
+            <source type="image/avif" srcSet={strip.avif} />
             <img
               ref={strip.first ? stripRef : undefined}
               className="map-art-strip"
@@ -180,15 +183,18 @@ export function MapArt({
         ))}
       </div>
       {detail !== 'none' && (
-        <img
-          className={`map-art map-art-detail${detail === 'shown' ? ' is-shown' : ''}`}
-          src={MAP_ART_FULL}
-          alt=""
-          aria-hidden="true"
-          style={fill}
-          decoding="async"
-          onLoad={() => setDetail('shown')}
-        />
+        <picture>
+          <source type="image/avif" srcSet={MAP_ART_FULL_AVIF} />
+          <img
+            className={`map-art map-art-detail${detail === 'shown' ? ' is-shown' : ''}`}
+            src={MAP_ART_FULL}
+            alt=""
+            aria-hidden="true"
+            style={fill}
+            decoding="async"
+            onLoad={() => setDetail('shown')}
+          />
+        </picture>
       )}
     </>
   );

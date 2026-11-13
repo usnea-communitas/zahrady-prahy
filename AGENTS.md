@@ -57,6 +57,9 @@ local build with `PROD_URL=http://127.0.0.1:4173/`.
   strips, and `app/mobile.css` gives it that height before the app runs; a
   small phone held sideways starts with a lighter copy and gets the original
   once zoomed in (`lib/map/art.ts`, made by `scripts/build-map-variants.mjs`).
+  The strips and the original also come in AVIF, offered first; the garden
+  panel's illustration comes in 640, 800 and 1000 px
+  (`scripts/build-illustration-sizes.mjs`).
 - Addresses (`lib/routes.ts`): `/` and `/cs/` for the atlas, `/zahrada/<id>/`
   and `/cs/zahrada/<id>/` for each garden; titles, descriptions and
   structured data in `lib/page-meta.ts`. `src/main.tsx` loads the styles
