@@ -320,3 +320,62 @@ test.describe('on short phones', () => {
       await page.close();
     });
 });
+
+/** Everything in the open dialog that reaches past its left or right edge. */
+async function dialogOverflow(page: Page) {
+  return page.getByRole('dialog').evaluate((dialog) => {
+    const box = dialog.getBoundingClientRect();
+    const past: string[] = [];
+    if (dialog.scrollWidth > dialog.clientWidth)
+      past.push(
+        `scrolls sideways by ${dialog.scrollWidth - dialog.clientWidth} px`,
+      );
+    for (const element of dialog.querySelectorAll('*')) {
+      if (element.closest('[aria-hidden="true"]')) continue;
+      const rect = element.getBoundingClientRect();
+      if (!rect.width || !rect.height) continue;
+      if (rect.left < box.left - 0.5 || rect.right > box.right + 0.5)
+        past.push(
+          `${element.tagName.toLowerCase()} "${(element.textContent ?? '').trim().slice(0, 40)}"`,
+        );
+    }
+    const label = dialog
+      .querySelector('.dialog-eyebrow')
+      ?.getBoundingClientRect();
+    const close = dialog
+      .querySelector('[data-slot="dialog-close"]')
+      ?.getBoundingClientRect();
+    if (
+      label &&
+      close &&
+      label.right > close.left &&
+      label.bottom > close.top &&
+      label.top < close.bottom
+    )
+      past.push('the label runs under the close button');
+    return past;
+  });
+}
+
+/* The "Add a place" dialog ran past the right edge of a 390 px phone in Czech
+ * (found on 12 November 2026). */
+for (const [path, names] of [
+  ['/', ['Add a place · soon', 'About the map Zahrady Prahy']],
+  ['/cs/', ['Přidat místo · brzy', 'O mapě Zahrady Prahy']],
+] as const) {
+  for (const width of [320, 360, 390, 430]) {
+    test(`both dialogs fit inside a ${width} px phone (${path})`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await openAtlas(page, path);
+      for (const name of names) {
+        await page.getByRole('button', { name, exact: true }).first().click();
+        await expect(page.getByRole('dialog')).toBeVisible();
+        expect(await dialogOverflow(page), name).toEqual([]);
+        await page.keyboard.press('Escape');
+        await expect(page.getByRole('dialog')).toHaveCount(0);
+      }
+    });
+  }
+}
