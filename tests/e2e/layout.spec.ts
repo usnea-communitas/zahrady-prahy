@@ -1,6 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import { openAtlas } from './atlas';
+import { WEBKIT_WITHOUT_GPU, openAtlas } from './atlas';
+
+// Firefox has no mobile emulation; its phone pages keep their size and touch.
+const firefox = process.env.BROWSER === 'firefox';
 
 /**
  * Where each garden marker's round core is: fully on the visible map stage
@@ -127,7 +130,9 @@ test.describe('on a phone in portrait', () => {
   ] as const)
     test(`the map fills the height and panning reaches every garden at ${width}×${height}`, async ({
       page,
+      browserName,
     }) => {
+      test.fixme(browserName === 'webkit', WEBKIT_WITHOUT_GPU);
       await page.setViewportSize({ width, height });
       await openAtlas(page);
       const fit = await page.evaluate(() => {
@@ -173,7 +178,7 @@ test.describe('on a phone in portrait', () => {
     for (const app of [false, true]) {
       const page = await browser.newPage({
         viewport: { width: 390, height: 844 },
-        isMobile: true,
+        isMobile: !firefox,
         hasTouch: true,
       });
       if (!app)
@@ -231,7 +236,9 @@ for (const [width, height] of [
 ] as const) {
   test(`the close button never covers the garden text at ${width}×${height}`, async ({
     page,
+    browserName,
   }) => {
+    test.fixme(browserName === 'webkit', WEBKIT_WITHOUT_GPU);
     await page.setViewportSize({ width, height });
     await openAtlas(page, '/?zahrada=kotlaska');
     expect(await closeButtonCover(page)).toEqual([]);
@@ -282,7 +289,7 @@ test.describe('on short phones', () => {
     }) => {
       const page = await browser.newPage({
         viewport: { width, height },
-        isMobile: true,
+        isMobile: !firefox,
         hasTouch: true,
       });
       for (const id of ['prales', 'liboza', 'na-polske']) {

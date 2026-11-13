@@ -2,6 +2,9 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { openAtlas } from './atlas';
 
+// Firefox has no mobile emulation; its phone pages keep their size and touch.
+const firefox = process.env.BROWSER === 'firefox';
+
 const ART = '/map/prague-storybook-vltava-v6';
 const STRIPS = ['left', 'centre', 'right'].map(
   (name) => `${ART}-strip-${name}.webp`,
@@ -37,7 +40,7 @@ const phone = (width: number, height: number, deviceScaleFactor: number) => ({
   viewport: { width, height },
   screen: { width, height },
   deviceScaleFactor,
-  isMobile: true,
+  isMobile: !firefox,
   hasTouch: true,
 });
 

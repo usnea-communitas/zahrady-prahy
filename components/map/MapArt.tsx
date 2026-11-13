@@ -104,12 +104,23 @@ export function MapArt({
   );
 
   // The strips beside the first view follow it, so they never compete with
-  // it for the connection.
+  // it for the connection, and only where they are shown: a <picture> added
+  // after the page loaded makes WebKit fetch its <img> before it reads the
+  // <source> that says 'none here', so Safari on a computer would download
+  // both side strips for nothing.
+  const [portrait, setPortrait] = useState(false);
   useEffect(() => {
-    if (!loaded || sides) return;
+    const query = window.matchMedia(MAP_ART_PORTRAIT_PHONE);
+    const update = () => setPortrait(query.matches);
+    update();
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+  useEffect(() => {
+    if (!loaded || sides || !portrait) return;
     const frame = requestAnimationFrame(() => setSides(true));
     return () => cancelAnimationFrame(frame);
-  }, [loaded, sides]);
+  }, [loaded, sides, portrait]);
 
   // After each zoom, measure in the next frame whether the copy is enlarged
   // too much to stay sharp.
