@@ -5,7 +5,12 @@ import {
   writeAtlasUrl,
   gardenShareUrl,
 } from '../lib/atlas-navigation.ts';
-import { allRoutes, parseRoutePath, routePath } from '../lib/routes.ts';
+import {
+  allRoutes,
+  isPlainClick,
+  parseRoutePath,
+  routePath,
+} from '../lib/routes.ts';
 
 await test('search, filters, category and selected garden round-trip together', () => {
   const state = {
@@ -115,4 +120,20 @@ await test('page addresses: language prefix, garden segment, trailing slash', ()
   });
   assert.deepEqual(parseRoutePath('/en/', ids), { locale: 'en', gardenId: '' });
   assert.equal(allRoutes(ids).length, 6);
+});
+
+await test('a plain click stays in the atlas, a held key or another button opens the link', () => {
+  const click = (extra = {}) => ({
+    button: 0,
+    metaKey: false,
+    ctrlKey: false,
+    shiftKey: false,
+    altKey: false,
+    ...extra,
+  });
+  assert.equal(isPlainClick(click()), true);
+  for (const key of ['metaKey', 'ctrlKey', 'shiftKey', 'altKey'])
+    assert.equal(isPlainClick(click({ [key]: true })), false, key);
+  assert.equal(isPlainClick(click({ button: 1 })), false, 'middle button');
+  assert.equal(isPlainClick(click({ defaultPrevented: true })), false);
 });

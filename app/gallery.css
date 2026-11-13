@@ -284,14 +284,14 @@ body {
 .share-feedback {
   color: var(--color-graphite);
 }
-.garden-directory li button {
+.garden-directory li a {
   border-radius: var(--radius-cards);
   padding: 10px 8px;
   grid-template-columns: 56px minmax(0, 1fr) 16px;
   gap: 12px;
 }
-.garden-directory li button:hover,
-.garden-directory li button[aria-pressed='true'] {
+.garden-directory li a:hover,
+.garden-directory li a[aria-current='page'] {
   background: var(--color-putty);
   border-color: transparent;
 }
@@ -676,6 +676,7 @@ body {
 .map-experience button:focus-visible,
 .map-experience a:focus-visible,
 .garden-directory button:focus-visible,
+.garden-directory a:focus-visible,
 .about-dialog button:focus-visible,
 .add-garden-dialog button:focus-visible {
   outline: 2px solid var(--color-ink);
@@ -888,7 +889,12 @@ body {
   box-sizing: border-box;
   align-items: center;
 }
-.header-actions .language-switcher button {
+.header-actions .language-switcher a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-decoration: none;
   height: calc(var(--gallery-control-size) - 6px) !important;
   min-width: 42px;
   padding-inline: 12px !important;
@@ -902,11 +908,11 @@ body {
   font: 500 12px var(--font-helvetica-now);
   letter-spacing: 0.04em;
 }
-.header-actions .language-switcher button:hover {
+.header-actions .language-switcher a:hover {
   background: rgba(255, 255, 255, 0.64) !important;
   color: var(--color-ink) !important;
 }
-.header-actions .language-switcher button[aria-pressed='true'] {
+.header-actions .language-switcher a[aria-current='page'] {
   background: var(--color-graphite) !important;
   color: var(--color-paper) !important;
 }

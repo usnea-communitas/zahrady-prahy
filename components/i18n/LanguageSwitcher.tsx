@@ -3,17 +3,19 @@
 import { useState } from 'react';
 
 import { dictionaries, locales, type Locale } from '@/lib/i18n';
+import { isPlainClick, routePath } from '@/lib/routes';
 import { useLocale } from '@/components/i18n/LocaleProvider';
 
 const shortNames: Record<Locale, string> = { en: 'EN', cs: 'CS' };
 const longNames: Record<Locale, string> = { en: 'English', cs: 'Čeština' };
 
 /**
- * A two-option language toggle for the header. Rendered as a group of
- * pressable buttons (not a select) so it works with a single key press,
- * shows the active language at a glance and announces each change.
+ * A two-option language toggle for the header. Each option is a link to the
+ * same page in that language, so it opens in a new tab and search engines
+ * find both versions; a plain click switches in place, keeps the search and
+ * the filters, shows the active language at a glance and announces the change.
  */
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ gardenId = '' }: { gardenId?: string }) {
   const { locale, setLocale, t } = useLocale();
   const [announcement, setAnnouncement] = useState('');
 
@@ -28,18 +30,23 @@ export function LanguageSwitcher() {
     <fieldset className="language-switcher">
       <legend className="sr-only">{t.langSwitch.label}</legend>
       {locales.map((option) => (
-        <button
+        <a
           key={option}
-          type="button"
+          href={routePath({ locale: option, gardenId })}
+          hrefLang={option}
           lang={option}
-          aria-pressed={locale === option}
+          aria-current={locale === option ? 'page' : undefined}
           title={longNames[option]}
-          onClick={() => choose(option)}
+          onClick={(event) => {
+            if (!isPlainClick(event)) return;
+            event.preventDefault();
+            choose(option);
+          }}
         >
           {/* The name starts with the visible code, then the full name. */}
           {shortNames[option]}
           <span className="sr-only"> {longNames[option]}</span>
-        </button>
+        </a>
       ))}
       <output className="sr-only" aria-live="polite">
         {announcement}

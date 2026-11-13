@@ -98,5 +98,5 @@ await test('each page is served in its language and the switcher is wired into t
   assert.ok(server.includes('og:locale:alternate'));
   assert.ok(server.includes('<LocaleProvider initialLocale={route.locale}>'));
   assert.ok(client.includes('<LocaleProvider initialLocale={route.locale}>'));
-  assert.ok(page.includes('<LanguageSwitcher />'));
+  assert.ok(page.includes('<LanguageSwitcher gardenId={selectedId} />'));
 });

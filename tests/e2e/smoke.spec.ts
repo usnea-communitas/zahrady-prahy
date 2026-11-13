@@ -59,7 +59,7 @@ test('a garden opens and closes with the keyboard alone', async ({ page }) => {
 
 test('Czech is one switch away and is remembered', async ({ page }) => {
   await openAtlas(page);
-  await page.getByRole('button', { name: /Čeština/ }).click();
+  await page.getByRole('link', { name: /Čeština/ }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'cs');
   await expect(
     page.getByRole('textbox', { name: 'Hledat zahradu nebo čtvrť' }),
@@ -80,12 +80,12 @@ test('a ?lang=cs link opens in Czech and the address follows the switcher', asyn
   await expect(page.locator('.garden-preview')).toBeVisible();
   expect(new URL(page.url()).pathname).toBe('/cs/zahrada/prales/');
 
-  await page.getByRole('button', { name: /English/ }).click();
+  await page.getByRole('link', { name: /English/ }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect
     .poll(() => new URL(page.url()).pathname)
     .toBe('/zahrada/prales/');
-  await page.getByRole('button', { name: /Čeština/ }).click();
+  await page.getByRole('link', { name: /Čeština/ }).click();
   await expect
     .poll(() => new URL(page.url()).pathname)
     .toBe('/cs/zahrada/prales/');
