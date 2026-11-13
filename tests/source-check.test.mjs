@@ -7,6 +7,7 @@ import {
   checkUrl,
   collectSources,
   formatReport,
+  loadReadByHand,
   pastSeasons,
   samePage,
   staleFacts,
@@ -179,4 +180,66 @@ await test('the report lists only what needs a look', () => {
   for (const source of [first, second, third]) {
     assert.ok(report.includes(source.url), source.url);
   }
+});
+
+await test('a source read by hand stays out of the count for 120 days, then counts again', () => {
+  const sources = collectSources(gardens);
+  const register = loadReadByHand();
+  assert.ok(register.length > 0);
+  for (const entry of register) {
+    assert.ok(
+      sources.some((s) => s.url === entry.url),
+      `${entry.url} is a source the atlas names`,
+    );
+    assert.match(entry.readAt, /^\d{4}-\d{2}-\d{2}$/);
+  }
+  // what the check sees from GitHub: the registered addresses time out
+  const results = sources.map((s) =>
+    register.some((e) => e.url === s.url)
+      ? { url: s.url, status: 0, finalUrl: s.url, error: 'ETIMEDOUT' }
+      : { url: s.url, status: 200, finalUrl: s.url },
+  );
+  const report = (today) =>
+    formatReport({
+      today,
+      sources,
+      results,
+      stale: [],
+      seasons: [],
+      factCount: facts.length,
+      readByHand: register,
+    });
+  const newest = register.map((e) => e.readAt).sort()[0];
+
+  const fresh = report(addDays(newest, MAX_AGE_DAYS));
+  assert.match(fresh, /\*\*Nothing to look at\.\*\*/);
+  assert.match(
+    fresh,
+    new RegExp(
+      `0 could not be reached, ${register.length} (was|were) read by hand instead`,
+    ),
+  );
+  assert.match(fresh, /### Sources read by hand/);
+  assert.doesNotMatch(fresh, /### Sources the check could not reach/);
+
+  const old = report(addDays(newest, MAX_AGE_DAYS + 1));
+  assert.match(old, new RegExp(`\\*\\*${register.length} to look at\\.\\*\\*`));
+  assert.match(
+    old,
+    /### Sources the check could not reach[\s\S]*last read by hand on \d{4}-\d{2}-\d{2}/,
+  );
+  assert.doesNotMatch(old, /### Sources read by hand/);
+
+  // a registered source that answers again is simply counted as answering
+  const answering = formatReport({
+    today: addDays(newest, 10),
+    sources,
+    results: sources.map((s) => ({ url: s.url, status: 200, finalUrl: s.url })),
+    stale: [],
+    seasons: [],
+    factCount: facts.length,
+    readByHand: register,
+  });
+  assert.match(answering, new RegExp(`${sources.length} answer as before`));
+  assert.doesNotMatch(answering, /read by hand/);
 });

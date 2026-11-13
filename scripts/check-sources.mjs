@@ -9,6 +9,9 @@
  *   answer, or that now lead to a different page;
  * - lists the facts last checked more than 120 days ago, and the seasonal
  *   facts that name a season which is already over;
+ * - keeps apart the sources GitHub's servers cannot open but a person read
+ *   in a browser in the last 120 days (scripts/sources-read-by-hand.json),
+ *   so a known gap does not keep the issue's title from saying "nothing";
  *
  * and writes the result as Markdown, for one issue that
  * `.github/workflows/source-check.yml` updates once a month. It never changes
@@ -18,7 +21,7 @@
  *   node scripts/check-sources.mjs [--out report.md] [--title-out title.txt]
  *                                  [--today YYYY-MM-DD]
  */
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 /** A fact older than this is due for a re-check. */
@@ -55,6 +58,16 @@ export function collectSources(gardens) {
 /** Whole days from one ISO date to another. */
 export function daysBetween(from, to) {
   return Math.floor((Date.parse(to) - Date.parse(from)) / DAY);
+}
+
+/** The register of sources read by hand (scripts/sources-read-by-hand.json). */
+export function loadReadByHand() {
+  return JSON.parse(
+    readFileSync(
+      new URL('./sources-read-by-hand.json', import.meta.url),
+      'utf8',
+    ),
+  ).sources;
 }
 
 /** The facts whose last check is more than `maxDays` old on `today`. */
@@ -183,20 +196,40 @@ export function formatReport({
   stale,
   seasons,
   factCount,
+  readByHand = [],
 }) {
   const byUrl = new Map(results.map((r) => [r.url, r]));
   const ok = (r) => r && r.status >= 200 && r.status < 300;
+  // a source the check could not open but a person read recently enough
+  const reading = (s) => {
+    const entry = readByHand.find((e) => e.url === s.url);
+    return entry && daysBetween(entry.readAt, today) <= MAX_AGE_DAYS
+      ? entry
+      : null;
+  };
+  const readLately = sources.filter((s) => !ok(byUrl.get(s.url)) && reading(s));
   // an error page, or no connection at all (status 0)
   const failed = sources.filter(
-    (s) => byUrl.get(s.url)?.status > 0 && !ok(byUrl.get(s.url)),
+    (s) => byUrl.get(s.url)?.status > 0 && !ok(byUrl.get(s.url)) && !reading(s),
   );
-  const unreachable = sources.filter((s) => !(byUrl.get(s.url)?.status > 0));
+  const unreachable = sources.filter(
+    (s) => !(byUrl.get(s.url)?.status > 0) && !reading(s),
+  );
+  // the date of an older reading, said where the source is listed again
+  const lastRead = (s) => {
+    const entry = readByHand.find((e) => e.url === s.url);
+    return entry ? `; last read by hand on ${entry.readAt}` : '';
+  };
   const moved = sources.filter((s) => {
     const r = byUrl.get(s.url);
     return ok(r) && !samePage(s.url, r.finalUrl);
   });
   const answering =
-    sources.length - failed.length - unreachable.length - moved.length;
+    sources.length -
+    failed.length -
+    unreachable.length -
+    moved.length -
+    readLately.length;
   const todo =
     failed.length +
     unreachable.length +
@@ -211,7 +244,10 @@ export function formatReport({
       `${count(answering, 'answers', 'answer')} as before, ` +
       `${count(moved.length, 'now leads', 'now lead')} elsewhere, ` +
       `${count(failed.length, 'answers', 'answer')} with an error, ` +
-      `${count(unreachable.length, 'could', 'could')} not be reached. ` +
+      `${count(unreachable.length, 'could', 'could')} not be reached` +
+      (readLately.length
+        ? `, ${count(readLately.length, 'was', 'were')} read by hand instead. `
+        : '. ') +
       `${count(factCount, 'visiting fact', 'visiting facts')}: ` +
       `${count(stale.length, 'was', 'were')} last checked more than ${MAX_AGE_DAYS} days ago, ` +
       `${count(seasons.length, 'is', 'are')} for a season that is over.`,
@@ -227,7 +263,7 @@ export function formatReport({
         ['Address', 'Answer', 'Used for'],
         failed.map((s) => [
           s.url,
-          String(byUrl.get(s.url).status),
+          String(byUrl.get(s.url).status) + lastRead(s),
           usedFor(s.uses),
         ]),
       ),
@@ -244,9 +280,29 @@ export function formatReport({
         ['Address', 'What happened', 'Used for'],
         unreachable.map((s) => [
           s.url,
-          `no connection (${byUrl.get(s.url)?.error || 'unknown'})`,
+          `no connection (${byUrl.get(s.url)?.error || 'unknown'})${lastRead(s)}`,
           usedFor(s.uses),
         ]),
+      ),
+    );
+  }
+  if (readLately.length) {
+    lines.push(
+      '',
+      '### Sources read by hand',
+      '',
+      `The check cannot open these addresses from GitHub's servers, so a person reads them in a browser; a reading counts for ${MAX_AGE_DAYS} days (\`scripts/sources-read-by-hand.json\`). Nothing to do until then.`,
+      '',
+      table(
+        ['Address', 'Read by hand', 'Used for'],
+        readLately.map((s) => {
+          const { readAt } = reading(s);
+          return [
+            s.url,
+            `${readAt} (${daysBetween(readAt, today)} days ago)`,
+            usedFor(s.uses),
+          ];
+        }),
       ),
     );
   }
@@ -290,6 +346,7 @@ export function formatReport({
       '',
       "1. Read the source again (the garden's own page first) and correct the fact in both languages in `lib/garden-visits.ts`. What the source no longer says becomes an honest gap, never a guess.",
       '2. Change the check date only when every source of that fact has been re-read, then open a pull request that names the sources.',
+      '3. A source that the check cannot reach but a browser can: when it still says the same, write the day you read it in `scripts/sources-read-by-hand.json`.',
     );
   }
   lines.push(
@@ -301,7 +358,12 @@ export function formatReport({
 }
 
 /** Runs the check: opens every address (four at a time) and makes the report. */
-export async function runCheck({ gardens, today, fetch } = {}) {
+export async function runCheck({
+  gardens,
+  today,
+  fetch,
+  readByHand = loadReadByHand(),
+} = {}) {
   const sources = collectSources(gardens);
   const results = Array.from({ length: sources.length });
   let next = 0;
@@ -326,6 +388,7 @@ export async function runCheck({ gardens, today, fetch } = {}) {
     stale,
     seasons,
     factCount,
+    readByHand,
   });
   // the issue's title repeats the summary: "Source check: 2 to look at"
   const summary = report.match(/\*\*(.+?)\.\*\*/)[1];
