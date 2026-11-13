@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { gardens } from '../../lib/gardens';
-import { collectErrors, openAtlas } from './atlas';
+import { WEBKIT_WITHOUT_GPU, collectErrors, openAtlas } from './atlas';
 
 // The pages as built (dist/), read as text: what a search engine and a visitor
 // whose browser has not run the app find.
@@ -53,7 +53,9 @@ test('the sitemap dates each page by the last check of its facts', async ({
 
 test('a garden link opens the garden in place, and a held key leaves it to the browser', async ({
   page,
+  browserName,
 }) => {
+  test.fixme(browserName === 'webkit', WEBKIT_WITHOUT_GPU);
   const errors = collectErrors(page);
   await openAtlas(page);
   await page.locator('button[aria-controls="garden-list"]').click();

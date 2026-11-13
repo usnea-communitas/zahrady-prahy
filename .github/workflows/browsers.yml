@@ -1,0 +1,36 @@
+name: Browsers
+
+# The browser tests again in WebKit (the engine of Safari) and Firefox (S-17).
+# Not a required check yet: it runs beside CI and is read before every merge.
+# Known differences and their reasons: docs/BROWSERS.md.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: Browser tests in ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [webkit, firefox]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # The static pages in dist/, the same files Vercel serves.
+      - run: npm run build
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: The same tests as in Chromium
+        run: npm run test:e2e
+        env:
+          BROWSER: ${{ matrix.browser }}

@@ -1,6 +1,11 @@
 import { expect, test } from '@playwright/test';
 
-import { collectErrors, openAtlas } from './atlas';
+import {
+  FIREFOX_TOUCH,
+  WEBKIT_WITHOUT_GPU,
+  collectErrors,
+  openAtlas,
+} from './atlas';
 
 test('the atlas opens in English with all thirteen gardens', async ({
   page,
@@ -45,7 +50,11 @@ test('a shared link opens the garden with its sourced visiting facts', async ({
   );
 });
 
-test('a garden opens and closes with the keyboard alone', async ({ page }) => {
+test('a garden opens and closes with the keyboard alone', async ({
+  page,
+  browserName,
+}) => {
+  test.fixme(browserName === 'webkit', WEBKIT_WITHOUT_GPU);
   await openAtlas(page);
   const marker = page.locator('.garden-marker').first();
   await marker.focus();
@@ -95,7 +104,11 @@ test('a ?lang=cs link opens in Czech and the address follows the switcher', asyn
   await expect(page.locator('html')).toHaveAttribute('lang', 'cs');
 });
 
-test('every garden has its own page in both languages', async ({ page }) => {
+test('every garden has its own page in both languages', async ({
+  page,
+  browserName,
+}) => {
+  test.fixme(browserName === 'webkit', WEBKIT_WITHOUT_GPU);
   const errors = collectErrors(page);
   await openAtlas(page, '/cs/zahrada/kotlaska/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'cs');
@@ -165,7 +178,9 @@ test.describe('on a phone', () => {
 
   test('the map credit and the motion pause stay on screen', async ({
     page,
+    browserName,
   }) => {
+    test.fixme(browserName === 'webkit', WEBKIT_WITHOUT_GPU);
     await openAtlas(page);
     await expect(
       page.getByRole('link', { name: '© OpenStreetMap', exact: true }),
@@ -175,7 +190,12 @@ test.describe('on a phone', () => {
     ).toBeInViewport();
   });
 
-  test('two fingers zoom the map and one finger pans it', async ({ page }) => {
+  test('two fingers zoom the map and one finger pans it', async ({
+    page,
+    browserName,
+  }) => {
+    test.fixme(browserName === 'webkit', WEBKIT_WITHOUT_GPU);
+    test.skip(browserName === 'firefox', FIREFOX_TOUCH);
     await openAtlas(page);
     const plane = page.locator('.map-plane');
     const zoom = async () =>
