@@ -6,6 +6,13 @@ Notable changes to Zahrady Prahy (Gardens of Prague). The version lives in
 
 ## Unreleased
 
+## 1.3.0 — 2026-11-13
+
+Live since 12–13 November 2026: pictures that match the screen, links that
+search engines and people can follow, every text checked in both languages
+at every width and in the engines of Safari and Firefox, and a source check
+without false alarms.
+
 - **Pictures that match the screen.** The illustrated map now also comes in AVIF, which every current browser shows: the original for wide screens is 350 kB instead of 636 kB and the three strips a phone held upright gets are 351 kB instead of 421 kB, with no difference to see at the enlargement of a 3× phone or a 2× laptop (browsers that cannot show AVIF still get the WebP). The blurred backdrop behind the map takes the same file, so a laptop downloads the map once. Each garden's illustration in its panel comes in three widths (640, 800 and the 1000 px original) and the browser takes the one the screen needs: a laptop with an ordinary screen downloads about 90 kB instead of about 220 kB, a 2× or 3× phone still gets the original.
 - **Every text fits, in both languages and at every width.** A new browser test (`tests/e2e/fit.spec.ts`) opens the atlas, the filters, all thirteen garden panels and both dialogs in English and Czech on phones 320, 360, 390 and 430 px wide, on a phone held sideways and in two laptop windows, and fails on any text that runs past its box or the button it is on, is cut off by it, or leaves the screen (the illustrated map, which pans, is left out). It found nothing to fix: the dialogs were fixed in November, and the panels hold in every engine (Chromium, WebKit and Firefox).
 - **Tests in the engines of Safari and Firefox.** The browser tests also run in WebKit and Firefox (`BROWSER=webkit npm run test:e2e`), in a second workflow beside CI. They found that Safari on a computer downloaded the phone's two side strips of the map for nothing; the strips are now added only on a phone held upright. What WebKit and Firefox cannot test here, and why, is in [`docs/BROWSERS.md`](docs/BROWSERS.md).
