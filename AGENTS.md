@@ -74,8 +74,8 @@ local build with `PROD_URL=http://127.0.0.1:4173/`.
 - `scripts/`: asset scripts (thumbnails, icons, sprites, map copies). The
   latin-ext fonts hold only Czech and Slovak letters; `src/fonts.css` says how
   to cut them, and `tests/fonts.test.mjs` fails when a text needs another
-  letter. `tests/`: unit tests; `tests/e2e/`: smoke, layout, map picture and
-  accessibility tests.
+  letter. `tests/`: unit tests; `tests/e2e/`: smoke, layout, every text fits,
+  map picture and accessibility tests.
 - Design work: the Impeccable skill (`.agents/skills/impeccable`,
   `.claude/skills/impeccable`) with its hooks, and `design/README.md`.
 
