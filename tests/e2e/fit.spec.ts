@@ -174,6 +174,8 @@ for (const [path, names] of [
   test.describe(`every text fits (${path})`, () => {
     for (const viewport of VIEWPORTS) {
       test(`at ${viewport.name}`, async ({ browser }) => {
+        // thirteen panels and two dialogs: WebKit without a graphics card needs more than 30 s
+        test.setTimeout(120_000);
         const page = await browser.newPage({
           viewport: { width: viewport.width, height: viewport.height },
           isMobile: viewport.phone && !firefox,
