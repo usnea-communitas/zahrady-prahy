@@ -40,6 +40,29 @@ export function parseRoutePath(
   return { locale, gardenId };
 }
 
+/**
+ * A click the atlas handles in place: the main button with no key held. A held
+ * key or another button lets the browser open the link its own way (a new tab
+ * or window), so every page link still works as a link.
+ */
+export function isPlainClick(event: {
+  button: number;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  shiftKey: boolean;
+  altKey: boolean;
+  defaultPrevented?: boolean;
+}): boolean {
+  return (
+    event.button === 0 &&
+    !event.metaKey &&
+    !event.ctrlKey &&
+    !event.shiftKey &&
+    !event.altKey &&
+    !event.defaultPrevented
+  );
+}
+
 /** Every page the build writes: the atlas and each garden, in each language. */
 export function allRoutes(gardenIds: readonly string[]): Route[] {
   return locales.flatMap((locale) =>

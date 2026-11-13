@@ -13,6 +13,7 @@ import {
   LOCALE_STORAGE_KEY,
 } from '@/lib/i18n';
 import {
+  atlasStructuredData,
   gardenStructuredData,
   pageDescription,
   pageTitle,
@@ -27,6 +28,11 @@ import {
   MAP_ART_PORTRAIT_PHONE,
 } from '@/lib/map/art';
 import { SITE_URL, allRoutes, routePath, type Route } from '@/lib/routes';
+import {
+  GARDEN_VISIT_CHECKED_AT,
+  gardenVisits,
+  visitFacts,
+} from '@/lib/garden-visits';
 
 export { routePath };
 import Home from '../app/page';
@@ -109,10 +115,12 @@ export function head(route: Route): string {
     `<meta name="twitter:description" content="${escape(shareDescription)}">`,
     `<meta name="twitter:image" content="${image.url}">`,
   ];
-  if (garden)
-    tags.push(
-      `<script type="application/ld+json">${JSON.stringify(gardenStructuredData(route.locale, garden)).replace(/</g, '\\u003c')}</script>`,
-    );
+  const data = garden
+    ? gardenStructuredData(route.locale, garden)
+    : atlasStructuredData(route.locale, gardens);
+  tags.push(
+    `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`,
+  );
   return tags.join('\n    ');
 }
 
@@ -135,6 +143,14 @@ export const legacyRedirectScript =
   "var u=(lang==='cs'?'/cs':'')+(g?'/zahrada/'+g:'')+'/'+(r?'?'+r:'')+l.hash;" +
   'if(u!==l.pathname+l.search+l.hash)l.replace(u)}catch(e){}})();';
 
+/** The day a garden's facts were last checked; the atlas, the latest of them. */
+export function lastChecked(gardenId: string): string {
+  if (!gardenId) return gardenIds.map(lastChecked).sort().at(-1)!;
+  const visit = gardenVisits[gardenId as keyof typeof gardenVisits];
+  const days = visit ? visitFacts(visit).map(({ fact }) => fact.checkedAt) : [];
+  return days.sort().at(-1) ?? GARDEN_VISIT_CHECKED_AT;
+}
+
 export function sitemap(): string {
   const pages = ['', ...gardenIds].map((gardenId) =>
     locales
@@ -145,7 +161,7 @@ export function sitemap(): string {
               `    <xhtml:link rel="alternate" hreflang="${other}" href="${SITE_URL + routePath({ locale: other, gardenId })}"/>`,
           )
           .join('\n');
-        return `  <url>\n    <loc>${SITE_URL + routePath({ locale, gardenId })}</loc>\n${links}\n  </url>`;
+        return `  <url>\n    <loc>${SITE_URL + routePath({ locale, gardenId })}</loc>\n    <lastmod>${lastChecked(gardenId)}</lastmod>\n${links}\n  </url>`;
       })
       .join('\n'),
   );

@@ -56,7 +56,7 @@ import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
 import { useLocale } from '@/components/i18n/LocaleProvider';
 import { registerGardenSearch } from '@/lib/webmcp';
 import { pageTitle } from '@/lib/page-meta';
-import { parseRoutePath } from '@/lib/routes';
+import { isPlainClick, parseRoutePath, routePath } from '@/lib/routes';
 import {
   emptyNavigation,
   readAtlasUrl,
@@ -972,7 +972,18 @@ export default function Home({
         aria-label={t.map.canvasLabel}
       >
         <header className="map-header">
-          <a className="brand" href="#top" aria-label={t.header.home}>
+          <a
+            className="brand"
+            href={routePath({ locale, gardenId: '' })}
+            aria-label={t.header.home}
+            onClick={(event) => {
+              // the atlas itself: close an open garden and go to the top
+              if (!isPlainClick(event)) return;
+              event.preventDefault();
+              if (navigationRef.current.selectedId) selectGarden('');
+              document.getElementById('top')?.scrollIntoView();
+            }}
+          >
             <span className="brand-mark" aria-hidden="true">
               <Leaf />
             </span>
@@ -1011,7 +1022,7 @@ export default function Home({
           </search>
 
           <div className="header-actions">
-            <LanguageSwitcher />
+            <LanguageSwitcher gardenId={selectedId} />
             <Button
               className="glass-button"
               variant="outline"
@@ -1192,10 +1203,14 @@ export default function Home({
           <ul>
             {filteredGardens.map((garden) => (
               <li key={garden.id}>
-                <button
-                  type="button"
-                  aria-pressed={selectedId === garden.id}
-                  onClick={() => selectGarden(garden.id)}
+                <a
+                  href={routePath({ locale, gardenId: garden.id })}
+                  aria-current={selectedId === garden.id ? 'page' : undefined}
+                  onClick={(event) => {
+                    if (!isPlainClick(event)) return;
+                    event.preventDefault();
+                    selectGarden(garden.id);
+                  }}
                 >
                   <span className="directory-image">
                     <Image
@@ -1212,7 +1227,7 @@ export default function Home({
                     </small>
                   </span>
                   <ArrowRight />
-                </button>
+                </a>
               </li>
             ))}
           </ul>

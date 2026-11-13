@@ -79,7 +79,7 @@
   .map-experience .header-actions .language-switcher {
     height: 42px;
   }
-  .map-experience .header-actions .language-switcher button {
+  .map-experience .header-actions .language-switcher a {
     width: 38px !important;
     height: 36px !important;
   }

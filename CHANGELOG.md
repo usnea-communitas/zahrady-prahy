@@ -4,6 +4,11 @@ Notable changes to Zahrady Prahy (Gardens of Prague). The version lives in
 `package.json`; each version is also a
 [GitHub release](https://github.com/usnea-communitas/zahrady-prahy/releases).
 
+## Unreleased
+
+- **Links that search engines and people can follow.** The list of gardens and the language switch are now real links: `/` and `/cs/` link to all thirteen garden pages, and every garden page links back to the atlas (the name in the header) and to the same garden in the other language. A plain click still opens the garden or switches the language in place and keeps the search and the filters; a click with a held key opens the page in a new tab. The atlas pages carry structured data listing the thirteen gardens, and the sitemap dates every page by the day its facts were last checked. A browser test reads the built pages to keep it so.
+- The *Add a place* and *About the map* dialogs fit phones from 320 px in both languages; their label no longer runs under the close button.
+
 ## 1.2.0 — 2026-11-12
 
 Live since 10–11 November 2026: a static atlas with an address for every

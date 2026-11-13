@@ -29,6 +29,26 @@ export function shareImage(garden?: Garden | null) {
     : { url: `${SITE_URL}/zahrady-prahy-og.jpg`, width: 1200, height: 630 };
 }
 
+/** schema.org data for the atlas: the list of its gardens, each with its page. */
+export function atlasStructuredData(
+  locale: Locale,
+  gardens: readonly Garden[],
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: dictionaries[locale].meta.title,
+    url: SITE_URL + routePath({ locale, gardenId: '' }),
+    numberOfItems: gardens.length,
+    itemListElement: gardens.map((garden, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: garden.name,
+      url: SITE_URL + routePath({ locale, gardenId: garden.id }),
+    })),
+  };
+}
+
 /** schema.org data for a garden page: what the catalogue states, nothing more.
  * Coordinates are left out where the catalogue marks them as approximate. */
 export function gardenStructuredData(locale: Locale, garden: Garden) {
