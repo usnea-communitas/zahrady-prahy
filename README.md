@@ -155,7 +155,7 @@ lib/
 public/
   map/, gardens/, audio/  Illustrations, sprites and the soundscape (see LICENSE-ASSETS.md)
 tests/                  Unit tests: catalogue, fonts, i18n, navigation, viewport
-tests/e2e/              Browser tests (Playwright): smoke, layout, map picture, accessibility
+tests/e2e/              Browser tests (Playwright): smoke, layout, every text fits, map picture, accessibility
 tests/production/       Live-site check run after each production deployment
 docs/                   Rebuild notes and media provenance (prompts and tools)
 design/                 Design tokens and theme reference
