@@ -6,6 +6,12 @@ Notable changes to Zahrady Prahy (Gardens of Prague). The version lives in
 
 ## Unreleased
 
+## 1.3.2 — 2026-11-14
+
+Live since 14 November 2026: "About the map" and "Add a place" load when
+they are wanted, so the code the atlas runs as it starts is 16 kB
+(compressed) smaller and a first visit no longer downloads the dialogs.
+
 - **The dialogs load when they are wanted.** "About the map" and "Add a place", with the dialog code of Base UI they use, now come as a file of their own that the browser fetches when a pointer or the keyboard focus reaches a button that opens one, not with the atlas. The code the atlas runs as it starts is 16 kB (compressed) smaller and a first visit no longer downloads the dialogs; once a dialog has opened, it stays ready, closes with its animation and returns the focus to its button as before. The browser tests (90) and the accessibility checks pass unchanged.
 
 ## 1.3.1 — 2026-11-14
