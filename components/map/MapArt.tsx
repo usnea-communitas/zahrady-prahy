@@ -55,7 +55,8 @@ const fill: CSSProperties = {
 /**
  * The illustrated map. Wide screens show the original. A phone in portrait
  * shows three full-resolution strips over the blurred placeholder instead:
- * the middle one first, the other two once it is on screen and the app runs.
+ * the middle one first, the other two once they come into view or the map is
+ * touched (until then the placeholder shows there).
  * A small phone held sideways starts with a lighter copy and gets the
  * original laid over it once the map is zoomed in beyond what the copy shows
  * sharply (it fades in when loaded, so the map never goes blank).
@@ -109,8 +110,12 @@ export function MapArt({
   // it for the connection, and only where they are shown: a <picture> added
   // after the page loaded makes WebKit fetch its <img> before it reads the
   // <source> that says 'none here', so Safari on a computer would download
-  // both side strips for nothing.
+  // both side strips for nothing. On most phones the middle strip covers the
+  // whole first view, so the side strips wait until a part of them comes
+  // into view or the map is touched (chosen on 14 November 2026): a visitor
+  // who only looks downloads about 200 kB less.
   const [portrait, setPortrait] = useState(false);
+  const slotsRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const query = window.matchMedia(MAP_ART_PORTRAIT_PHONE);
     const update = () => setPortrait(query.matches);
@@ -119,9 +124,25 @@ export function MapArt({
     return () => query.removeEventListener('change', update);
   }, []);
   useEffect(() => {
-    if (!loaded || sides || !portrait) return;
-    const frame = requestAnimationFrame(() => setSides(true));
-    return () => cancelAnimationFrame(frame);
+    const strips = slotsRef.current;
+    if (!loaded || sides || !portrait || !strips) return;
+    const show = () => setSides(true);
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) show();
+    });
+    strips
+      .querySelectorAll('.map-art-strip-slot')
+      .forEach((slot) => observer.observe(slot));
+    // a finger, a mouse, a wheel or a key on the map is about to move it
+    const plane = strips.closest('.map-plane');
+    const events = ['pointerdown', 'wheel', 'keydown'] as const;
+    events.forEach((name) =>
+      plane?.addEventListener(name, show, { once: true, passive: true }),
+    );
+    return () => {
+      observer.disconnect();
+      events.forEach((name) => plane?.removeEventListener(name, show));
+    };
   }, [loaded, sides, portrait]);
 
   // Pictures added after the page has loaded name one file in the format the
@@ -167,7 +188,16 @@ export function MapArt({
           onError={finish}
         />
       </picture>
-      <div className="map-art-strips">
+      <div className="map-art-strips" ref={slotsRef}>
+        {/* where a side strip will go: watched until it comes into view */}
+        {!sides &&
+          MAP_ART_STRIPS.filter((strip) => !strip.first).map((strip) => (
+            <div
+              key={`${strip.name}-slot`}
+              className="map-art-strip-slot"
+              style={{ left: `${strip.left}%`, width: `${strip.width}%` }}
+            />
+          ))}
         {MAP_ART_STRIPS.filter(
           (strip) => strip.first || (sides && avif !== null),
         ).map((strip) => (
