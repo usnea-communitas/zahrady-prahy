@@ -46,7 +46,9 @@ local build with `PROD_URL=http://127.0.0.1:4173/`.
 
 ## Where things are
 
-- `app/page.tsx`: the whole atlas. Styles are layered `globals.css`,
+- `app/page.tsx`: the whole atlas; its two dialogs are in
+  `components/atlas-dialogs.tsx`, which loads when a pointer or the focus
+  reaches a button that opens one. Styles are layered `globals.css`,
   `atlas.css`, `gallery.css`, then `mobile.css` (the phone layout, last).
 - `lib/gardens.ts` (catalogue, search), `lib/garden-visits.ts` (visiting facts
   with sources), `lib/i18n.ts` (dictionary: `en` sets the shape, `cs` mirrors

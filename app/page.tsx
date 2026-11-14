@@ -1,6 +1,8 @@
 'use client';
 
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -35,20 +37,12 @@ import {
   Tractor,
   Trees,
   House,
-  Wheat,
   Check,
   X,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { MapArt } from '@/components/map/MapArt';
 import { MapMotionLayer } from '@/components/map/MapMotionLayer';
 import { MapViewport } from '@/components/map/MapViewport';
@@ -180,6 +174,16 @@ const visitFactLabels = {
 
 /** The atlas. `initialGardenId` is the garden of the page being built or
  * hydrated (`/zahrada/<id>/`), so its detail is already in the static HTML. */
+
+// "Add a place" and "About" load when a dialog is wanted: a pointer or the focus on a
+// button that opens one starts the download, so a first visit does without them and
+// without Base UI's dialog code (components/atlas-dialogs.tsx).
+const loadAtlasDialogs = () => import('@/components/atlas-dialogs');
+const AtlasDialogs = lazy(loadAtlasDialogs);
+const warmDialogs = () => {
+  void loadAtlasDialogs();
+};
+
 export default function Home({
   initialGardenId = '',
 }: { initialGardenId?: string } = {}) {
@@ -219,6 +223,16 @@ export default function Home({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  // once a dialog has opened, its code stays mounted, so closing animates and returns focus
+  const [dialogsMounted, setDialogsMounted] = useState(false);
+  const openAbout = useCallback(() => {
+    setDialogsMounted(true);
+    setAboutOpen(true);
+  }, []);
+  const openAdd = useCallback(() => {
+    setDialogsMounted(true);
+    setAddOpen(true);
+  }, []);
   const [soundState, setSoundState] = useState<SoundState>('idle');
   const [mapLoaded, setMapLoaded] = useState(false);
   const [motionPaused, setMotionPaused] = useState(false);
@@ -844,7 +858,9 @@ export default function Home({
         id="intro-postcard"
         className="intro-postcard"
         type="button"
-        onClick={() => setAboutOpen(true)}
+        onClick={openAbout}
+        onPointerEnter={warmDialogs}
+        onFocus={warmDialogs}
         aria-label={t.intro.openStory}
         tabIndex={introMinimized ? -1 : 0}
       >
@@ -959,7 +975,9 @@ export default function Home({
         <button
           className="gallery-seal"
           type="button"
-          onClick={() => setAboutOpen(true)}
+          onClick={openAbout}
+          onPointerEnter={warmDialogs}
+          onFocus={warmDialogs}
           aria-label={t.caption.about}
         >
           <Leaf aria-hidden="true" />
@@ -1064,7 +1082,9 @@ export default function Home({
             <button
               className="header-about"
               type="button"
-              onClick={() => setAboutOpen(true)}
+              onClick={openAbout}
+              onPointerEnter={warmDialogs}
+              onFocus={warmDialogs}
               aria-label={t.caption.about}
               title={t.caption.about}
             >
@@ -1124,7 +1144,9 @@ export default function Home({
             <Button
               className="add-button"
               size="lg"
-              onClick={() => setAddOpen(true)}
+              onClick={openAdd}
+              onPointerEnter={warmDialogs}
+              onFocus={warmDialogs}
               aria-label={t.header.add}
               title={t.header.addLabel}
             >
@@ -1541,106 +1563,17 @@ export default function Home({
         </footer>
       </section>
 
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent
-          className="add-garden-dialog"
-          closeLabel={t.dialog.close}
-        >
-          <DialogHeader>
-            <span className="dialog-eyebrow">
-              <Sprout /> {t.addDialog.eyebrow}
-            </span>
-            <DialogTitle>{t.addDialog.title}</DialogTitle>
-            <DialogDescription>{t.addDialog.description}</DialogDescription>
-          </DialogHeader>
-          <Button className="dialog-primary" onClick={() => setAddOpen(false)}>
-            {t.addDialog.back} <ArrowRight />
-          </Button>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={aboutOpen} onOpenChange={setAboutOpen}>
-        <DialogContent className="about-dialog" closeLabel={t.dialog.close}>
-          <div className="about-botanical-field" aria-hidden="true">
-            <Image
-              className="about-canopy about-canopy-left"
-              src="/map/motion/tree-cluster-v1.webp"
-              alt=""
-              width={384}
-              height={256}
-              sizes="260px"
-            />
-            <Image
-              className="about-canopy about-canopy-right"
-              src="/map/motion/tree-cluster-v1.webp"
-              alt=""
-              width={384}
-              height={256}
-              sizes="260px"
-            />
-            <span className="about-sprig about-sprig-one">
-              <Leaf />
-            </span>
-            <span className="about-sprig about-sprig-two">
-              <Flower2 />
-            </span>
-            <span className="about-sprig about-sprig-three">
-              <Wheat />
-            </span>
-          </div>
-          <DialogHeader className="about-dialog-header">
-            <span className="dialog-eyebrow">
-              <span className="dialog-eyebrow-icon" aria-hidden="true">
-                <Leaf />
-              </span>
-              {t.aboutDialog.eyebrow}
-            </span>
-            <DialogTitle>
-              {t.aboutDialog.titleStart}{' '}
-              <span>{t.aboutDialog.titleAccent}</span>
-            </DialogTitle>
-            <DialogDescription>{t.aboutDialog.description}</DialogDescription>
-          </DialogHeader>
-          <ol className="how-list">
-            <li>
-              <span className="how-icon" aria-hidden="true">
-                <Search />
-              </span>
-              <div className="how-step-copy">
-                <strong>{t.aboutDialog.step1Title}</strong>
-                <small>{t.aboutDialog.step1Text}</small>
-              </div>
-              <span className="how-step-number" aria-hidden="true">
-                01
-              </span>
-            </li>
-            <li>
-              <span className="how-icon" aria-hidden="true">
-                <Sprout />
-              </span>
-              <div className="how-step-copy">
-                <strong>{t.aboutDialog.step2Title}</strong>
-                <small>{t.aboutDialog.step2Text}</small>
-              </div>
-              <span className="how-step-number" aria-hidden="true">
-                02
-              </span>
-            </li>
-            <li>
-              <span className="how-icon" aria-hidden="true">
-                <Flower2 />
-              </span>
-              <div className="how-step-copy">
-                <strong>{t.aboutDialog.step3Title}</strong>
-                <small>{t.aboutDialog.step3Text}</small>
-              </div>
-              <span className="how-step-number" aria-hidden="true">
-                03
-              </span>
-            </li>
-          </ol>
-        </DialogContent>
-      </Dialog>
+      {dialogsMounted && (
+        <Suspense fallback={null}>
+          <AtlasDialogs
+            t={t}
+            addOpen={addOpen}
+            onAddOpenChange={setAddOpen}
+            aboutOpen={aboutOpen}
+            onAboutOpenChange={setAboutOpen}
+          />
+        </Suspense>
+      )}
     </main>
   );
 }
