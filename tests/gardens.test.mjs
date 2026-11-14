@@ -235,10 +235,10 @@ await test('western and eastern places stay on their respective sides of the ill
     assert.ok(artPositions[id].x > 55);
 });
 await test('no fake submission confirmation or personal-data collection remains', () => {
-  const page = readFileSync(
-    new URL('../app/page.tsx', import.meta.url),
-    'utf8',
-  );
+  // the page and its dialogs, which load when one is wanted
+  const page = ['../app/page.tsx', '../components/atlas-dialogs.tsx']
+    .map((file) => readFileSync(new URL(file, import.meta.url), 'utf8'))
+    .join('\n');
   const dictionary = readFileSync(
     new URL('../lib/i18n.ts', import.meta.url),
     'utf8',
