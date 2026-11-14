@@ -21,8 +21,9 @@ export const MAP_ART_FULL_AVIF = `${ART}-wide.avif`;
  * A phone in portrait shows the map as high as the screen allows (chosen on
  * 11 November 2026), two to three times wider than the screen, and pans it
  * sideways. That needs the full resolution, so the map comes in three strips:
- * the middle one covers the first view and loads first, the other two once
- * the app runs (nobody can pan to them before).
+ * the middle one covers the first view and loads first, the other two once a
+ * part of them comes into view or the map is touched (chosen on 14 November
+ * 2026; on most phones the middle strip fills the first view).
  */
 export const MAP_ART_PORTRAIT_PHONE =
   '(max-width: 720px) and (orientation: portrait)';

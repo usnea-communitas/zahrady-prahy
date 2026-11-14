@@ -65,7 +65,7 @@ const phone = (width: number, height: number, deviceScaleFactor: number) => ({
 test.describe('on a phone in portrait', () => {
   test.use(phone(390, 844, 3));
 
-  test('the map comes in full-resolution strips, the middle one first', async ({
+  test('the map comes in full-resolution strips, the sides once the map moves', async ({
     page,
     browserName,
   }) => {
@@ -80,13 +80,23 @@ test.describe('on a phone in portrait', () => {
     expect(downloads[0].bytes).toBeLessThanOrEqual(
       type === 'avif' ? 150_000 : 220_000,
     );
-    // the side strips wait for a frame after the first one: WebKit without a
-    // graphics card has about one a second (docs/BROWSERS.md)
+    // The middle strip fills this phone's first view, so the side strips wait
+    // until a part of them comes into view or the map is touched (chosen on
+    // 14 November 2026); the placeholder shows there until then.
+    await page.waitForTimeout(1500);
+    expect(paths(downloads)).toEqual([`${ART}-strip-centre.${type}`]);
+    await expect(page.locator('.map-art-strip-slot')).toHaveCount(2);
+
+    // A key on the map moves it, and the side strips follow (WebKit without
+    // a graphics card has about one frame a second, docs/BROWSERS.md).
+    await page.locator('.map-plane').focus();
+    await page.keyboard.press('ArrowRight');
     await expect
       .poll(() => paths(downloads), {
         timeout: browserName === 'webkit' ? 20_000 : 5_000,
       })
       .toEqual([...STRIPS].sort());
+    await expect(page.locator('.map-art-strip-slot')).toHaveCount(0);
 
     // The strips meet without a gap and together cover the whole map.
     const plane = await page.locator('.map-plane').boundingBox();
@@ -110,6 +120,25 @@ test.describe('on a phone in portrait', () => {
     await page.waitForTimeout(300);
     await expect(page.locator('.map-art-detail')).toHaveCount(0);
     expect(paths(downloads)).toEqual([...STRIPS].sort());
+  });
+});
+
+test.describe('on a 16 : 9 phone in portrait', () => {
+  test.use(phone(360, 640, 2));
+
+  test('the side strips are in the first view, so they come at once', async ({
+    page,
+    browserName,
+  }) => {
+    const downloads = collectMapDownloads(page);
+    await openAtlas(page);
+    const STRIPS = stripFiles(await pictureType(page));
+    await expect
+      .poll(() => paths(downloads), {
+        timeout: browserName === 'webkit' ? 20_000 : 5_000,
+      })
+      .toEqual([...STRIPS].sort());
+    await expect(page.locator('.map-art-strip')).toHaveCount(3);
   });
 });
 

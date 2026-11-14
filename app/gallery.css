@@ -1077,7 +1077,8 @@ body {
 .map-art-strips {
   display: none;
 }
-.map-art-strip {
+.map-art-strip,
+.map-art-strip-slot {
   position: absolute;
   top: 0;
   height: 100%;
