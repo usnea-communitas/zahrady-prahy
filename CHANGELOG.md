@@ -6,6 +6,12 @@ Notable changes to Zahrady Prahy (Gardens of Prague). The version lives in
 
 ## Unreleased
 
+## 1.3.1 — 2026-11-14
+
+Live since 14 November 2026: on a phone held upright, the map's side strips
+come when they are needed, so a first visit downloads 467 KiB instead of
+673 KiB.
+
 - **The map's side strips come when they are needed.** On a phone held upright, the middle strip fills the first view of most phones, so the two side strips now load once a part of them comes into view or the map is touched (a finger, a mouse, a wheel or a key), not straight after the first view (decision of 14 November 2026). A visitor who only looks downloads about 200 kB less; on a 16 : 9 phone, where the sides show at once, they still come at once. Until a side strip arrives, the blurred placeholder shows there.
 
 ## 1.3.0 — 2026-11-13
